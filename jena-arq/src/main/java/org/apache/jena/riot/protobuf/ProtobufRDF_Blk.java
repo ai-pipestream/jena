@@ -58,11 +58,30 @@ public class ProtobufRDF_Blk {
     /**
      * Write all of the {@link StreamRDF} to an output stream without length delimiters.
      * "apply"
+     *
+     * @param outputStream the destination output stream
+     * @param streamDest callback that populates the {@link StreamRDF}
      */
     public static void streamToOutputStreamBlk(OutputStream outputStream, Consumer<StreamRDF> streamDest) {
+        streamToOutputStreamBlk(outputStream, streamDest, false);
+    }
+
+    /**
+     * Write all of the {@link StreamRDF} to an output stream without length delimiters.
+     *
+     * @param outputStream the destination output stream
+     * @param streamDest callback that populates the {@link StreamRDF}
+     * @param withValues {@code true} to encode numeric literals by value
+     * @throws IllegalArgumentException Thrown if {@code outputStream} or {@code streamDest} is {@code null}
+     */
+    public static void streamToOutputStreamBlk(OutputStream outputStream, Consumer<StreamRDF> streamDest, boolean withValues) {
+        if ( outputStream == null )
+            throw new IllegalArgumentException("outputStream must not be null");
+        if ( streamDest == null )
+            throw new IllegalArgumentException("streamDest must not be null");
         outputStream = IO.ensureBuffered(outputStream);
         try {
-            StreamRDF2Protobuf.writeBlk(outputStream, streamDest, false);
+            StreamRDF2Protobuf.writeBlk(outputStream, streamDest, withValues);
         } finally { IO.flush(outputStream); }
     }
 

@@ -50,20 +50,48 @@ class PBufRDF {
     }
 
     public static RDF_Triple rdfTriple(Triple triple, RDF_Triple.Builder tripleBuilder, RDF_Term.Builder termBuilder) {
+        return rdfTriple(triple, PMAP0, tripleBuilder, termBuilder, false);
+    }
+
+    /**
+     * Encode a {@link Triple} into an {@link RDF_Triple} using the supplied builders, prefix map, and value encoding flag.
+     *
+     * @param triple the triple to encode
+     * @param pmap the prefix map for URI abbreviation, or {@code null} for no abbreviation
+     * @param tripleBuilder the reusable triple builder
+     * @param termBuilder the reusable term builder
+     * @param encodeValues {@code true} to encode numeric literals by value
+     * @return the built {@link RDF_Triple}
+     */
+    static RDF_Triple rdfTriple(Triple triple, PrefixMap pmap, RDF_Triple.Builder tripleBuilder, RDF_Term.Builder termBuilder, boolean encodeValues) {
         tripleBuilder.clear();
-        tripleBuilder.setS(rdfTerm(triple.getSubject(), termBuilder));
-        tripleBuilder.setP(rdfTerm(triple.getPredicate(), termBuilder));
-        tripleBuilder.setO(rdfTerm(triple.getObject(), termBuilder));
+        tripleBuilder.setS(rdfTerm(triple.getSubject(), pmap, termBuilder, encodeValues));
+        tripleBuilder.setP(rdfTerm(triple.getPredicate(), pmap, termBuilder, encodeValues));
+        tripleBuilder.setO(rdfTerm(triple.getObject(), pmap, termBuilder, encodeValues));
         return tripleBuilder.build();
     }
 
     public static RDF_Quad rdfQuad(Quad quad, RDF_Quad.Builder quadBuilder, RDF_Term.Builder termBuilder) {
+        return rdfQuad(quad, PMAP0, quadBuilder, termBuilder, false);
+    }
+
+    /**
+     * Encode a {@link Quad} into an {@link RDF_Quad} using the supplied builders, prefix map, and value encoding flag.
+     *
+     * @param quad the quad to encode
+     * @param pmap the prefix map for URI abbreviation, or {@code null} for no abbreviation
+     * @param quadBuilder the reusable quad builder
+     * @param termBuilder the reusable term builder
+     * @param encodeValues {@code true} to encode numeric literals by value
+     * @return the built {@link RDF_Quad}
+     */
+    static RDF_Quad rdfQuad(Quad quad, PrefixMap pmap, RDF_Quad.Builder quadBuilder, RDF_Term.Builder termBuilder, boolean encodeValues) {
         quadBuilder.clear();
         if ( quad.getGraph() != null )
-            quadBuilder.setG(rdfTerm(quad.getGraph(), termBuilder));
-        quadBuilder.setS(rdfTerm(quad.getSubject(), termBuilder));
-        quadBuilder.setP(rdfTerm(quad.getPredicate(), termBuilder));
-        quadBuilder.setO(rdfTerm(quad.getObject(), termBuilder));
+            quadBuilder.setG(rdfTerm(quad.getGraph(), pmap, termBuilder, encodeValues));
+        quadBuilder.setS(rdfTerm(quad.getSubject(), pmap, termBuilder, encodeValues));
+        quadBuilder.setP(rdfTerm(quad.getPredicate(), pmap, termBuilder, encodeValues));
+        quadBuilder.setO(rdfTerm(quad.getObject(), pmap, termBuilder, encodeValues));
         return quadBuilder.build();
     }
 
@@ -72,9 +100,22 @@ class PBufRDF {
     }
 
     static RDF_Term rdfTerm(Node node, RDF_Term.Builder termBuilder, boolean encodeValues) {
+        return rdfTerm(node, PMAP0, termBuilder, encodeValues);
+    }
+
+    /**
+     * Encode a {@link Node} into an {@link RDF_Term} using the supplied term builder, prefix map, and value encoding flag.
+     *
+     * @param node the node to encode
+     * @param pmap the prefix map for URI abbreviation, or {@code null} for no abbreviation
+     * @param termBuilder the reusable term builder
+     * @param encodeValues {@code true} to encode numeric literals by value
+     * @return the built {@link RDF_Term}
+     */
+    static RDF_Term rdfTerm(Node node, PrefixMap pmap, RDF_Term.Builder termBuilder, boolean encodeValues) {
         termBuilder.clear();
-        RDF_Term term = ProtobufConvert.toProtobuf(node, PMAP0, termBuilder, encodeValues);
-        return term;
+        PrefixMap activeMap = (pmap != null) ? pmap : PMAP0;
+        return ProtobufConvert.toProtobuf(node, activeMap, termBuilder, encodeValues);
     }
 
 
