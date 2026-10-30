@@ -45,6 +45,16 @@ Minor:
 
 ## PR 3: `GH-4364-jena-grpc`
 
+**Update 2026-10-30:** the 3 blocking items below are fixed in `f456a4836967553ea0ec1f525c9d32489d55aefd` on `GH-4364-jena-grpc`:
+
+1. Broadcast goes through one ordered `PatchPublisher`. Each writer reserves a ticket while it still holds the write lock, so delivery follows commit order, and every `onNext` to a subscriber happens under the publisher lock. Test: `subscribePatches_concurrentPatchesArriveWhole` (8 threads x 20 patches; failed on `a112eb9507` with `[TX, A, TX]`).
+2. Patch rows applied inside a remote transaction are held by the `ServerTxnSession` and published on commit, dropped on abort or end. Test: `subscribePatches_onlyCommittedTxnPatches`.
+3. Remote transactions idle longer than `txnIdleTimeout` (default 5 minutes, configurable on `RDFGrpcServer.Builder` and `RDFDatasetGrpcService`) are aborted and ended by a reaper. `RDFLinkGrpc.commit()`/`abort()` now always send `EndTxn`, even when the commit or abort call fails. Test: `idleRemoteTransaction_isAbortedAndReleasesWriteLock`.
+
+Not addressed (still minor): no limit on the number of open sessions, `promote()` stays local, and server streams do not use `isReady()` flow control.
+
+Original findings:
+
 Blocking:
 1. `RDFDatasetGrpcService.java:611-617` (`broadcastPatchRows`, also reached from `publishPatch` at line 209 and `subscribePatches` at line 608): `onNext` is called on each subscriber `StreamObserver` from whichever gRPC thread finished an `applyPatch`, with no synchronization. Two concurrent `applyPatch` calls (or a broadcast racing the ready marker) call `onNext` on the same observer concurrently, which the gRPC `StreamObserver` contract forbids, and rows from two patches can interleave (TX, TX, A, B, TC, TC) or arrive out of commit order. Since the broadcast happens after `Txn.executeWrite` returns, commit order is not preserved even without interleaving. For a replication feed this gives replicas a wrong history. Fix: serialize broadcasts (one lock, or a single-threaded publisher) and publish inside the write critical section, or after commit while holding an ordering lock. Add a test with concurrent `applyPatch` calls and a subscriber.
 2. `RDFDatasetGrpcService.java:590-600` (`applyPatchRows`): when the call carries a remote transaction id, the rows are applied inside the open session transaction and broadcast immediately, before `CommitTxn`. If the client later aborts, subscribers have already received changes that never committed. Fix: buffer rows per `ServerTxnSession` and broadcast on commit (drop on abort); add a test that aborts and checks the subscriber saw nothing.
