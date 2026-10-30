@@ -7,9 +7,14 @@
 
 ## Test status
 
-Maven did not run in this session. The local auto-mode permission check blocked every `mvn` command (warmup and the three verification commands) in the fresh clone. The em/en dash check was run with `git diff upstream/main...HEAD | grep -cP '\xe2\x80[\x93\x94]'` and returned 0 for all three PRs. No `@author` tags were added. All new Java files in `jena-grpc` carry the ASF header.
+Verification commands were run on 2026-10-30 in a fresh clone of `ai-pipestream/jena` at the pinned heads (all three trees clean, `upstream/main` = `73713dcc54`). The 6.3.0-SNAPSHOT Jena jars were not in `~/.m2`, so each `-pl` command was run with `-am -Dsurefire.failIfNoSpecifiedTests=false` added.
 
-Because the build was not run, no row below is `APPROVED`. The rows should be updated once the verification commands have been run.
+- PR 1 `c24db5cc35`: `TS_RDFProtobuf` 52 tests, 0 failures, 0 errors. BUILD SUCCESS.
+- PR 2 `a3c165fc8a`: `TS_RDFProtobuf` 40 and `TS_RDFPatch` 64 tests (`TestPatchIO_Protobuf` 8), 0 failures, 0 errors. BUILD SUCCESS.
+- PR 3 `a112eb9507`: 52 + 64 + 129 tests (`TestRDFLinkGrpcInProcess` 48, `TestRDFLinkGrpcNetty` 42, `TestRDFConnectionGrpc` 39), 0 failures, 0 errors. BUILD SUCCESS. `dependency:tree -pl jena-grpc` has no `jetty` or `servlet` entries. Enforcer on `jena-grpc`: `DependencyConvergence`, `RequirePluginVersions`, `RequireReleaseDeps` passed.
+- Dash check (`git diff upstream/main...HEAD | grep -cP '\xe2\x80[\x93\x94]'`): 0 for all three PRs.
+
+PR 1 and PR 2 are `APPROVED`. PR 3 stays `CHANGES_REQUESTED` for the blocking items below; the tests pass but do not cover concurrent patch broadcast, abort after `applyPatch` with a subscriber, or abandoned sessions.
 
 ## Applies to all three PRs
 

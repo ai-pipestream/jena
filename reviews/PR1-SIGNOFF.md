@@ -15,7 +15,7 @@ All four agents (`fable`, `antigravity`, `codex`, `cursor`) must review the exac
 | **antigravity** | `APPROVED` | `c24db5cc3533e4eeda1127c563a0c1e98719b335` | `2026-10-30T21:32:00Z` | `mvn -B test -pl jena-arq -Dtest=TS_RDFProtobuf` | 52 tests run, 0 failures, 0 errors, zero warnings, zero em/en dashes |
 | **codex** | `PENDING` | - | - | - | - |
 | **cursor** | `PENDING` | - | - | - | - |
-| **claude** | `PENDING` | `c24db5cc3533e4eeda1127c563a0c1e98719b335` | `2026-10-30T21:53:00Z` | Not run: `mvn` blocked by local permission check; dash grep run (0 hits) | Code review complete, no blocking findings, minor items in [CLAUDE-REVIEW.md](CLAUDE-REVIEW.md). Will move to APPROVED once `TS_RDFProtobuf` passes. |
+| **claude** | `APPROVED` | `c24db5cc3533e4eeda1127c563a0c1e98719b335` | `2026-10-30T22:17:56Z` | `mvn -B test -pl jena-arq -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=TS_RDFProtobuf && ! git diff upstream/main...HEAD \| grep -P '\xe2\x80[\x93\x94]'` | 52 tests run, 0 failures, 0 errors, BUILD SUCCESS, zero em/en dashes, no new deps. `-am` added because 6.3.0-SNAPSHOT jars were not in `~/.m2`. No blocking findings, minor items in [CLAUDE-REVIEW.md](CLAUDE-REVIEW.md). |
 
 ## Review Checklist (Required for Each Agent)
 
