@@ -1,64 +1,98 @@
 # Agent Seeding Instructions: Apache Jena Protobuf & gRPC Review (`GH-4364` / `JENA-2167`)
 
-> **Note:** This `LLM-SEED-INSTRUCTIONS.md` file is a fork-only review guide on `ai-pipestream/jena` to seed multi-agent code reviews. It is not part of the upstream Apache Jena submission and should be excluded when squashing for upstream.
-
 ## 1. Mission & Role
 
-You are reviewing (and verifying) a 3-part stacked implementation for Apache Jena ticket **GH-4364** (*Completing Protobuf / gRPC support (`JENA-2167`): message-level `StreamRDF`/`RowSet` adapters, Protobuf `RDFPatch`, and `RDFLink` over gRPC*).
+You are an independent review agent (`fable`, `codex`, or `cursor`) reviewing and verifying a 3-part stacked implementation for Apache Jena ticket **GH-4364** (*Completing Protobuf / gRPC support (`JENA-2167`): message-level `StreamRDF`/`RowSet` adapters, Protobuf `RDFPatch`, and `RDFLink` over gRPC*).
 
-Before taking any action, read:
-1. `/work/worktrees/jena-workspace/AGENTS.md` (if working in the local multi-worktree workspace)
-2. `CONTRIBUTING.md` at the repository root
-3. `/home/krickert/.claude/skills/krickert-review/SKILL.md` (if present on the local machine)
+All branches and the signoff ledgers are hosted on the fork **`https://github.com/ai-pipestream/jena.git`**.
 
 ### Strict Safety Guardrails (Non-Negotiable)
 - **Never push or write to `upstream` (`apache/jena`).**
 - **Do NOT open any GitHub Pull Requests** (neither on `apache/jena` nor on `ai-pipestream/jena`) unless explicitly instructed by the user.
 - **Do NOT tag or mention any GitHub users** (never use `@username` in any commit, comment, or document).
 - **Never use em dashes or en dashes** anywhere in code, Javadoc, comments, commit messages, or review markdown. Use ASCII hyphens (`-` or `--`), commas, colons, or parentheses.
-- **Do NOT modify `fork/main`** (`/work/worktrees/jena-workspace/fork`).
-- **Preserve SHA-pinned signoffs:** Only modify code in a PR worktree if you find a genuine **Blocking** bug. Any new commit invalidates prior agent signoffs for that worktree.
+- **Do NOT modify `fork/main`**.
+- **Keep the 3 PR branches untouched unless fixing a Blocking bug:** Record your signoffs on the dedicated **`GH-4364-reviews`** branch so the 3 PR branch SHAs remain stable across all 4 agent reviews.
 
 ---
 
-## 2. Branch Topology & Implementation Commits (Option A)
+## 2. Step-by-Step Bootstrap on a Fresh Machine (Start Here)
 
-All three branches are pushed to the fork `origin` (`https://github.com/ai-pipestream/jena.git`) and checked out in dedicated worktrees under `/work/worktrees/jena-workspace`:
+If you are starting on a fresh machine that does not yet have the workspace set up, run the following commands to clone the fork, configure `upstream`, check out the 3 PR worktrees plus the `GH-4364-reviews` ledger worktree, and populate the top-level workspace files:
 
-| PR | Worktree Path | Branch Name | Base | Implementation Commit SHA |
-| :--- | :--- | :--- | :--- | :--- |
-| **PR 1** | `/work/worktrees/jena-workspace/pr1-GH-4364-protobuf-stream-adapters` | `GH-4364-protobuf-stream-adapters` | `upstream/main` (`73713dcc54`) | `03c2037d3d4041fdf694fc88228d68d802cc6af6` |
-| **PR 2** | `/work/worktrees/jena-workspace/pr2-GH-4364-protobuf-rdfpatch` | `GH-4364-protobuf-rdfpatch` | `upstream/main` (`73713dcc54`) | `451eeb0cdfed2ab907b19930d893a96e15ef2059` |
-| **PR 3** | `/work/worktrees/jena-workspace/pr3-GH-4364-jena-grpc` | `GH-4364-jena-grpc` | Merge of PR 1 + PR 2 (`c9607ac2da`) | `aa929c2a075028ab4a11b623ebac7976f35eaea2` |
-
-### Fork Inspection Links (No PRs Opened)
-- **PR 1 branch on fork:** `https://github.com/ai-pipestream/jena/tree/GH-4364-protobuf-stream-adapters`
-- **PR 1 diff on fork:** `https://github.com/ai-pipestream/jena/compare/main...GH-4364-protobuf-stream-adapters`
-- **PR 2 branch on fork:** `https://github.com/ai-pipestream/jena/tree/GH-4364-protobuf-rdfpatch`
-- **PR 2 diff on fork:** `https://github.com/ai-pipestream/jena/compare/main...GH-4364-protobuf-rdfpatch`
-- **PR 3 branch on fork:** `https://github.com/ai-pipestream/jena/tree/GH-4364-jena-grpc`
-- **PR 3 implementation commit on fork:** `https://github.com/ai-pipestream/jena/commit/aa929c2a075028ab4a11b623ebac7976f35eaea2`
-
-To check workspace status at any time, run:
 ```bash
-/work/worktrees/jena-workspace/sync.sh
+export WORKSPACE_DIR="${WORKSPACE_DIR:-/work/worktrees/jena-workspace}"
+mkdir -p "${WORKSPACE_DIR}"
+
+# 1. Clone the fork (origin = ai-pipestream/jena) into fork/ and add upstream (apache/jena)
+git clone https://github.com/ai-pipestream/jena.git "${WORKSPACE_DIR}/fork"
+git -C "${WORKSPACE_DIR}/fork" remote add upstream https://github.com/apache/jena.git
+git -C "${WORKSPACE_DIR}/fork" fetch origin --prune
+git -C "${WORKSPACE_DIR}/fork" fetch upstream --prune
+
+# 2. Create the 3 PR worktrees tracking the fork branches
+git -C "${WORKSPACE_DIR}/fork" worktree add -B GH-4364-protobuf-stream-adapters \
+  "${WORKSPACE_DIR}/pr1-GH-4364-protobuf-stream-adapters" origin/GH-4364-protobuf-stream-adapters
+
+git -C "${WORKSPACE_DIR}/fork" worktree add -B GH-4364-protobuf-rdfpatch \
+  "${WORKSPACE_DIR}/pr2-GH-4364-protobuf-rdfpatch" origin/GH-4364-protobuf-rdfpatch
+
+git -C "${WORKSPACE_DIR}/fork" worktree add -B GH-4364-jena-grpc \
+  "${WORKSPACE_DIR}/pr3-GH-4364-jena-grpc" origin/GH-4364-jena-grpc
+
+# 3. Check out the GH-4364-reviews branch (contains AGENTS.md, sync.sh, and reviews/PR*-SIGNOFF.md)
+git -C "${WORKSPACE_DIR}/fork" worktree add -B GH-4364-reviews \
+  "${WORKSPACE_DIR}/reviews-branch" origin/GH-4364-reviews
+
+cp "${WORKSPACE_DIR}/reviews-branch/AGENTS.md" "${WORKSPACE_DIR}/AGENTS.md"
+cp "${WORKSPACE_DIR}/reviews-branch/sync.sh" "${WORKSPACE_DIR}/sync.sh"
+chmod +x "${WORKSPACE_DIR}/sync.sh"
+mkdir -p "${WORKSPACE_DIR}/reviews"
+cp "${WORKSPACE_DIR}/reviews-branch/reviews/"*.md "${WORKSPACE_DIR}/reviews/"
+```
+
+### One-Time Local Maven Snapshot Warmup (Required on a Fresh Machine)
+
+Because targeted test runs (`mvn test -pl jena-arq`) depend on sibling `6.3.0-SNAPSHOT` reactor jars (`jena-base`, `jena-core`, `jena-iri`, `jena-tdb2`, `jena-rdfconnection`), install the base reactor artifacts into your local `~/.m2/repository` once before running targeted module tests:
+
+```bash
+cd "${WORKSPACE_DIR}/pr3-GH-4364-jena-grpc"
+mvn -B -DskipTests -Dmaven.javadoc.skip=true install -pl jena-tdb2,jena-rdfconnection -am
 ```
 
 ---
 
-## 3. Detailed Review Scope per PR
+## 3. Branch Topology & Pinned Commit SHAs (Option A)
+
+All branches live on `origin` (`https://github.com/ai-pipestream/jena.git`):
+
+| Worktree / Role | Branch Name | Base | Branch HEAD SHA | Code Implementation Commit SHA |
+| :--- | :--- | :--- | :--- | :--- |
+| **PR 1** (`pr1-GH-4364-protobuf-stream-adapters`) | `GH-4364-protobuf-stream-adapters` | `upstream/main` (`73713dcc54`) | `c24db5cc3533e4eeda1127c563a0c1e98719b335` | `03c2037d3d4041fdf694fc88228d68d802cc6af6` |
+| **PR 2** (`pr2-GH-4364-protobuf-rdfpatch`) | `GH-4364-protobuf-rdfpatch` | `upstream/main` (`73713dcc54`) | `a3c165fc8a274953ec6900e9ff4141be1dc7b09e` | `451eeb0cdfed2ab907b19930d893a96e15ef2059` |
+| **PR 3** (`pr3-GH-4364-jena-grpc`) | `GH-4364-jena-grpc` | Merge of PR 1 + PR 2 (`c9607ac2da`) | `a112eb95072d4369dcadee832e3fa2f799e47f1f` | `aa929c2a075028ab4a11b623ebac7976f35eaea2` |
+| **Reviews & Ledgers** (`reviews-branch`) | `GH-4364-reviews` | `upstream/main` (`73713dcc54`) | (Updated as agents sign off) | Holds `AGENTS.md`, `sync.sh`, `reviews/PR1-SIGNOFF.md`, `reviews/PR2-SIGNOFF.md`, `reviews/PR3-SIGNOFF.md` |
+
+Before reviewing code, read:
+1. `${WORKSPACE_DIR}/AGENTS.md`
+2. `${WORKSPACE_DIR}/fork/CONTRIBUTING.md`
+3. `/home/krickert/.claude/skills/krickert-review/SKILL.md` (if present on your machine)
+
+---
+
+## 4. Detailed Review Scope & Verification Commands per PR
 
 ### PR 1: In-Memory Protobuf `StreamRDF` and `RowSet` Message Adapters
-- **Worktree:** `/work/worktrees/jena-workspace/pr1-GH-4364-protobuf-stream-adapters`
+- **Worktree:** `${WORKSPACE_DIR}/pr1-GH-4364-protobuf-stream-adapters`
 - **Module:** `jena-arq` (`org.apache.jena.riot.protobuf`)
 - **Diff Command:**
   ```bash
-  cd /work/worktrees/jena-workspace/pr1-GH-4364-protobuf-stream-adapters
-  git diff upstream/main...HEAD -- ':!LLM-SEED-INSTRUCTIONS.md'
+  cd "${WORKSPACE_DIR}/pr1-GH-4364-protobuf-stream-adapters"
+  git show 03c2037d3d4041fdf694fc88228d68d802cc6af6
   ```
 - **Test & Verification Command:**
   ```bash
-  cd /work/worktrees/jena-workspace/pr1-GH-4364-protobuf-stream-adapters
+  cd "${WORKSPACE_DIR}/pr1-GH-4364-protobuf-stream-adapters"
   mvn -B test -pl jena-arq -Dtest=TS_RDFProtobuf && ! git diff upstream/main...HEAD | grep -P '\xe2\x80[\x93\x94]'
   ```
 - **Changed / Added Files:**
@@ -81,17 +115,17 @@ To check workspace status at any time, run:
 ---
 
 ### PR 2: Protobuf `RDF_Patch_Row` Schema & Binary `RDFPatch` Support
-- **Worktree:** `/work/worktrees/jena-workspace/pr2-GH-4364-protobuf-rdfpatch`
+- **Worktree:** `${WORKSPACE_DIR}/pr2-GH-4364-protobuf-rdfpatch`
 - **Modules:** `jena-arq` and `jena-rdfpatch`
 - **Diff Commands:**
   ```bash
-  cd /work/worktrees/jena-workspace/pr2-GH-4364-protobuf-rdfpatch
+  cd "${WORKSPACE_DIR}/pr2-GH-4364-protobuf-rdfpatch"
   # Inspect hand-written changes (excluding generated PB_RDF.java):
-  git diff upstream/main...HEAD -- ':!jena-arq/src/main/java/org/apache/jena/riot/protobuf/wire/PB_RDF.java' ':!LLM-SEED-INSTRUCTIONS.md'
+  git show 451eeb0cdfed2ab907b19930d893a96e15ef2059 -- ':!jena-arq/src/main/java/org/apache/jena/riot/protobuf/wire/PB_RDF.java'
   ```
 - **Test & Verification Command:**
   ```bash
-  cd /work/worktrees/jena-workspace/pr2-GH-4364-protobuf-rdfpatch
+  cd "${WORKSPACE_DIR}/pr2-GH-4364-protobuf-rdfpatch"
   mvn -B test -pl jena-arq,jena-rdfpatch -Dtest=TS_RDFProtobuf,TS_RDFPatch && ! git diff upstream/main...HEAD | grep -P '\xe2\x80[\x93\x94]'
   ```
 - **Changed / Added Files:**
@@ -112,19 +146,17 @@ To check workspace status at any time, run:
 ---
 
 ### PR 3: Jetty-Free `jena-grpc` Transport (`RDFLinkGrpc`, `RDFConnectionGrpc`, `RDFDatasetGrpcService`)
-- **Worktree:** `/work/worktrees/jena-workspace/pr3-GH-4364-jena-grpc`
+- **Worktree:** `${WORKSPACE_DIR}/pr3-GH-4364-jena-grpc`
 - **Module:** `jena-grpc` (plus root `pom.xml` and `jena-bom/pom.xml`)
 - **Diff Commands:**
   ```bash
-  cd /work/worktrees/jena-workspace/pr3-GH-4364-jena-grpc
+  cd "${WORKSPACE_DIR}/pr3-GH-4364-jena-grpc"
   # Inspect PR 3 specific implementation changes on top of the PR 1 + PR 2 merge commit:
   git show aa929c2a075028ab4a11b623ebac7976f35eaea2
-  # Or full diff against upstream/main:
-  git diff upstream/main...HEAD -- ':!jena-arq/src/main/java/org/apache/jena/riot/protobuf/wire/PB_RDF.java' ':!LLM-SEED-INSTRUCTIONS.md'
   ```
 - **Test & Verification Commands:**
   ```bash
-  cd /work/worktrees/jena-workspace/pr3-GH-4364-jena-grpc
+  cd "${WORKSPACE_DIR}/pr3-GH-4364-jena-grpc"
   mvn -B test -pl jena-arq,jena-rdfpatch,jena-grpc -Dtest=TS_RDFProtobuf,TS_RDFPatch,TS_JenaGrpc && ! git diff upstream/main...HEAD | grep -P '\xe2\x80[\x93\x94]'
   mvn -B dependency:tree -pl jena-grpc | grep -E 'jetty|servlet' || echo "Zero Jetty/Servlet dependencies verified"
   ```
@@ -154,15 +186,29 @@ To check workspace status at any time, run:
 
 ---
 
-## 4. How to Record Your Signoff
+## 5. How to Record & Push Your Signoff (`GH-4364-reviews`)
 
 After independently inspecting the diffs and running the verification commands for all 3 PRs:
 
-1. Check the checklist items in `/work/worktrees/jena-workspace/reviews/PR1-SIGNOFF.md`, `/work/worktrees/jena-workspace/reviews/PR2-SIGNOFF.md`, and `/work/worktrees/jena-workspace/reviews/PR3-SIGNOFF.md`.
-2. Update your agent row (`fable`, `codex`, or `cursor`) in each of the 3 ledger files with:
+1. Pull the latest `GH-4364-reviews` branch in `${WORKSPACE_DIR}/reviews-branch`:
+   ```bash
+   git -C "${WORKSPACE_DIR}/reviews-branch" pull --rebase origin GH-4364-reviews
+   ```
+2. Update your agent row (`fable`, `codex`, or `cursor`) in:
+   - `${WORKSPACE_DIR}/reviews-branch/reviews/PR1-SIGNOFF.md`
+   - `${WORKSPACE_DIR}/reviews-branch/reviews/PR2-SIGNOFF.md`
+   - `${WORKSPACE_DIR}/reviews-branch/reviews/PR3-SIGNOFF.md`
+   with:
    - Status: `` `APPROVED` `` (or `` `CHANGES_REQUESTED` `` if a blocking bug is found)
-   - Reviewed Commit SHA: the exact 40-character `git rev-parse HEAD` SHA of each worktree
+   - Reviewed Commit SHA: the 40-character SHA of each PR worktree (`c24db5cc3533e4eeda1127c563a0c1e98719b335` / `03c2037d3d4041fdf694fc88228d68d802cc6af6` for PR 1; `a3c165fc8a274953ec6900e9ff4141be1dc7b09e` / `451eeb0cdfed2ab907b19930d893a96e15ef2059` for PR 2; `a112eb95072d4369dcadee832e3fa2f799e47f1f` / `aa929c2a075028ab4a11b623ebac7976f35eaea2` for PR 3)
    - Date (UTC) in ISO-8601 format
    - Exact verification command run
    - Brief test summary / notes
-3. Run `/work/worktrees/jena-workspace/sync.sh` to confirm all worktrees remain clean (`dirty=0`) and your signoffs are recorded.
+3. Copy the updated ledger files to `${WORKSPACE_DIR}/reviews/`, commit them to `GH-4364-reviews`, and push `GH-4364-reviews` to `origin` (`ai-pipestream/jena`):
+   ```bash
+   cp "${WORKSPACE_DIR}/reviews-branch/reviews/"*.md "${WORKSPACE_DIR}/reviews/"
+   git -C "${WORKSPACE_DIR}/reviews-branch" add reviews/
+   git -C "${WORKSPACE_DIR}/reviews-branch" commit -s -m "GH-4364: Record <agent-name> review signoff"
+   git -C "${WORKSPACE_DIR}/reviews-branch" push origin GH-4364-reviews
+   "${WORKSPACE_DIR}/sync.sh"
+   ```
