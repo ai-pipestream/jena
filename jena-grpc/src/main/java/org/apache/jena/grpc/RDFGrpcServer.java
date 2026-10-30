@@ -23,6 +23,7 @@ package org.apache.jena.grpc;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import io.grpc.Server;
@@ -125,6 +126,7 @@ public class RDFGrpcServer implements AutoCloseable {
         private String inProcessName;
         private boolean encodeValues = true;
         private int batchSize = ProtobufRDF.DEFAULT_BATCH_SIZE;
+        private Duration txnIdleTimeout = RDFDatasetGrpcService.DEFAULT_TXN_IDLE_TIMEOUT;
 
         private Builder() {}
 
@@ -211,6 +213,21 @@ public class RDFGrpcServer implements AutoCloseable {
         }
 
         /**
+         * Set how long a remote transaction may stay idle before the server aborts and ends it
+         * (defaults to {@link RDFDatasetGrpcService#DEFAULT_TXN_IDLE_TIMEOUT}).
+         *
+         * @param txnIdleTimeout the idle timeout
+         * @return this builder
+         * @throws IllegalArgumentException Thrown if {@code txnIdleTimeout} is {@code null} or not positive
+         */
+        public Builder txnIdleTimeout(Duration txnIdleTimeout) {
+            if ( txnIdleTimeout == null || txnIdleTimeout.isNegative() || txnIdleTimeout.isZero() )
+                throw new IllegalArgumentException("txnIdleTimeout must be positive: " + txnIdleTimeout);
+            this.txnIdleTimeout = txnIdleTimeout;
+            return this;
+        }
+
+        /**
          * Build the {@link RDFGrpcServer}.
          *
          * @return the unstarted {@link RDFGrpcServer}
@@ -219,7 +236,7 @@ public class RDFGrpcServer implements AutoCloseable {
         public RDFGrpcServer build() {
             if ( dataset == null )
                 throw new IllegalArgumentException(ERR_DSG_NULL);
-            RDFDatasetGrpcService service = new RDFDatasetGrpcService(dataset, encodeValues, batchSize);
+            RDFDatasetGrpcService service = new RDFDatasetGrpcService(dataset, encodeValues, batchSize, txnIdleTimeout);
             Server server;
             if ( inProcessName != null ) {
                 server = InProcessServerBuilder.forName(inProcessName)

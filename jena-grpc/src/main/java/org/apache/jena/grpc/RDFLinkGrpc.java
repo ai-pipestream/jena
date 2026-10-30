@@ -760,12 +760,12 @@ public class RDFLinkGrpc implements RDFLink {
             try {
                 ClientCalls.blockingUnaryCall(
                     rawChannel, RDFGrpcProtocol.COMMIT_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
-                ClientCalls.blockingUnaryCall(
-                    rawChannel, RDFGrpcProtocol.END_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
             } catch (StatusRuntimeException sre) {
                 throw RDFGrpcProtocol.fromStatusException(sre);
             } finally {
+                // Always release the server session, even if the commit call failed.
                 currentTxnId.remove();
+                endRemoteTxn(txnId);
             }
         }
     }
@@ -780,13 +780,22 @@ public class RDFLinkGrpc implements RDFLink {
             try {
                 ClientCalls.blockingUnaryCall(
                     rawChannel, RDFGrpcProtocol.ABORT_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
-                ClientCalls.blockingUnaryCall(
-                    rawChannel, RDFGrpcProtocol.END_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
             } catch (StatusRuntimeException sre) {
                 throw RDFGrpcProtocol.fromStatusException(sre);
             } finally {
+                // Always release the server session, even if the abort call failed.
                 currentTxnId.remove();
+                endRemoteTxn(txnId);
             }
+        }
+    }
+
+    private void endRemoteTxn(String txnId) {
+        try {
+            ClientCalls.blockingUnaryCall(
+                rawChannel, RDFGrpcProtocol.END_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
+        } catch (StatusRuntimeException ignored) {
+            // Best effort: the server also ends idle transactions after a timeout
         }
     }
 

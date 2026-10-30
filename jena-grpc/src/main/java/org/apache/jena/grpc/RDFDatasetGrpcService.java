@@ -21,6 +21,8 @@
 
 package org.apache.jena.grpc;
 
+import java.time.Duration;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,10 +30,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import com.google.protobuf.BoolValue;
@@ -52,6 +57,7 @@ import io.grpc.stub.ServerCalls;
 import io.grpc.stub.StreamObserver;
 import org.apache.jena.atlas.json.JSON;
 import org.apache.jena.atlas.json.JsonArray;
+import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -94,11 +100,16 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     private static final String ERR_PATCH_NULL = "patch must not be null";
     private static final int DEFAULT_BATCH_SIZE = ProtobufRDF.DEFAULT_BATCH_SIZE;
 
+    /** Default time a remote transaction may stay idle before the server aborts and ends it. */
+    public static final Duration DEFAULT_TXN_IDLE_TIMEOUT = Duration.ofMinutes(5);
+
     private final DatasetGraph dsg;
     private final boolean encodeValues;
     private final int batchSize;
+    private final long txnIdleTimeoutNanos;
     private final Map<String, ServerTxnSession> activeTxns = new ConcurrentHashMap<>();
-    private final List<StreamObserver<RDF_Patch_Row>> patchSubscribers = new CopyOnWriteArrayList<>();
+    private final PatchPublisher patchPublisher = new PatchPublisher();
+    private final ScheduledExecutorService txnReaper;
 
     /**
      * Create a gRPC service backed by {@code dsg} with value encoding enabled and default batch size.
@@ -119,13 +130,41 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
      * @throws IllegalArgumentException Thrown if {@code dsg} is {@code null} or {@code batchSize <= 0}
      */
     public RDFDatasetGrpcService(DatasetGraph dsg, boolean encodeValues, int batchSize) {
+        this(dsg, encodeValues, batchSize, DEFAULT_TXN_IDLE_TIMEOUT);
+    }
+
+    /**
+     * Create a gRPC service backed by {@code dsg} with configurable value encoding, batch size,
+     * and remote transaction idle timeout.
+     * <p>
+     * A remote transaction that has had no request for longer than {@code txnIdleTimeout} is aborted
+     * and ended by the server, so a client that disappears cannot hold the dataset's writer lock forever.
+     *
+     * @param dsg the backing {@link DatasetGraph}
+     * @param encodeValues {@code true} to encode numeric literals by value in {@code PB_RDF} terms
+     * @param batchSize number of rows per {@link RDF_Stream} batch
+     * @param txnIdleTimeout maximum idle time of a remote transaction
+     * @throws IllegalArgumentException Thrown if {@code dsg} or {@code txnIdleTimeout} is {@code null},
+     *     {@code batchSize <= 0}, or {@code txnIdleTimeout} is not positive
+     */
+    public RDFDatasetGrpcService(DatasetGraph dsg, boolean encodeValues, int batchSize, Duration txnIdleTimeout) {
         if ( dsg == null )
             throw new IllegalArgumentException(ERR_DSG_NULL);
         if ( batchSize <= 0 )
             throw new IllegalArgumentException("batchSize must be positive: " + batchSize);
+        if ( txnIdleTimeout == null || txnIdleTimeout.isNegative() || txnIdleTimeout.isZero() )
+            throw new IllegalArgumentException("txnIdleTimeout must be positive: " + txnIdleTimeout);
         this.dsg = dsg;
         this.encodeValues = encodeValues;
         this.batchSize = batchSize;
+        this.txnIdleTimeoutNanos = txnIdleTimeout.toNanos();
+        this.txnReaper = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "jena-grpc-txn-reaper");
+            t.setDaemon(true);
+            return t;
+        });
+        long periodMillis = Math.clamp(txnIdleTimeout.toMillis() / 4, 10L, 30_000L);
+        txnReaper.scheduleWithFixedDelay(this::reapIdleTxns, periodMillis, periodMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -202,30 +241,39 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     public void publishPatch(RDFPatch patch) {
         if ( patch == null )
             throw new IllegalArgumentException(ERR_PATCH_NULL);
-        if ( patchSubscribers.isEmpty() )
+        if ( !patchPublisher.hasSubscribers() )
             return;
         List<RDF_Patch_Row> rows = new ArrayList<>();
         RDFPatchOps.writeProtobuf(patch, rows::add);
-        broadcastPatchRows(rows);
+        patchPublisher.reserve().publish(rows);
     }
 
     /** {@inheritDoc} */
     @Override
     public void close() {
+        txnReaper.shutdownNow();
         for ( String id : new ArrayList<>(activeTxns.keySet()) ) {
             ServerTxnSession session = activeTxns.remove(id);
             if ( session != null ) {
                 session.close();
             }
         }
-        for ( StreamObserver<RDF_Patch_Row> sub : patchSubscribers ) {
-            try {
-                sub.onCompleted();
-            } catch (RuntimeException ignored) {
-                // Subscriber already disconnected
+        patchPublisher.close();
+    }
+
+    /** Number of open remote transactions (for tests). */
+    int activeTxnCount() {
+        return activeTxns.size();
+    }
+
+    private void reapIdleTxns() {
+        for ( Map.Entry<String, ServerTxnSession> e : activeTxns.entrySet() ) {
+            ServerTxnSession session = e.getValue();
+            if ( session.isIdleFor(txnIdleTimeoutNanos) && activeTxns.remove(e.getKey(), session) ) {
+                Log.warn(this, "Remote transaction idle timeout, aborting: " + e.getKey());
+                session.close();
             }
         }
-        patchSubscribers.clear();
     }
 
     private ServerInterceptor metadataInterceptor() {
@@ -587,39 +635,51 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
         }
     }
 
+    /**
+     * Apply patch rows. Without a remote transaction the patch is applied in its own write transaction
+     * and published to subscribers after it commits, in commit order. Inside a remote transaction the rows
+     * are held by the session and published only when that transaction commits.
+     */
     private void applyPatchRows(String txnId, List<RDF_Patch_Row> rows) throws Exception {
-        executeWrite(txnId, () -> {
-            RDFChangesApply changes = new NonTransactionalChangesApply(dsg);
-            Consumer<RDF_Patch_Row> sink = RDFPatchOps.protobufChangesReceiver(changes);
-            changes.start();
-            for ( RDF_Patch_Row row : rows ) {
-                sink.accept(row);
-            }
-            changes.finish();
-        });
-        broadcastPatchRows(rows);
+        List<RDF_Patch_Row> rowsCopy = List.copyOf(rows);
+        if ( txnId != null ) {
+            ServerTxnSession session = requireSession(txnId);
+            session.run(() -> {
+                applyRows(rowsCopy);
+                session.addPendingPatchRows(rowsCopy);
+            });
+            return;
+        }
+        // The ticket is taken while holding the write lock, so ticket order is commit order.
+        PatchPublisher.Ticket[] ticket = new PatchPublisher.Ticket[1];
+        try {
+            Txn.executeWrite(dsg, () -> {
+                applyRows(rowsCopy);
+                ticket[0] = patchPublisher.reserve();
+            });
+        } catch (Throwable ex) {
+            if ( ticket[0] != null )
+                ticket[0].cancel();
+            throw ex;
+        }
+        ticket[0].publish(rowsCopy);
+    }
+
+    private void applyRows(List<RDF_Patch_Row> rows) {
+        RDFChangesApply changes = new NonTransactionalChangesApply(dsg);
+        Consumer<RDF_Patch_Row> sink = RDFPatchOps.protobufChangesReceiver(changes);
+        changes.start();
+        for ( RDF_Patch_Row row : rows ) {
+            sink.accept(row);
+        }
+        changes.finish();
     }
 
     private void subscribePatches(Empty request, StreamObserver<RDF_Patch_Row> responseObserver) {
-        patchSubscribers.add(responseObserver);
         if ( responseObserver instanceof ServerCallStreamObserver<RDF_Patch_Row> serverObs ) {
-            serverObs.setOnCancelHandler(() -> patchSubscribers.remove(responseObserver));
+            serverObs.setOnCancelHandler(() -> patchPublisher.unsubscribe(responseObserver));
         }
-        responseObserver.onNext(RDF_Patch_Row.getDefaultInstance());
-    }
-
-    private void broadcastPatchRows(List<RDF_Patch_Row> rows) {
-        if ( patchSubscribers.isEmpty() || rows.isEmpty() )
-            return;
-        for ( StreamObserver<RDF_Patch_Row> sub : patchSubscribers ) {
-            try {
-                for ( RDF_Patch_Row row : rows ) {
-                    sub.onNext(row);
-                }
-            } catch (RuntimeException ex) {
-                patchSubscribers.remove(sub);
-            }
-        }
+        patchPublisher.subscribe(responseObserver);
     }
 
     private void beginTxn(StringValue request, StreamObserver<StringValue> responseObserver) {
@@ -639,7 +699,7 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     private void commitTxn(StringValue request, StreamObserver<Empty> responseObserver) {
         try {
             ServerTxnSession session = requireSession(request.getValue());
-            session.commit();
+            session.commit(patchPublisher);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
         } catch (Throwable ex) {
@@ -783,13 +843,107 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     }
 
     /**
+     * Delivers patch rows to subscribers one patch at a time, in the order tickets were reserved.
+     * All calls to a subscriber's {@link StreamObserver} happen while holding this object's lock,
+     * because a gRPC {@link StreamObserver} must not be called concurrently.
+     */
+    private static final class PatchPublisher {
+        // Guarded by "this"
+        private final List<StreamObserver<RDF_Patch_Row>> subscribers = new ArrayList<>();
+        private final ArrayDeque<Ticket> tickets = new ArrayDeque<>();
+
+        /** A reserved place in the delivery order. Resolve it with {@link #publish} or {@link #cancel}. */
+        final class Ticket {
+            private List<RDF_Patch_Row> rows;
+            private boolean resolved;
+
+            void publish(List<RDF_Patch_Row> patchRows) {
+                resolve(this, patchRows);
+            }
+
+            void cancel() {
+                resolve(this, List.of());
+            }
+        }
+
+        synchronized Ticket reserve() {
+            Ticket ticket = new Ticket();
+            tickets.addLast(ticket);
+            return ticket;
+        }
+
+        synchronized boolean hasSubscribers() {
+            return !subscribers.isEmpty();
+        }
+
+        synchronized void subscribe(StreamObserver<RDF_Patch_Row> subscriber) {
+            subscribers.add(subscriber);
+            // Ready marker: tells the client the subscription is registered.
+            send(subscriber, RDF_Patch_Row.getDefaultInstance());
+        }
+
+        synchronized void unsubscribe(StreamObserver<RDF_Patch_Row> subscriber) {
+            subscribers.remove(subscriber);
+        }
+
+        private synchronized void resolve(Ticket ticket, List<RDF_Patch_Row> patchRows) {
+            if ( ticket.resolved )
+                return;
+            ticket.rows = patchRows;
+            ticket.resolved = true;
+            while ( !tickets.isEmpty() && tickets.peekFirst().resolved ) {
+                deliver(tickets.removeFirst().rows);
+            }
+        }
+
+        private void deliver(List<RDF_Patch_Row> patchRows) {
+            if ( patchRows.isEmpty() )
+                return;
+            for ( StreamObserver<RDF_Patch_Row> sub : List.copyOf(subscribers) ) {
+                for ( RDF_Patch_Row row : patchRows ) {
+                    if ( !send(sub, row) )
+                        break;
+                }
+            }
+        }
+
+        private boolean send(StreamObserver<RDF_Patch_Row> sub, RDF_Patch_Row row) {
+            try {
+                sub.onNext(row);
+                return true;
+            } catch (RuntimeException ex) {
+                // Subscriber disconnected
+                subscribers.remove(sub);
+                return false;
+            }
+        }
+
+        synchronized void close() {
+            tickets.clear();
+            for ( StreamObserver<RDF_Patch_Row> sub : subscribers ) {
+                try {
+                    sub.onCompleted();
+                } catch (RuntimeException ignored) {
+                    // Subscriber already disconnected
+                }
+            }
+            subscribers.clear();
+        }
+    }
+
+    /**
      * Pins a server-side {@link DatasetGraph} transaction to a dedicated single-thread executor
      * so multiple gRPC requests sharing a transaction ID execute on the same thread.
+     * Patch rows applied in the transaction are held until commit.
      */
     private static final class ServerTxnSession {
         private final DatasetGraph dsg;
         private final ExecutorService executor;
-        private boolean ended;
+        private final AtomicInteger inFlight = new AtomicInteger();
+        // Only touched on the session thread
+        private final List<RDF_Patch_Row> pendingPatchRows = new ArrayList<>();
+        private volatile long lastUsed = System.nanoTime();
+        private volatile boolean ended;
 
         ServerTxnSession(DatasetGraph dsg, TxnType txnType) throws Exception {
             this.dsg = dsg;
@@ -809,8 +963,12 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
         }
 
         <T> T call(Callable<T> callable) throws Exception {
+            inFlight.incrementAndGet();
+            lastUsed = System.nanoTime();
             try {
                 return executor.submit(callable).get();
+            } catch (RejectedExecutionException ex) {
+                throw new JenaTransactionException("Remote transaction has ended or expired", ex);
             } catch (ExecutionException ex) {
                 Throwable cause = ex.getCause();
                 if ( cause instanceof Exception e )
@@ -818,15 +976,45 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
                 if ( cause instanceof Error err )
                     throw err;
                 throw ex;
+            } finally {
+                lastUsed = System.nanoTime();
+                inFlight.decrementAndGet();
             }
         }
 
-        void commit() throws Exception {
-            run(dsg::commit);
+        boolean isIdleFor(long nanos) {
+            return inFlight.get() == 0 && System.nanoTime() - lastUsed > nanos;
+        }
+
+        /** Call on the session thread. */
+        void addPendingPatchRows(List<RDF_Patch_Row> rows) {
+            pendingPatchRows.addAll(rows);
+        }
+
+        void commit(PatchPublisher publisher) throws Exception {
+            run(() -> {
+                // Reserve while still holding the write lock so delivery follows commit order.
+                PatchPublisher.Ticket ticket = pendingPatchRows.isEmpty() ? null : publisher.reserve();
+                try {
+                    dsg.commit();
+                } catch (Throwable ex) {
+                    pendingPatchRows.clear();
+                    if ( ticket != null )
+                        ticket.cancel();
+                    throw ex;
+                }
+                if ( ticket != null ) {
+                    ticket.publish(List.copyOf(pendingPatchRows));
+                    pendingPatchRows.clear();
+                }
+            });
         }
 
         void abort() throws Exception {
-            run(dsg::abort);
+            run(() -> {
+                pendingPatchRows.clear();
+                dsg.abort();
+            });
         }
 
         void end() throws Exception {
@@ -834,6 +1022,7 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
                 ended = true;
                 try {
                     run(() -> {
+                        pendingPatchRows.clear();
                         if ( dsg.isInTransaction() && dsg.transactionMode() == ReadWrite.WRITE ) {
                             dsg.abort();
                         }
