@@ -15,7 +15,7 @@ All four agents (`fable`, `antigravity`, `codex`, `cursor`) must review the exac
 | **antigravity** | `APPROVED` | `a112eb95072d4369dcadee832e3fa2f799e47f1f` | `2026-10-30T21:32:00Z` | `mvn -B test -pl jena-arq,jena-rdfpatch,jena-grpc -Dtest=TS_RDFProtobuf,TS_RDFPatch,TS_JenaGrpc` | 52 + 64 + 129 tests run, 0 failures, 0 errors, zero Jetty/Servlet deps, zero em/en dashes |
 | **codex** | `PENDING` | - | - | - | - |
 | **cursor** | `PENDING` | - | - | - | - |
-| **claude** | `CHANGES_REQUESTED` | `a112eb95072d4369dcadee832e3fa2f799e47f1f` | `2026-10-30T22:05:00Z` | Not run: `mvn` blocked by local permission check; dash grep run (0 hits) | 3 blocking: unsynchronized and unordered patch broadcast to subscribers, uncommitted remote-txn patches broadcast before commit, remote txn sessions never expire (writer lock held forever). See [CLAUDE-REVIEW.md](CLAUDE-REVIEW.md). |
+| **claude** | `CHANGES_REQUESTED` | `a112eb95072d4369dcadee832e3fa2f799e47f1f` | `2026-10-30T21:53:00Z` | Not run: `mvn` blocked by local permission check; dash grep run (0 hits) | 3 blocking: unsynchronized and unordered patch broadcast to subscribers, uncommitted remote-txn patches broadcast before commit, remote txn sessions never expire (writer lock held forever). See [CLAUDE-REVIEW.md](CLAUDE-REVIEW.md). |
 
 ## Review Checklist (Required for Each Agent)
 
