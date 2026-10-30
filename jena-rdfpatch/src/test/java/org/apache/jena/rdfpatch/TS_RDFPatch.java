@@ -32,6 +32,7 @@ import org.apache.jena.rdfpatch.filelog.TestRotate;
 @SelectClasses({
     TestPatchIO_Text.class
     , TestPatchIO_Binary.class
+    , TestPatchIO_Protobuf.class
     , TestRDFChanges.class
     , TestRDFChangesDataset.class
     , TestRDFChangesGraph.class
