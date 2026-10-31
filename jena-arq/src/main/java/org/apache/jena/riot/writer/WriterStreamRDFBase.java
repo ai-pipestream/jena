@@ -29,7 +29,9 @@ import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.RIOT;
+import org.apache.jena.riot.out.NodeFormatter;
 import org.apache.jena.riot.out.NodeFormatterTTL;
+import org.apache.jena.riot.out.NodeFormatterTTL_MultiLine;
 import org.apache.jena.riot.out.NodeToLabel;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
@@ -60,8 +62,10 @@ public abstract class WriterStreamRDFBase implements StreamRDF
     protected final PrefixMap pMap;
     protected String baseURI = null;
     protected final NodeToLabel nodeToLabel;
+    private final NodeFormatter customFmt;
+    private final boolean multilineLiterals;
 
-    protected NodeFormatterTTL fmt;
+    protected NodeFormatter fmt;
     protected final IndentedWriter out;
     protected final DirectiveStyle directiveStyle;
     // Allows for ability to write RDF without writing the base URI.
@@ -79,30 +83,50 @@ public abstract class WriterStreamRDFBase implements StreamRDF
 
     protected WriterStreamRDFBase(IndentedWriter output, Context context) {
         this(output,
-             NodeToLabel.createScopeByDocument(),
+             WriterLib.nodeFormatter(context),
+             WriterLib.nodeToLabel(context) != null ? WriterLib.nodeToLabel(context) : NodeToLabel.createScopeByDocument(),
              WriterLib.directiveStyle(context),
-             context.isFalseOrUndef(RIOT.symTurtleOmitBase));
+             context == null || context.isFalseOrUndef(RIOT.symTurtleOmitBase),
+             context != null && context.isTrue(RIOT.symTurtleMultilineLiterals));
     }
 
     protected WriterStreamRDFBase(IndentedWriter output,
                                   NodeToLabel nodeToLabel,
                                   DirectiveStyle directiveStyle,
                                   boolean printBase) {
+        this(output, null, nodeToLabel, directiveStyle, printBase, false);
+    }
+
+    private WriterStreamRDFBase(IndentedWriter output,
+                                NodeFormatter customFmt,
+                                NodeToLabel nodeToLabel,
+                                DirectiveStyle directiveStyle,
+                                boolean printBase,
+                                boolean multilineLiterals) {
         // Stream writing does not take an external base URI from the API "write"
         // call. The base URI is output if StreamRDF.base() called, which means BASE
         // was in the data stream.
         this.out = output;
         this.baseURI = null;
         this.pMap = PrefixMapFactory.create();
+        this.customFmt = customFmt;
         this.nodeToLabel = nodeToLabel;
         this.directiveStyle = directiveStyle;
         this.printBase = printBase;
+        this.multilineLiterals = multilineLiterals;
         setFormatter();
     }
 
     // Set and reset the formatter. It needs resetting if BASE is encountered.
     private void setFormatter() {
-        fmt = new NodeFormatterTTL(baseURI, pMap, nodeToLabel);
+        if ( customFmt != null ) {
+            fmt = customFmt;
+            return;
+        }
+        if ( multilineLiterals )
+            fmt = new NodeFormatterTTL_MultiLine(baseURI, pMap, nodeToLabel);
+        else
+            fmt = new NodeFormatterTTL(baseURI, pMap, nodeToLabel);
     }
 
     private static IndentedWriter wrap(Writer output) {

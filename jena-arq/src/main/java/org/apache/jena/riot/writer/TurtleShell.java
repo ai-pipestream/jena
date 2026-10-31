@@ -79,10 +79,16 @@ public abstract class TurtleShell {
     }
 
     static public NodeFormatter createNodeFormatter(PrefixMap pmap, String baseURI, Context context) {
+        NodeFormatter fmt = WriterLib.nodeFormatter(context);
+        if ( fmt != null )
+            return fmt;
+        NodeToLabel nodeToLabel = WriterLib.nodeToLabel(context);
+        if ( nodeToLabel == null )
+            nodeToLabel = NodeToLabel.createScopeByDocument();
         if ( context != null && context.isTrue(RIOT.symTurtleMultilineLiterals) )
-            return new NodeFormatterTTL_MultiLine(baseURI, pmap, NodeToLabel.createScopeByDocument());
+            return new NodeFormatterTTL_MultiLine(baseURI, pmap, nodeToLabel);
         else
-            return new NodeFormatterTTL(baseURI, pmap, NodeToLabel.createScopeByDocument());
+            return new NodeFormatterTTL(baseURI, pmap, nodeToLabel);
     }
 
     protected void writeBase(String base) {
@@ -669,7 +675,8 @@ public abstract class TurtleShell {
 
             // Must be in this order.
             findLists();
-            findBNodesSyntax1();
+            if ( ! WriterLib.hasCustomNodeOutput(context) )
+                findBNodesSyntax1();
             // Stop head of lists printed as triples going all the way to the
             // good part.
             nestedObjects.removeAll(listElts);

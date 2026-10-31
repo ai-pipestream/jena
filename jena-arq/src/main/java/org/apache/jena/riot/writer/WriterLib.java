@@ -21,7 +21,11 @@
 
 package org.apache.jena.riot.writer;
 
+import org.apache.jena.atlas.lib.CharSpace;
 import org.apache.jena.riot.RIOT;
+import org.apache.jena.riot.out.NodeFormatter;
+import org.apache.jena.riot.out.NodeFormatterNT;
+import org.apache.jena.riot.out.NodeToLabel;
 import org.apache.jena.sparql.util.Context;
 
 /** Package-scoped utilities */
@@ -56,5 +60,39 @@ import org.apache.jena.sparql.util.Context;
 
         // Default choice; includes null in context.
         return dftIndentStyle;
+    }
+
+    /** Extract a configured {@link NodeFormatter} from the {@link Context}, or return {@code null}. */
+    /*package*/ static NodeFormatter nodeFormatter(Context context) {
+        if ( context == null )
+            return null;
+        Object x = context.get(RIOT.symNodeFormatter);
+        if ( x instanceof NodeFormatter fmt )
+            return fmt;
+        return null;
+    }
+
+    /** Extract a configured {@link NodeToLabel} from the {@link Context}, or return {@code null}. */
+    /*package*/ static NodeToLabel nodeToLabel(Context context) {
+        if ( context == null )
+            return null;
+        Object x = context.get(RIOT.symNodeToLabel);
+        if ( x instanceof NodeToLabel n2l )
+            return n2l;
+        return null;
+    }
+
+    /** Return true if a custom {@link NodeFormatter} or {@link NodeToLabel} is configured in the {@link Context}. */
+    /*package*/ static boolean hasCustomNodeOutput(Context context) {
+        return nodeFormatter(context) != null || nodeToLabel(context) != null;
+    }
+
+    /** Create a {@link NodeFormatter} for N-Triples/N-Quads taking {@link Context} settings into account. */
+    /*package*/ static NodeFormatter nodeFormatterNT(CharSpace charSpace, Context context) {
+        NodeFormatter fmt = nodeFormatter(context);
+        if ( fmt != null )
+            return fmt;
+        NodeToLabel nodeToLabel = nodeToLabel(context);
+        return new NodeFormatterNT(charSpace, nodeToLabel);
     }
 }

@@ -31,6 +31,7 @@ import org.apache.jena.atlas.lib.CharSpace;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.out.NodeFormatter;
 import org.apache.jena.riot.out.NodeFormatterNT;
+import org.apache.jena.riot.out.NodeToLabel;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.riot.system.StreamRDF;
@@ -87,7 +88,7 @@ public class NQuadsWriter extends WriterDatasetRIOTBase {
     @Override
     public void write(Writer out, DatasetGraph dataset, PrefixMap prefixMap, String baseURI, Context context) {
         Iterator<Quad> iter = dataset.find();
-        NodeFormatter nodeFmt = createNodeFormatter();
+        NodeFormatter nodeFmt = createNodeFormatter(context);
         AWriter w = IO.wrap(out);
         StreamRDF s = new WriterStreamRDFPlain(IO.wrap(out), nodeFmt);
         write$(s, iter);
@@ -96,10 +97,26 @@ public class NQuadsWriter extends WriterDatasetRIOTBase {
     @Override
     public void write(OutputStream out, DatasetGraph dataset, PrefixMap prefixMap, String baseURI, Context context) {
         Iterator<Quad> iter = dataset.find();
-        NodeFormatter nodeFmt = createNodeFormatter();
+        NodeFormatter nodeFmt = createNodeFormatter(context);
         AWriter w = createAWriter(out);
         StreamRDF s = new WriterStreamRDFPlain(w, nodeFmt);
         write$(s, iter);
+    }
+
+    /**
+     * Create a {@link NodeFormatter} for this writer using any custom formatter or label policy in {@code context}.
+     *
+     * @param context Writer context, may be {@code null}.
+     * @return The {@link NodeFormatter} to use.
+     */
+    protected NodeFormatter createNodeFormatter(Context context) {
+        NodeFormatter nodeFmt = WriterLib.nodeFormatter(context);
+        if ( nodeFmt != null )
+            return nodeFmt;
+        NodeToLabel nodeToLabel = WriterLib.nodeToLabel(context);
+        if ( nodeToLabel != null )
+            return new NodeFormatterNT(charSpace, nodeToLabel);
+        return createNodeFormatter();
     }
 
     protected NodeFormatter createNodeFormatter() {

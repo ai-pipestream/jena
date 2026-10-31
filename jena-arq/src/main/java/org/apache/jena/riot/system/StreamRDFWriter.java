@@ -73,7 +73,7 @@ public class StreamRDFWriter {
         @Override
         public StreamRDF create(OutputStream output, RDFFormat format, Context context) {
             AWriter w = IO.wrapUTF8(output) ;
-            return new WriterStreamRDFPlain(w, CharSpace.UTF8) ;     // N-Quads and N-Triples.
+            return new WriterStreamRDFPlain(w, CharSpace.UTF8, context) ;     // N-Quads and N-Triples.
         }
     } ;
 
@@ -81,7 +81,7 @@ public class StreamRDFWriter {
         @Override
         public StreamRDF create(OutputStream output, RDFFormat format, Context context) {
             AWriter w = IO.wrapUTF8(output) ;
-            return new WriterStreamRDFPlain(w, CharSpace.ASCII) ;     // N-Quads and N-Triples.
+            return new WriterStreamRDFPlain(w, CharSpace.ASCII, context) ;     // N-Quads and N-Triples.
         }
     } ;
 
