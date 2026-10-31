@@ -82,6 +82,7 @@ import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.sparql.JenaTransactionException;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.core.Transactional.Promote;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.exec.UpdateExec;
@@ -228,6 +229,8 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
                 ServerCalls.asyncUnaryCall(this::abortTxn))
             .addMethod(RDFGrpcProtocol.END_TXN_METHOD,
                 ServerCalls.asyncUnaryCall(this::endTxn))
+            .addMethod(RDFGrpcProtocol.PROMOTE_TXN_METHOD,
+                ServerCalls.asyncUnaryCall(this::promoteTxn))
             .build();
         return ServerInterceptors.intercept(raw, metadataInterceptor());
     }
@@ -726,6 +729,24 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
                 session.end();
             }
             responseObserver.onNext(Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } catch (Throwable ex) {
+            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
+        }
+    }
+
+    private void promoteTxn(StringValue request, StreamObserver<BoolValue> responseObserver) {
+        try {
+            String raw = request.getValue();
+            int sep = raw.lastIndexOf(':');
+            String txnId = (sep > 0) ? raw.substring(0, sep) : raw;
+            String modeStr = (sep > 0) ? raw.substring(sep + 1) : Promote.ISOLATED.name();
+            Promote promoteMode = "READ_COMMITTED".equalsIgnoreCase(modeStr)
+                ? Promote.READ_COMMITTED
+                : Promote.ISOLATED;
+            ServerTxnSession session = requireSession(txnId);
+            boolean promoted = session.call(() -> dsg.promote(promoteMode));
+            responseObserver.onNext(BoolValue.of(promoted));
             responseObserver.onCompleted();
         } catch (Throwable ex) {
             responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));

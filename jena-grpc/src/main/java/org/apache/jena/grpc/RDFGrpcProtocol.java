@@ -33,6 +33,7 @@ import io.grpc.MethodDescriptor.MethodType;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.ProtoUtils;
+import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryParseException;
@@ -309,6 +310,15 @@ public final class RDFGrpcProtocol {
             .setResponseMarshaller(ProtoUtils.marshaller(Empty.getDefaultInstance()))
             .build();
 
+    /** Promote an active remote transaction using {@code txnId + ":" + promoteMode}. */
+    public static final MethodDescriptor<StringValue, BoolValue> PROMOTE_TXN_METHOD =
+        MethodDescriptor.<StringValue, BoolValue>newBuilder()
+            .setType(MethodType.UNARY)
+            .setFullMethodName(MethodDescriptor.generateFullMethodName(SERVICE_NAME, "PromoteTxn"))
+            .setRequestMarshaller(ProtoUtils.marshaller(StringValue.getDefaultInstance()))
+            .setResponseMarshaller(ProtoUtils.marshaller(BoolValue.getDefaultInstance()))
+            .build();
+
     private RDFGrpcProtocol() {}
 
     /**
@@ -397,7 +407,8 @@ public final class RDFGrpcProtocol {
         if ( ex instanceof JenaTransactionException ) {
             return Status.FAILED_PRECONDITION.withDescription(PREFIX_TXN_ERROR + msg).withCause(ex).asRuntimeException();
         }
-        return Status.INTERNAL.withDescription(msg).withCause(ex).asRuntimeException();
+        Log.warn(RDFGrpcProtocol.class, "Unhandled server exception in gRPC service", ex);
+        return Status.INTERNAL.withDescription("Internal server error").withCause(ex).asRuntimeException();
     }
 
     /**

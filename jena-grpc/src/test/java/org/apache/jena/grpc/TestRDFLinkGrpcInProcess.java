@@ -48,6 +48,7 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.ReadWrite;
+import org.apache.jena.query.TxnType;
 import org.apache.jena.rdflink.AbstractTestRDFLink;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdfpatch.RDFPatch;
@@ -60,7 +61,9 @@ import org.apache.jena.sparql.JenaTransactionException;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.core.Transactional.Promote;
 import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.sse.SSE;
 import org.apache.jena.sparql.util.IsoMatcher;
 import org.apache.jena.system.Txn;
@@ -392,6 +395,37 @@ public class TestRDFLinkGrpcInProcess extends AbstractTestRDFLink {
             assertThrows(JenaTransactionException.class, abandoned::commit);
             abandoned.end();
             assertEquals(1, other.get().size());
+        }
+    }
+
+    @Test
+    public void queryExec_abortCancelsActiveSelectStream() {
+        DatasetGraph source = SSE.parseDatasetGraph(
+            "(dataset (graph (:s1 :p1 :o1) (:s2 :p1 :o2) (:s3 :p1 :o3)))");
+        try ( RDFLinkGrpc link = RDFLinkGrpc.connectInProcess(serverName) ) {
+            link.putDataset(source);
+            try ( QueryExec qExec = link.query("SELECT ?s ?o WHERE { ?s ?p ?o }") ) {
+                RowSet rs = qExec.select();
+                assertTrue(rs.hasNext());
+                rs.next();
+                qExec.abort();
+                assertTrue(qExec.isClosed());
+                assertFalse(rs.hasNext());
+            }
+        }
+    }
+
+    @Test
+    public void remoteTransaction_promoteReadToWrite() {
+        try ( RDFLinkGrpc link = RDFLinkGrpc.connectInProcess(serverName) ) {
+            link.begin(TxnType.READ_PROMOTE);
+            assertEquals(ReadWrite.READ, link.transactionMode());
+            assertTrue(link.promote(Promote.ISOLATED));
+            assertEquals(ReadWrite.WRITE, link.transactionMode());
+            link.update("INSERT DATA { <http://example/s> <http://example/p> 'promoted' }");
+            link.commit();
+            link.end();
+            assertEquals(1, link.get().size());
         }
     }
 

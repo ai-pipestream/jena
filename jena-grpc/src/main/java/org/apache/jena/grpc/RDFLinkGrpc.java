@@ -34,6 +34,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 
@@ -46,9 +47,11 @@ import io.grpc.ForwardingClientCall.SimpleForwardingClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
+import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCalls;
 import io.grpc.stub.StreamObserver;
+import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -73,12 +76,11 @@ import org.apache.jena.riot.system.StreamRDFBase;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.sparql.ARQException;
+import org.apache.jena.sparql.JenaTransactionException;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.core.Transactional.Promote;
-import org.apache.jena.sparql.core.TransactionalLock;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecApp;
@@ -111,8 +113,9 @@ public class RDFLinkGrpc implements RDFLink {
     private final boolean parseCheckUpdates;
     private final boolean encodeValues;
     private final int batchSize;
-    private final Transactional txnLifecycle;
     private final ThreadLocal<String> currentTxnId = new ThreadLocal<>();
+    private final ThreadLocal<TxnType> currentTxnType = new ThreadLocal<>();
+    private final ThreadLocal<ReadWrite> currentTxnMode = new ThreadLocal<>();
     private volatile boolean open = true;
 
     RDFLinkGrpc(
@@ -128,7 +131,6 @@ public class RDFLinkGrpc implements RDFLink {
         this.parseCheckUpdates = parseCheckUpdates;
         this.encodeValues = encodeValues;
         this.batchSize = batchSize;
-        this.txnLifecycle = TransactionalLock.createMRPlusSW();
         this.interceptedChannel = ClientInterceptors.intercept(rawChannel, txnHeaderInterceptor());
     }
 
@@ -184,6 +186,11 @@ public class RDFLinkGrpc implements RDFLink {
     /**
      * Stream quads matching {@code (g, s, p, o)} from the remote dataset using {@code RDF_ANY}
      * wildcards for {@code null} or {@link Node#ANY} components.
+     * <p>
+     * This convenience method collects matching quads from the streaming RPC into an in-memory list
+     * before returning the {@link Stream}. For non-buffering streaming consumption of large datasets,
+     * use {@link #findStream(Node, Node, Node, Node, StreamRDF)} or
+     * {@link #findStreamBatched(Node, Node, Node, Node, StreamRDF)}.
      *
      * @param g graph node pattern, or {@code null} / {@link Node#ANY} for any graph
      * @param s subject node pattern, or {@code null} / {@link Node#ANY} for any subject
@@ -371,6 +378,15 @@ public class RDFLinkGrpc implements RDFLink {
     public interface PatchSubscription extends AutoCloseable {
         @Override
         void close();
+
+        /**
+         * Return the terminal stream error if the subscription terminated abnormally, or {@code null}.
+         *
+         * @return the terminal error, or {@code null}
+         */
+        default Throwable error() {
+            return null;
+        }
     }
 
     /**
@@ -382,6 +398,19 @@ public class RDFLinkGrpc implements RDFLink {
      * @throws IllegalArgumentException Thrown if {@code target} is {@code null}
      */
     public PatchSubscription subscribePatches(RDFChanges target) {
+        return subscribePatches(target, t -> Log.warn(RDFLinkGrpc.class, "Patch subscription terminated with error", t));
+    }
+
+    /**
+     * Subscribe to live {@link RDF_Patch_Row} messages published by the remote server,
+     * decoding each row into {@code target} and notifying {@code errorHandler} if the stream fails.
+     *
+     * @param target the destination {@link RDFChanges} sink
+     * @param errorHandler callback invoked on unexpected stream termination errors (may be {@code null})
+     * @return a {@link PatchSubscription} handle that cancels the subscription when closed
+     * @throws IllegalArgumentException Thrown if {@code target} is {@code null}
+     */
+    public PatchSubscription subscribePatches(RDFChanges target, Consumer<Throwable> errorHandler) {
         if ( target == null )
             throw new IllegalArgumentException(ERR_TARGET_NULL);
         checkOpen();
@@ -389,6 +418,7 @@ public class RDFLinkGrpc implements RDFLink {
             interceptedChannel.newCall(RDFGrpcProtocol.SUBSCRIBE_PATCHES_METHOD, CallOptions.DEFAULT);
         Consumer<RDF_Patch_Row> sink = RDFPatchOps.protobufChangesReceiver(target);
         CountDownLatch readyLatch = new CountDownLatch(1);
+        AtomicReference<Throwable> errorRef = new AtomicReference<>();
         ClientCalls.asyncServerStreamingCall(call, Empty.getDefaultInstance(), new StreamObserver<>() {
             @Override
             public void onNext(RDF_Patch_Row value) {
@@ -403,6 +433,14 @@ public class RDFLinkGrpc implements RDFLink {
             @Override
             public void onError(Throwable t) {
                 readyLatch.countDown();
+                if ( t instanceof StatusRuntimeException sre
+                        && sre.getStatus().getCode() == Status.Code.CANCELLED ) {
+                    return;
+                }
+                errorRef.set(t);
+                if ( errorHandler != null ) {
+                    errorHandler.accept(t);
+                }
             }
 
             @Override
@@ -416,7 +454,17 @@ public class RDFLinkGrpc implements RDFLink {
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
         }
-        return () -> call.cancel("Subscription closed by client", null);
+        return new PatchSubscription() {
+            @Override
+            public void close() {
+                call.cancel("Subscription closed by client", null);
+            }
+
+            @Override
+            public Throwable error() {
+                return errorRef.get();
+            }
+        };
     }
 
     /** {@inheritDoc} */
@@ -725,15 +773,18 @@ public class RDFLinkGrpc implements RDFLink {
     /** {@inheritDoc} */
     @Override
     public void begin(TxnType txnType) {
+        Objects.requireNonNull(txnType, "txnType must not be null");
         checkOpen();
-        txnLifecycle.begin(txnType);
+        if ( isInTransaction() ) {
+            throw new JenaTransactionException("Already in a transaction");
+        }
         try {
             StringValue resp = ClientCalls.blockingUnaryCall(
                 rawChannel, RDFGrpcProtocol.BEGIN_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnType.name()));
             currentTxnId.set(resp.getValue());
+            currentTxnType.set(txnType);
+            currentTxnMode.set(TxnType.initial(txnType));
         } catch (StatusRuntimeException sre) {
-            txnLifecycle.abort();
-            txnLifecycle.end();
             throw RDFGrpcProtocol.fromStatusException(sre);
         }
     }
@@ -747,7 +798,33 @@ public class RDFLinkGrpc implements RDFLink {
     /** {@inheritDoc} */
     @Override
     public boolean promote(Promote promote) {
-        return txnLifecycle.promote(promote);
+        checkOpen();
+        String txnId = currentTxnId.get();
+        if ( txnId == null ) {
+            throw new JenaTransactionException("Not in a transaction");
+        }
+        if ( currentTxnMode.get() == ReadWrite.WRITE ) {
+            return true;
+        }
+        TxnType txnType = currentTxnType.get();
+        if ( txnType == TxnType.READ ) {
+            return false;
+        }
+        Promote mode = (promote != null) ? promote : Promote.ISOLATED;
+        try {
+            BoolValue resp = ClientCalls.blockingUnaryCall(
+                rawChannel,
+                RDFGrpcProtocol.PROMOTE_TXN_METHOD,
+                CallOptions.DEFAULT,
+                StringValue.of(txnId + ":" + mode.name()));
+            if ( resp.getValue() ) {
+                currentTxnMode.set(ReadWrite.WRITE);
+                return true;
+            }
+            return false;
+        } catch (StatusRuntimeException sre) {
+            throw RDFGrpcProtocol.fromStatusException(sre);
+        }
     }
 
     /** {@inheritDoc} */
@@ -755,18 +832,18 @@ public class RDFLinkGrpc implements RDFLink {
     public void commit() {
         checkOpen();
         String txnId = currentTxnId.get();
-        txnLifecycle.commit();
-        if ( txnId != null ) {
-            try {
-                ClientCalls.blockingUnaryCall(
-                    rawChannel, RDFGrpcProtocol.COMMIT_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
-            } catch (StatusRuntimeException sre) {
-                throw RDFGrpcProtocol.fromStatusException(sre);
-            } finally {
-                // Always release the server session, even if the commit call failed.
-                currentTxnId.remove();
-                endRemoteTxn(txnId);
-            }
+        if ( txnId == null ) {
+            throw new JenaTransactionException("Not in a transaction");
+        }
+        try {
+            ClientCalls.blockingUnaryCall(
+                rawChannel, RDFGrpcProtocol.COMMIT_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
+        } catch (StatusRuntimeException sre) {
+            throw RDFGrpcProtocol.fromStatusException(sre);
+        } finally {
+            // Always release the server session and local state, even if the commit call failed.
+            clearLocalTxnState();
+            endRemoteTxn(txnId);
         }
     }
 
@@ -775,18 +852,18 @@ public class RDFLinkGrpc implements RDFLink {
     public void abort() {
         checkOpen();
         String txnId = currentTxnId.get();
-        txnLifecycle.abort();
-        if ( txnId != null ) {
-            try {
-                ClientCalls.blockingUnaryCall(
-                    rawChannel, RDFGrpcProtocol.ABORT_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
-            } catch (StatusRuntimeException sre) {
-                throw RDFGrpcProtocol.fromStatusException(sre);
-            } finally {
-                // Always release the server session, even if the abort call failed.
-                currentTxnId.remove();
-                endRemoteTxn(txnId);
-            }
+        if ( txnId == null ) {
+            throw new JenaTransactionException("Not in a transaction");
+        }
+        try {
+            ClientCalls.blockingUnaryCall(
+                rawChannel, RDFGrpcProtocol.ABORT_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
+        } catch (StatusRuntimeException sre) {
+            throw RDFGrpcProtocol.fromStatusException(sre);
+        } finally {
+            // Always release the server session and local state, even if the abort call failed.
+            clearLocalTxnState();
+            endRemoteTxn(txnId);
         }
     }
 
@@ -799,38 +876,42 @@ public class RDFLinkGrpc implements RDFLink {
         }
     }
 
+    private void clearLocalTxnState() {
+        currentTxnId.remove();
+        currentTxnType.remove();
+        currentTxnMode.remove();
+    }
+
     /** {@inheritDoc} */
     @Override
     public boolean isInTransaction() {
-        return txnLifecycle.isInTransaction();
+        return currentTxnId.get() != null;
     }
 
     /** {@inheritDoc} */
     @Override
     public void end() {
         String txnId = currentTxnId.get();
-        currentTxnId.remove();
+        ReadWrite mode = currentTxnMode.get();
+        clearLocalTxnState();
         if ( txnId != null ) {
-            try {
-                ClientCalls.blockingUnaryCall(
-                    rawChannel, RDFGrpcProtocol.END_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
-            } catch (StatusRuntimeException ignored) {
-                // Best-effort cleanup of remote session before local lifecycle check
+            endRemoteTxn(txnId);
+            if ( mode == ReadWrite.WRITE ) {
+                throw new JenaTransactionException("Write transaction - no commit or abort before end()");
             }
         }
-        txnLifecycle.end();
     }
 
     /** {@inheritDoc} */
     @Override
     public ReadWrite transactionMode() {
-        return txnLifecycle.transactionMode();
+        return currentTxnMode.get();
     }
 
     /** {@inheritDoc} */
     @Override
     public TxnType transactionType() {
-        return txnLifecycle.transactionType();
+        return currentTxnType.get();
     }
 
     /** {@inheritDoc} */
@@ -846,7 +927,7 @@ public class RDFLinkGrpc implements RDFLink {
             return;
         open = false;
         String txnId = currentTxnId.get();
-        currentTxnId.remove();
+        clearLocalTxnState();
         if ( txnId != null ) {
             try {
                 ClientCalls.blockingUnaryCall(
