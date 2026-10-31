@@ -54,6 +54,9 @@ public class WriterConst
     /** Column for start of object */
     public static final int INDENT_OBJECT   = 8;
 
+    /** Indent for long style */
+    public static final int INDENT_LONG     = 2;
+
     /** Minimum gap from S to P and from P to O */
     public static final int MIN_GAP         = 2;
 

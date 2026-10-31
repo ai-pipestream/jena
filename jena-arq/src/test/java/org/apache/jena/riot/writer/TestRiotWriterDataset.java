@@ -52,6 +52,7 @@ public class TestRiotWriterDataset extends AbstractWriterTest {
                  Arguments.of(RDFFormat.TRIG_PRETTY),
                  Arguments.of(RDFFormat.TRIG_BLOCKS),
                  Arguments.of(RDFFormat.TRIG_FLAT),
+                 Arguments.of(RDFFormat.TRIG_LONG),
                  Arguments.of(RDFFormat.JSONLD),
                  Arguments.of(RDFFormat.JSONLD_PRETTY),
                  Arguments.of(RDFFormat.JSONLD_FLAT),

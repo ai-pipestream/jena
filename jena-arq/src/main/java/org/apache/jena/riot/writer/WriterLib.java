@@ -22,6 +22,8 @@
 package org.apache.jena.riot.writer;
 
 import org.apache.jena.riot.RIOT;
+import org.apache.jena.riot.RiotException;
+import org.apache.jena.sparql.ARQException;
 import org.apache.jena.sparql.util.Context;
 
 /** Package-scoped utilities */
@@ -53,8 +55,27 @@ import org.apache.jena.sparql.util.Context;
             IndentStyle style = IndentStyle.create(s);
             return style == null ? dftIndentStyle : style;
         }
-
         // Default choice; includes null in context.
         return dftIndentStyle;
+    }
+
+    /**
+     * Determine the indentation width from the context, or return {@code defaultIndentWidth}
+     * if unset.
+     *
+     * @throws RiotException Thrown if the configured value is not an integer or is outside the supported range.
+     */
+    /*package*/ static int indentWidth(Context context, int defaultIndentWidth) {
+        if ( context == null || !context.isDefined(RIOT.symTurtleIndentWidth) )
+            return defaultIndentWidth;
+        long x;
+        try {
+            x = context.getLong(RIOT.symTurtleIndentWidth, defaultIndentWidth);
+        } catch (NumberFormatException | ARQException ex) {
+            throw new RiotException("Bad indentation width: " + context.get(RIOT.symTurtleIndentWidth), ex);
+        }
+        if ( x < 0 || x > Integer.MAX_VALUE )
+            throw new RiotException("Bad indentation width (must be between 0 and " + Integer.MAX_VALUE + "): " + x);
+        return (int)x;
     }
 }

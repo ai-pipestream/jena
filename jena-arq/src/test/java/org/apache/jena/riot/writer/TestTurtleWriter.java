@@ -22,22 +22,30 @@
 package org.apache.jena.riot.writer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.atlas.lib.Bytes;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.*;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.util.Context;
+import org.apache.jena.sparql.util.IsoMatcher;
 
 public class TestTurtleWriter {
     // Tests data.
@@ -197,6 +205,349 @@ public class TestTurtleWriter {
             String result = Bytes.bytes2string(o.toByteArray());
             return result;
         } catch (IOException ex) { IO.exception(ex); return null;}
+    }
+
+    private static final String INDENT_TTL_DATA = """
+        PREFIX : <http://example/>
+        :s :p 1 ;
+           :q 2 .
+        """;
+
+    private static final String INDENT_TRIG_DATA = """
+        PREFIX : <http://example/>
+        :s :p 1 ;
+           :q 2 .
+        :g {
+            :s :p 1 ;
+               :q 2 .
+        }
+        """;
+
+    @Test
+    public void test_indent_width_turtle_pretty_default_and_custom() {
+        Graph g = RDFParser.fromString(INDENT_TTL_DATA, Lang.TTL).toGraph();
+
+        String defaultWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_PRETTY)
+            .asString();
+        String explicitDefaultWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_PRETTY)
+            .set(RIOT.symTurtleIndentWidth, WriterConst.INDENT_PREDICATE)
+            .asString();
+        assertEquals(defaultWritten, explicitDefaultWritten);
+        assertTrue(defaultWritten.contains("\n        :q"));
+
+        String customWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_PRETTY)
+            .set(RIOT.symTurtleIndentWidth, 4)
+            .asString();
+        assertTrue(customWritten.contains(":s  :p"));
+        assertTrue(customWritten.contains("\n    :q"));
+
+        Graph parsed = RDFParser.fromString(customWritten, Lang.TTL).toGraph();
+        assertTrue(g.isIsomorphicWith(parsed));
+    }
+
+    @Test
+    public void test_indent_width_turtle_long_default_and_custom() {
+        Graph g = RDFParser.fromString(INDENT_TTL_DATA, Lang.TTL).toGraph();
+
+        String defaultWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_LONG)
+            .asString();
+        String explicitDefaultWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_LONG)
+            .set(RIOT.symTurtleIndentWidth, WriterConst.INDENT_LONG)
+            .asString();
+        assertEquals(defaultWritten, explicitDefaultWritten);
+        assertTrue(defaultWritten.contains("\n  :p"));
+        assertTrue(defaultWritten.contains("\n  :q"));
+
+        String customWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_LONG)
+            .set(RIOT.symTurtleIndentWidth, 4)
+            .asString();
+        assertTrue(customWritten.contains("\n    :p"));
+        assertTrue(customWritten.contains("\n    :q"));
+
+        Graph parsed = RDFParser.fromString(customWritten, Lang.TTL).toGraph();
+        assertTrue(g.isIsomorphicWith(parsed));
+    }
+
+    @Test
+    public void test_indent_width_turtle_blocks_default_and_custom() {
+        Graph g = RDFParser.fromString(INDENT_TTL_DATA, Lang.TTL).toGraph();
+
+        String defaultWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_BLOCKS)
+            .asString();
+        String explicitDefaultWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_BLOCKS)
+            .set(RIOT.symTurtleIndentWidth, WriterConst.INDENT_PREDICATE)
+            .asString();
+        assertEquals(defaultWritten, explicitDefaultWritten);
+        assertTrue(defaultWritten.contains("\n        :"));
+
+        String customWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_BLOCKS)
+            .set(RIOT.symTurtleIndentWidth, 4)
+            .asString();
+        assertTrue(customWritten.contains(":s  :"));
+        assertTrue(customWritten.contains("\n    :"));
+
+        Graph parsed = RDFParser.fromString(customWritten, Lang.TTL).toGraph();
+        assertTrue(g.isIsomorphicWith(parsed));
+    }
+
+    @Test
+    public void test_indent_width_trig_pretty_and_long_and_blocks() {
+        DatasetGraph dsg = RDFParser.fromString(INDENT_TRIG_DATA, Lang.TRIG).toDatasetGraph();
+
+        String trigPretty = RDFWriter.create()
+            .source(dsg)
+            .format(RDFFormat.TRIG_PRETTY)
+            .set(RIOT.symTurtleIndentWidth, 4)
+            .asString();
+        assertTrue(trigPretty.contains("\n    :q"));
+        assertTrue(trigPretty.contains("\n        :q"));
+        DatasetGraph parsedPretty = RDFParser.fromString(trigPretty, Lang.TRIG).toDatasetGraph();
+        assertTrue(IsoMatcher.isomorphic(dsg, parsedPretty));
+
+        String trigLong = RDFWriter.create()
+            .source(dsg)
+            .format(RDFFormat.TRIG_LONG)
+            .set(RIOT.symTurtleIndentWidth, 4)
+            .asString();
+        assertTrue(trigLong.contains("\n    :p"));
+        assertTrue(trigLong.contains("\n        :p"));
+        DatasetGraph parsedLong = RDFParser.fromString(trigLong, Lang.TRIG).toDatasetGraph();
+        assertTrue(IsoMatcher.isomorphic(dsg, parsedLong));
+
+        String trigBlocks = RDFWriter.create()
+            .source(dsg)
+            .format(RDFFormat.TRIG_BLOCKS)
+            .set(RIOT.symTurtleIndentWidth, 4)
+            .asString();
+        assertTrue(trigBlocks.contains("\n    :"));
+        assertTrue(trigBlocks.contains("\n        :"));
+        DatasetGraph parsedBlocks = RDFParser.fromString(trigBlocks, Lang.TRIG).toDatasetGraph();
+        assertTrue(IsoMatcher.isomorphic(dsg, parsedBlocks));
+    }
+
+    @Test
+    public void test_indent_width_turtle_pretty_nested_blank_node() {
+        Graph g = RDFParser.fromString("""
+            PREFIX : <http://example/>
+            [] :a 1 ; :b 2 .
+            """, Lang.TTL).toGraph();
+
+        String defaultWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_PRETTY)
+            .asString();
+        assertTrue(defaultWritten.contains("\n  :b"), defaultWritten);
+
+        String customWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_PRETTY)
+            .set(RIOT.symTurtleIndentWidth, 4)
+            .asString();
+        assertTrue(customWritten.contains("\n    :b"), customWritten);
+        assertTrue(g.isIsomorphicWith(RDFParser.fromString(customWritten, Lang.TTL).toGraph()));
+    }
+
+    @Test
+    public void test_indent_width_turtle_pretty_collection() {
+        Graph g = RDFParser.fromString("""
+            PREFIX : <http://example/>
+            :s :list ( [ :a 1 ] [ :a 2 ] ) .
+            """, Lang.TTL).toGraph();
+
+        String defaultWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_PRETTY)
+            .asString();
+        String customWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_PRETTY)
+            .set(RIOT.symTurtleIndentWidth, 4)
+            .asString();
+
+        int defaultIndent = lineIndent(defaultWritten, "2 ]");
+        int customIndent = lineIndent(customWritten, "2 ]");
+        int defaultListColumn = lineContaining(defaultWritten, ":list").indexOf("(");
+        int customListColumn = lineContaining(customWritten, ":list").indexOf("(");
+        assertEquals(defaultListColumn + 2, defaultIndent, defaultWritten);
+        assertEquals(customListColumn + 4, customIndent, customWritten);
+        assertTrue(g.isIsomorphicWith(RDFParser.fromString(customWritten, Lang.TTL).toGraph()));
+    }
+
+    private static int lineIndent(String output, String text) {
+        String line = lineContaining(output, text);
+        return line.length() - line.stripLeading().length();
+    }
+
+    private static String lineContaining(String output, String text) {
+        return output.lines()
+            .filter(x -> x.contains(text))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("Missing " + text + " in output:\n" + output));
+    }
+
+    static Stream<Arguments> indentFormats() {
+        return Stream.of(
+            Arguments.of(RDFFormat.TURTLE_PRETTY, false),
+            Arguments.of(RDFFormat.TURTLE_LONG, false),
+            Arguments.of(RDFFormat.TURTLE_BLOCKS, false),
+            Arguments.of(RDFFormat.TRIG_PRETTY, true),
+            Arguments.of(RDFFormat.TRIG_LONG, true),
+            Arguments.of(RDFFormat.TRIG_BLOCKS, true)
+        );
+    }
+
+    @Test
+    public void test_indent_width_trig_explicit_defaults_match_unset() {
+        DatasetGraph dsg = RDFParser.fromString(INDENT_TRIG_DATA, Lang.TRIG).toDatasetGraph();
+        for ( RDFFormat format : new RDFFormat[]{RDFFormat.TRIG_PRETTY, RDFFormat.TRIG_LONG, RDFFormat.TRIG_BLOCKS} ) {
+            int defaultWidth = format == RDFFormat.TRIG_LONG ? WriterConst.INDENT_LONG : WriterConst.INDENT_PREDICATE;
+            String defaultWritten = RDFWriter.create()
+                .source(dsg)
+                .format(format)
+                .asString();
+            String explicitDefaultWritten = RDFWriter.create()
+                .source(dsg)
+                .format(format)
+                .set(RIOT.symTurtleIndentWidth, defaultWidth)
+                .asString();
+            assertEquals(defaultWritten, explicitDefaultWritten, format.toString());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("indentFormats")
+    public void test_indent_width_zero_roundtrip(RDFFormat format, boolean isDataset) {
+        if ( isDataset ) {
+            DatasetGraph dsg = RDFParser.fromString(INDENT_TRIG_DATA, Lang.TRIG).toDatasetGraph();
+            String written = RDFWriter.create()
+                .source(dsg)
+                .format(format)
+                .set(RIOT.symTurtleIndentWidth, 0)
+                .asString();
+            DatasetGraph parsed = RDFParser.fromString(written, Lang.TRIG).toDatasetGraph();
+            assertTrue(IsoMatcher.isomorphic(dsg, parsed));
+        } else {
+            Graph g = RDFParser.fromString(INDENT_TTL_DATA, Lang.TTL).toGraph();
+            String written = RDFWriter.create()
+                .source(g)
+                .format(format)
+                .set(RIOT.symTurtleIndentWidth, 0)
+                .asString();
+            Graph parsed = RDFParser.fromString(written, Lang.TTL).toGraph();
+            assertTrue(g.isIsomorphicWith(parsed));
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("indentFormats")
+    public void test_indent_width_negative_rejected(RDFFormat format, boolean isDataset) {
+        if ( isDataset ) {
+            DatasetGraph dsg = RDFParser.fromString(INDENT_TRIG_DATA, Lang.TRIG).toDatasetGraph();
+            assertThrows(RiotException.class, () ->
+                RDFWriter.create()
+                    .source(dsg)
+                    .format(format)
+                    .set(RIOT.symTurtleIndentWidth, -1)
+                    .asString()
+            );
+        } else {
+            Graph g = RDFParser.fromString(INDENT_TTL_DATA, Lang.TTL).toGraph();
+            assertThrows(RiotException.class, () ->
+                RDFWriter.create()
+                    .source(g)
+                    .format(format)
+                    .set(RIOT.symTurtleIndentWidth, -1)
+                    .asString()
+            );
+        }
+    }
+
+    @Test
+    public void test_indent_width_nested_and_zero_and_invalid_string() {
+        String complexTtl = """
+            PREFIX : <http://example/>
+            :s <http://example/very-long-predicate-uri-exceeding-thirty-chars> "obj" ;
+               :list ( 1 2 ) ;
+               :bnode [ :a 1 ; :b 2 ] .
+            """;
+        Graph g = RDFParser.fromString(complexTtl, Lang.TTL).toGraph();
+
+        String prettyCustom = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_PRETTY)
+            .set(RIOT.symTurtleIndentWidth, "4")
+            .asString();
+        assertTrue(prettyCustom.contains("\n        \"obj\""));
+        assertTrue(g.isIsomorphicWith(RDFParser.fromString(prettyCustom, Lang.TTL).toGraph()));
+
+        String longCustom = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_LONG)
+            .set(RIOT.symTurtleIndentWidth, 4)
+            .asString();
+        assertTrue(longCustom.contains("\n        :a"));
+        assertTrue(longCustom.contains("\n        1\n        2"));
+        assertTrue(g.isIsomorphicWith(RDFParser.fromString(longCustom, Lang.TTL).toGraph()));
+
+        String zeroIndent = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_PRETTY)
+            .set(RIOT.symTurtleIndentWidth, 0)
+            .asString();
+        assertTrue(g.isIsomorphicWith(RDFParser.fromString(zeroIndent, Lang.TTL).toGraph()));
+
+        assertThrows(RiotException.class, () ->
+            RDFWriter.create()
+                .source(g)
+                .format(RDFFormat.TURTLE_PRETTY)
+                .set(RIOT.symTurtleIndentWidth, "invalid")
+                .asString()
+        );
+    }
+
+    @Test
+    public void test_indent_width_long_and_out_of_range() {
+        Graph g = RDFParser.fromString(INDENT_TTL_DATA, Lang.TTL).toGraph();
+
+        String customWritten = RDFWriter.create()
+            .source(g)
+            .format(RDFFormat.TURTLE_PRETTY)
+            .set(RIOT.symTurtleIndentWidth, 4L)
+            .asString();
+        assertTrue(customWritten.contains("\n    :q"));
+
+        assertThrows(RiotException.class, () ->
+            RDFWriter.create()
+                .source(g)
+                .format(RDFFormat.TURTLE_PRETTY)
+                .set(RIOT.symTurtleIndentWidth, 4.5)
+                .asString()
+        );
+        assertThrows(RiotException.class, () ->
+            RDFWriter.create()
+                .source(g)
+                .format(RDFFormat.TURTLE_PRETTY)
+                .set(RIOT.symTurtleIndentWidth, (long)Integer.MAX_VALUE + 1)
+                .asString()
+        );
     }
 }
 

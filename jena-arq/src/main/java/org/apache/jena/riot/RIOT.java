@@ -161,6 +161,12 @@ public class RIOT {
     public static final Symbol symTurtleIndentStyle = SystemARQ.allocSymbol(TURTLE_SYMBOL_BASE, "indentStyle");
 
     /**
+     * Printing style. Indentation width (number of spaces) for Turtle and TriG
+     * pretty and blocks writers.
+     */
+    public static final Symbol symTurtleIndentWidth = SystemARQ.allocSymbol(TURTLE_SYMBOL_BASE, "indentWidth");
+
+    /**
      * Print literals with newlines in multiple line form, using triple quotes.
      */
     public static final Symbol symTurtleMultilineLiterals = SystemARQ.allocSymbol(TURTLE_SYMBOL_BASE, "multiline_literals") ;

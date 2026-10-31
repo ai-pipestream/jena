@@ -51,6 +51,7 @@ public class TestWriterRegistration
     @Test public void registration_22() { testregistration(RDFFormat.TTL); }
     @Test public void registration_23() { testregistration(RDFFormat.TURTLE_BLOCKS); }
     @Test public void registration_24() { testregistration(RDFFormat.TURTLE_FLAT); }
+    @Test public void registration_24a() { testregistration(RDFFormat.TURTLE_LONG); }
 
     @Test public void registration_25() { testregistration(RDFFormat.NTRIPLES); }
     @Test public void registration_26() { testregistration(RDFFormat.NQUADS); }
@@ -63,6 +64,7 @@ public class TestWriterRegistration
     @Test public void registration_28() { testregistration(RDFFormat.TRIG); }
     @Test public void registration_29() { testregistration(RDFFormat.TRIG_BLOCKS); }
     @Test public void registration_30() { testregistration(RDFFormat.TRIG_FLAT); }
+    @Test public void registration_30a() { testregistration(RDFFormat.TRIG_LONG); }
     @Test public void registration_31() { testregistration(RDFFormat.RDFXML_PRETTY); }
     @Test public void registration_32() { testregistration(RDFFormat.RDFXML_ABBREV); }
     @Test public void registration_33() { testregistration(RDFFormat.RDFXML); }
