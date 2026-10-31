@@ -46,7 +46,7 @@ import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term;
 /**
  * Write an {@link RDFPatch} or {@link RDFChanges} stream in Protobuf binary format.
  * <p>
- * Thread safety is implementation specific; instances of this class are not thread safe.
+ * Instances of this class are not thread safe.
  *
  * @see RDFChangesWriterBinary
  * @see RDFChangesWriterText
