@@ -70,17 +70,21 @@ public class WriterStreamRDFBlocks extends WriterStreamRDFBatched
     protected int currentGraphIndent    = 0;
     // Set true if we see a prefix setting for the RDF namespace.
     protected boolean hasRDFprefix      = false;
+    private final int indentPredicate;
 
     public WriterStreamRDFBlocks(OutputStream output, Context context) {
         super(output, context);
+        this.indentPredicate = WriterLib.indentWidth(context, INDENT_PREDICATE);
     }
 
     public WriterStreamRDFBlocks(Writer output, Context context) {
         super(output, context);
+        this.indentPredicate = WriterLib.indentWidth(context, INDENT_PREDICATE);
     }
 
     public WriterStreamRDFBlocks(IndentedWriter output, Context context) {
         super(output, context);
+        this.indentPredicate = WriterLib.indentWidth(context, INDENT_PREDICATE);
     }
 
     @Override
@@ -133,10 +137,10 @@ public class WriterStreamRDFBlocks extends WriterStreamRDFBatched
             out.println();
         else
             gap(GAP_S_P);
-        out.incIndent(INDENT_PREDICATE);
+        out.incIndent(indentPredicate);
         out.pad();
         writePredicateObjectList(triples);
-        out.decIndent(INDENT_PREDICATE);
+        out.decIndent(indentPredicate);
     }
 
     private void writePredicateObjectList(Collection<Triple> triples) {

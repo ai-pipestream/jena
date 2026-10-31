@@ -232,6 +232,7 @@ public class RDFWriterRegistry
         register(RDFFormat.TRIG_PRETTY,     wdsfactory);
         register(RDFFormat.TRIG_BLOCKS,     wdsfactory);
         register(RDFFormat.TRIG_FLAT,       wdsfactory);
+        register(RDFFormat.TRIG_LONG,       wdsfactory);
 
         register(RDFFormat.NQUADS,          wdsfactory);
         register(RDFFormat.NQUADS_ASCII,    wdsfactory);
