@@ -1,7 +1,7 @@
 # PR 1 Signoff Ledger: `GH-4364-protobuf-stream-adapters`
 
 - **Worktree:** `/work/worktrees/jena-workspace/pr1-GH-4364-protobuf-stream-adapters`
-- **Branch:** `GH-4364-protobuf-stream-adapters` (HEAD `c24db5cc3533e4eeda1127c563a0c1e98719b335`, implementation commit `03c2037d3d4041fdf694fc88228d68d802cc6af6`)
+- **Branch:** `GH-4364-protobuf-stream-adapters` (HEAD `47fc5fdcf622aa71403cf88862358881d67ba830`, implementation commit `03c2037d3d4041fdf694fc88228d68d802cc6af6`)
 - **Upstream Issue:** https://github.com/apache/jena/issues/4364 (`GH-4364` / `JENA-2167`)
 - **Scope:** Expose message-level `StreamRDF` and `RowSet`/`Binding` Protobuf adapters in `jena-arq` (`org.apache.jena.riot.protobuf`) with zero new dependencies.
 
@@ -12,10 +12,10 @@ All four agents (`fable`, `antigravity`, `codex`, `cursor`) must review the exac
 | Agent | Status (`PENDING` / `APPROVED` / `CHANGES_REQUESTED`) | Reviewed Commit SHA | Date (UTC) | Verification Command Run | Notes / Report Link |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **fable** | `PENDING` | - | - | - | - |
-| **antigravity** | `APPROVED` | `c24db5cc3533e4eeda1127c563a0c1e98719b335` | `2026-10-30T21:32:00Z` | `mvn -B test -pl jena-arq -Dtest=TS_RDFProtobuf` | 52 tests run, 0 failures, 0 errors, zero warnings, zero em/en dashes |
+| **antigravity** | `APPROVED` | `47fc5fdcf622aa71403cf88862358881d67ba830` | `2026-10-31T12:19:00Z` | `mvn -B test -pl jena-arq -Dtest=TS_RDFProtobuf` + GitHub Actions CI run `41200011383` | 53 tests run, 0 failures, 0 errors, zero warnings, zero em/en dashes, full `maven.yml` CI green on Java 21 + 25 |
 | **codex** | `PENDING` | - | - | - | - |
 | **cursor** | `PENDING` | - | - | - | - |
-| **claude** | `APPROVED` | `c24db5cc3533e4eeda1127c563a0c1e98719b335` | `2026-10-30T22:17:56Z` | `mvn -B test -pl jena-arq -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=TS_RDFProtobuf && ! git diff upstream/main...HEAD \| grep -P '\xe2\x80[\x93\x94]'` | 52 tests run, 0 failures, 0 errors, BUILD SUCCESS, zero em/en dashes, no new deps. `-am` added because 6.3.0-SNAPSHOT jars were not in `~/.m2`. No blocking findings, minor items in [CLAUDE-REVIEW.md](CLAUDE-REVIEW.md). |
+| **claude** | `APPROVED` | `c24db5cc3533e4eeda1127c563a0c1e98719b335` | `2026-10-30T22:17:56Z` | `mvn -B test -pl jena-arq -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=TS_RDFProtobuf && ! git diff upstream/main...HEAD \| grep -P '\xe2\x80[\x93\x94]'` | 52 tests run, 0 failures, 0 errors, BUILD SUCCESS, zero em/en dashes, no new deps. `-am` added because 6.3.0-SNAPSHOT jars were not in `~/.m2`. No blocking findings, minor items in [CLAUDE-REVIEW.md](CLAUDE-REVIEW.md) addressed in `47fc5fdcf6`. |
 
 ## Review Checklist (Required for Each Agent)
 

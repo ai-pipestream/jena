@@ -1,7 +1,7 @@
 # PR 2 Signoff Ledger: `GH-4364-protobuf-rdfpatch`
 
 - **Worktree:** `/work/worktrees/jena-workspace/pr2-GH-4364-protobuf-rdfpatch`
-- **Branch:** `GH-4364-protobuf-rdfpatch` (HEAD `a3c165fc8a274953ec6900e9ff4141be1dc7b09e`, implementation commit `451eeb0cdfed2ab907b19930d893a96e15ef2059`)
+- **Branch:** `GH-4364-protobuf-rdfpatch` (HEAD `4b80f93683738f640e57da41d8953616c7a597b6`, implementation commit `451eeb0cdfed2ab907b19930d893a96e15ef2059`)
 - **Upstream Issue:** https://github.com/apache/jena/issues/4364 (`GH-4364` / `JENA-2167`)
 - **Scope:** Bring `binary-rdf.proto` (`jena-arq`) to parity with `BinaryRDF.thrift` by adding `RDF_Patch_Row` and adding Protobuf binary reader/writer and streaming adapters in `jena-rdfpatch`.
 
@@ -12,10 +12,10 @@ All four agents (`fable`, `antigravity`, `codex`, `cursor`) must review the exac
 | Agent | Status (`PENDING` / `APPROVED` / `CHANGES_REQUESTED`) | Reviewed Commit SHA | Date (UTC) | Verification Command Run | Notes / Report Link |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **fable** | `PENDING` | - | - | - | - |
-| **antigravity** | `APPROVED` | `a3c165fc8a274953ec6900e9ff4141be1dc7b09e` | `2026-10-30T21:32:00Z` | `mvn -B test -pl jena-arq,jena-rdfpatch -Dtest=TS_RDFProtobuf,TS_RDFPatch` | 40 + 64 tests run, 0 failures, 0 errors, zero warnings, zero em/en dashes |
+| **antigravity** | `APPROVED` | `4b80f93683738f640e57da41d8953616c7a597b6` | `2026-10-31T12:19:00Z` | `mvn -B test -pl jena-arq,jena-rdfpatch -Dtest=TS_RDFProtobuf,TS_RDFPatch` + GitHub Actions CI run `41200121800` | 40 + 64 tests run, 0 failures, 0 errors, zero warnings, zero em/en dashes |
 | **codex** | `PENDING` | - | - | - | - |
 | **cursor** | `PENDING` | - | - | - | - |
-| **claude** | `APPROVED` | `a3c165fc8a274953ec6900e9ff4141be1dc7b09e` | `2026-10-30T22:17:56Z` | `mvn -B test -pl jena-arq,jena-rdfpatch -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=TS_RDFProtobuf,TS_RDFPatch && ! git diff upstream/main...HEAD \| grep -P '\xe2\x80[\x93\x94]'` | 40 + 64 tests run (TestPatchIO_Protobuf: 8), 0 failures, 0 errors, BUILD SUCCESS, zero em/en dashes. No blocking findings, minor items in [CLAUDE-REVIEW.md](CLAUDE-REVIEW.md). |
+| **claude** | `APPROVED` | `a3c165fc8a274953ec6900e9ff4141be1dc7b09e` | `2026-10-30T22:17:56Z` | `mvn -B test -pl jena-arq,jena-rdfpatch -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=TS_RDFProtobuf,TS_RDFPatch && ! git diff upstream/main...HEAD \| grep -P '\xe2\x80[\x93\x94]'` | 40 + 64 tests run (TestPatchIO_Protobuf: 8), 0 failures, 0 errors, BUILD SUCCESS, zero em/en dashes. No blocking findings, minor items in [CLAUDE-REVIEW.md](CLAUDE-REVIEW.md) addressed in `4b80f93683`. |
 
 ## Review Checklist (Required for Each Agent)
 
