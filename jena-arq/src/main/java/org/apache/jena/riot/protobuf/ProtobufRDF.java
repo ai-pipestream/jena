@@ -53,6 +53,10 @@ public class ProtobufRDF {
     /** Default maximum number of {@link RDF_StreamRow} items per batched {@link RDF_Stream} message. */
     public static final int DEFAULT_BATCH_SIZE = 1000;
 
+    private static final String ERR_STREAM_NULL = "stream must not be null";
+    private static final String ERR_DEST_NULL = "dest must not be null";
+    private static final String ERR_ROW_SET_NULL = "rowSet must not be null";
+
     /**
      * Create an {@link StreamRDF} for output.  A filename ending {@code .gz} will have
      * a gzip compressor added to the output path. A filename of "-" is {@code System.out}.
@@ -111,6 +115,9 @@ public class ProtobufRDF {
     /**
      * Create a {@link StreamRDF} that emits each event as an in-memory {@link RDF_StreamRow} message
      * to {@code rowConsumer} without intermediate byte-stream serialization.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted rows must be decoded in order by one stateful decoder.
      *
      * @param rowConsumer consumer receiving each encoded {@link RDF_StreamRow}
      * @return a {@link StreamRDF} adapter
@@ -123,6 +130,9 @@ public class ProtobufRDF {
     /**
      * Create a {@link StreamRDF} that emits each event as an in-memory {@link RDF_StreamRow} message
      * to {@code rowConsumer} without intermediate byte-stream serialization.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted rows must be decoded in order by one stateful decoder.
      *
      * @param rowConsumer consumer receiving each encoded {@link RDF_StreamRow}
      * @param withValues {@code true} to encode numeric literals by value
@@ -136,6 +146,9 @@ public class ProtobufRDF {
     /**
      * Create a {@link StreamRDF} that emits each event as an in-memory {@link RDF_StreamRow} message
      * to {@code rowConsumer} and invokes {@code onFinish} when {@link StreamRDF#finish()} is called.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted rows must be decoded in order by one stateful decoder.
      *
      * @param rowConsumer consumer receiving each encoded {@link RDF_StreamRow}
      * @param withValues {@code true} to encode numeric literals by value
@@ -150,6 +163,9 @@ public class ProtobufRDF {
     /**
      * Create a {@link StreamRDF} that batches encoded {@link RDF_StreamRow} items into {@link RDF_Stream}
      * messages of at most {@link #DEFAULT_BATCH_SIZE} rows.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted batches must be decoded in order by one stateful decoder.
      *
      * @param batchConsumer consumer receiving each non-empty {@link RDF_Stream} batch
      * @return a batched {@link StreamRDF} adapter
@@ -162,6 +178,9 @@ public class ProtobufRDF {
     /**
      * Create a {@link StreamRDF} that batches encoded {@link RDF_StreamRow} items into {@link RDF_Stream}
      * messages of at most {@code batchSize} rows.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted batches must be decoded in order by one stateful decoder.
      *
      * @param batchConsumer consumer receiving each non-empty {@link RDF_Stream} batch
      * @param batchSize maximum number of rows per emitted {@link RDF_Stream} message (must be positive)
@@ -175,6 +194,9 @@ public class ProtobufRDF {
     /**
      * Create a {@link StreamRDF} that batches encoded {@link RDF_StreamRow} items into {@link RDF_Stream}
      * messages of at most {@code batchSize} rows.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted batches must be decoded in order by one stateful decoder.
      *
      * @param batchConsumer consumer receiving each non-empty {@link RDF_Stream} batch
      * @param batchSize maximum number of rows per emitted {@link RDF_Stream} message (must be positive)
@@ -189,6 +211,9 @@ public class ProtobufRDF {
     /**
      * Create a {@link StreamRDF} that batches encoded {@link RDF_StreamRow} items into {@link RDF_Stream}
      * messages of at most {@code batchSize} rows and invokes {@code onFinish} on {@link StreamRDF#finish()}.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted batches must be decoded in order by one stateful decoder.
      *
      * @param batchConsumer consumer receiving each non-empty {@link RDF_Stream} batch
      * @param batchSize maximum number of rows per emitted {@link RDF_Stream} message (must be positive)
@@ -292,9 +317,9 @@ public class ProtobufRDF {
      */
     public static void protobufToStreamRDF(RDF_Stream stream, StreamRDF dest) {
         if ( stream == null )
-            throw new IllegalArgumentException("stream must not be null");
+            throw new IllegalArgumentException(ERR_STREAM_NULL);
         if ( dest == null )
-            throw new IllegalArgumentException("dest must not be null");
+            throw new IllegalArgumentException(ERR_DEST_NULL);
         Protobuf2StreamRDF decoder = new Protobuf2StreamRDF(PrefixMapFactory.create(), dest);
         dest.start();
         try {
@@ -357,6 +382,17 @@ public class ProtobufRDF {
     public static RowSet readRowSet(InputStream input) {
         Protobuf2Binding p2b = new Protobuf2Binding(input);
         return RowSetStream.create(p2b.getVars(), p2b);
+    }
+
+    /**
+     * Decode an {@link RDF_VarTuple} header message into an ordered list of {@link Var} instances.
+     *
+     * @param varTuple the variable header message
+     * @return an ordered list of {@link Var}
+     * @throws IllegalArgumentException Thrown if {@code varTuple} is {@code null}
+     */
+    public static List<Var> decodeVars(RDF_VarTuple varTuple) {
+        return Protobuf2Binding.decodeVars(varTuple);
     }
 
     /**
@@ -439,7 +475,7 @@ public class ProtobufRDF {
      */
     public static void writeRowSet(RowSet rowSet, Consumer<RDF_VarTuple> headerConsumer, Consumer<RDF_DataTuple> rowConsumer, boolean withValues) {
         if ( rowSet == null )
-            throw new IllegalArgumentException("rowSet must not be null");
+            throw new IllegalArgumentException(ERR_ROW_SET_NULL);
         List<Var> vars = rowSet.getResultVars();
         try ( Binding2Protobuf b2p = new Binding2Protobuf(headerConsumer, rowConsumer, vars, withValues) ) {
             rowSet.forEachRemaining(b2p::output);

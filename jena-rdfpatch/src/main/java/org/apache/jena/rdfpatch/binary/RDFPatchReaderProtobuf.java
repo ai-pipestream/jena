@@ -171,6 +171,9 @@ public class RDFPatchReaderProtobuf implements PatchProcessor {
 
     /**
      * Read the leading {@link PatchHeader} from length-delimited {@link RDF_Patch_Row} messages on {@code input}.
+     * <p>
+     * This method consumes {@code input} up to and including the first non-header row; the stream is not reset
+     * and cannot be passed directly to {@link #read(InputStream)} afterward without reopening or resetting the source.
      *
      * @param input source input stream
      * @return the decoded {@link PatchHeader}

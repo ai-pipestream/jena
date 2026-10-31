@@ -39,7 +39,13 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 
 /** Convert from SPARQL result set encoded in Protobuf to Bindings */
-public class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterator<Binding> {
+class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterator<Binding> {
+
+    private static final String ERR_INPUT_NULL = "input must not be null";
+    private static final String ERR_VAR_TUPLE_NULL = "varTuple must not be null";
+    private static final String ERR_VARS_NULL = "vars must not be null";
+    private static final String ERR_DATA_TUPLES_NULL = "dataTuples must not be null";
+    private static final String ERR_DATA_TUPLE_NULL = "dataTuple must not be null";
 
     private List<Var> vars = new ArrayList<>();
     private List<String> varNames = new ArrayList<>();
@@ -55,9 +61,9 @@ public class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterat
      * @param input the source input stream
      * @throws IllegalArgumentException Thrown if {@code input} is {@code null}
      */
-    public Protobuf2Binding(InputStream input) {
+    Protobuf2Binding(InputStream input) {
         if ( input == null )
-            throw new IllegalArgumentException("input must not be null");
+            throw new IllegalArgumentException(ERR_INPUT_NULL);
         this.input = input;
         this.dataTuples = null;
         this.uriCache = null;
@@ -72,7 +78,7 @@ public class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterat
      * @param dataTuples iterator supplying {@link RDF_DataTuple} row messages
      * @throws IllegalArgumentException Thrown if {@code varTuple} or {@code dataTuples} is {@code null}
      */
-    public Protobuf2Binding(RDF_VarTuple varTuple, Iterator<RDF_DataTuple> dataTuples) {
+    Protobuf2Binding(RDF_VarTuple varTuple, Iterator<RDF_DataTuple> dataTuples) {
         this(decodeVars(varTuple), dataTuples, null);
     }
 
@@ -84,7 +90,7 @@ public class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterat
      * @param dataTuples iterator supplying {@link RDF_DataTuple} row messages
      * @throws IllegalArgumentException Thrown if {@code vars} or {@code dataTuples} is {@code null}
      */
-    public Protobuf2Binding(List<Var> vars, Iterator<RDF_DataTuple> dataTuples) {
+    Protobuf2Binding(List<Var> vars, Iterator<RDF_DataTuple> dataTuples) {
         this(vars, dataTuples, null);
     }
 
@@ -97,11 +103,11 @@ public class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterat
      * @param uriCache optional cache for interning URI nodes, or {@code null} to disable caching
      * @throws IllegalArgumentException Thrown if {@code vars} or {@code dataTuples} is {@code null}
      */
-    public Protobuf2Binding(List<Var> vars, Iterator<RDF_DataTuple> dataTuples, Cache<String, Node> uriCache) {
+    Protobuf2Binding(List<Var> vars, Iterator<RDF_DataTuple> dataTuples, Cache<String, Node> uriCache) {
         if ( vars == null )
-            throw new IllegalArgumentException("vars must not be null");
+            throw new IllegalArgumentException(ERR_VARS_NULL);
         if ( dataTuples == null )
-            throw new IllegalArgumentException("dataTuples must not be null");
+            throw new IllegalArgumentException(ERR_DATA_TUPLES_NULL);
         this.input = null;
         this.dataTuples = dataTuples;
         this.uriCache = uriCache;
@@ -118,9 +124,9 @@ public class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterat
      * @return an ordered list of {@link Var}
      * @throws IllegalArgumentException Thrown if {@code varTuple} is {@code null}
      */
-    public static List<Var> decodeVars(RDF_VarTuple varTuple) {
+    static List<Var> decodeVars(RDF_VarTuple varTuple) {
         if ( varTuple == null )
-            throw new IllegalArgumentException("varTuple must not be null");
+            throw new IllegalArgumentException(ERR_VAR_TUPLE_NULL);
         List<String> names = new ArrayList<>(varTuple.getVarsCount());
         varTuple.getVarsList().forEach(rv -> names.add(rv.getName()));
         return Var.varList(names);
@@ -140,14 +146,14 @@ public class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterat
      *
      * @return the result variables
      */
-    public List<Var> getVars()              { return vars; }
+    List<Var> getVars()              { return vars; }
 
     /**
      * Return the ordered list of result variable names.
      *
      * @return the result variable names
      */
-    public List<String> getVarNames()       { return varNames; }
+    List<String> getVarNames()       { return varNames; }
 
     /**
      * Decode a single {@link RDF_DataTuple} row message into a {@link Binding}.
@@ -157,9 +163,9 @@ public class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterat
      * @throws IllegalArgumentException Thrown if {@code dataTuple} is {@code null}
      * @throws RiotProtobufException Thrown if the row width does not match the number of result variables
      */
-    public Binding decode(RDF_DataTuple dataTuple) {
+    Binding decode(RDF_DataTuple dataTuple) {
         if ( dataTuple == null )
-            throw new IllegalArgumentException("dataTuple must not be null");
+            throw new IllegalArgumentException(ERR_DATA_TUPLE_NULL);
         b.reset();
         List<RDF_Term> row = dataTuple.getRowList();
         if ( row.size() != vars.size() )

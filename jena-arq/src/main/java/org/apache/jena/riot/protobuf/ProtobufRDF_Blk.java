@@ -39,6 +39,9 @@ import org.apache.jena.riot.system.StreamRDF;
  * A single operation will read or write a whole file.
  */
 public class ProtobufRDF_Blk {
+    private static final String ERR_OUTPUT_STREAM_NULL = "outputStream must not be null";
+    private static final String ERR_STREAM_DEST_NULL = "streamDest must not be null";
+
     // ==== Delimited items in a stream
 
     /**
@@ -76,9 +79,9 @@ public class ProtobufRDF_Blk {
      */
     public static void streamToOutputStreamBlk(OutputStream outputStream, Consumer<StreamRDF> streamDest, boolean withValues) {
         if ( outputStream == null )
-            throw new IllegalArgumentException("outputStream must not be null");
+            throw new IllegalArgumentException(ERR_OUTPUT_STREAM_NULL);
         if ( streamDest == null )
-            throw new IllegalArgumentException("streamDest must not be null");
+            throw new IllegalArgumentException(ERR_STREAM_DEST_NULL);
         outputStream = IO.ensureBuffered(outputStream);
         try {
             StreamRDF2Protobuf.writeBlk(outputStream, streamDest, withValues);

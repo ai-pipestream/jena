@@ -149,6 +149,7 @@ message RDF_Graph {
 
 // ==== RDF Patch
 
+// Used exclusively inside RDF_Patch_Row.oneof row, which provides explicit presence tracking for TX = 0.
 enum PatchTxn {
   TX      = 0 ;
   TC      = 1 ;

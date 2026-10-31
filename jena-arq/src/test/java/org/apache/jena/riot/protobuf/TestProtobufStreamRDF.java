@@ -392,6 +392,49 @@ public class TestProtobufStreamRDF {
         assertTrue(IsoMatcher.isomorphic(datasetGraph, decoded));
         Node obj = Iter.first(datasetGraph.listGraphNodes(), Node::isBlank);
         termAsObject(decoded, obj);
+
+        // Verify explicit flush() emits an incomplete batch before finish().
+        List<RDF_Stream> flushedBatches = new ArrayList<>();
+        StreamRDF flushEncoder = ProtobufRDF.streamToBatchConsumer(flushedBatches::add, 10, false);
+        Triple t1 = SSE.parseTriple("(:s1 :p1 :o1)");
+        Triple t2 = SSE.parseTriple("(:s2 :p2 :o2)");
+        flushEncoder.start();
+        flushEncoder.triple(t1);
+        assertEquals(0, flushedBatches.size());
+        flushEncoder.flush();
+        assertEquals(1, flushedBatches.size());
+        assertEquals(1, flushedBatches.get(0).getRowCount());
+        flushEncoder.triple(t2);
+        flushEncoder.finish();
+        assertEquals(2, flushedBatches.size());
+        assertEquals(1, flushedBatches.get(1).getRowCount());
+    }
+
+    @Test public void streamRowAdapter_midStreamPrefixRebind() {
+        String ns1 = "http://example.org/ns1#";
+        String ns2 = "http://example.org/ns2#";
+        Triple t1 = SSE.parseTriple("(<" + ns1 + "s> <" + ns1 + "p> 'v1')");
+        Triple t2 = SSE.parseTriple("(<" + ns2 + "s> <" + ns2 + "p> 'v2')");
+
+        List<RDF_StreamRow> rows = new ArrayList<>();
+        StreamRDF encoder = ProtobufRDF.streamToRowConsumer(rows::add, false);
+        encoder.start();
+        encoder.prefix(EX_PREFIX, ns1);
+        encoder.triple(t1);
+        encoder.prefix(EX_PREFIX, ns2);
+        encoder.triple(t2);
+        encoder.finish();
+
+        Graph decoded = GraphFactory.createGraphMem();
+        StreamRDF sink = StreamRDFLib.graph(decoded);
+        Consumer<RDF_StreamRow> decoder = ProtobufRDF.rowConsumerToStreamRDF(sink);
+        sink.start();
+        rows.forEach(decoder);
+        sink.finish();
+
+        assertTrue(decoded.contains(t1));
+        assertTrue(decoded.contains(t2));
+        assertEquals(ns2, decoded.getPrefixMapping().getNsPrefixURI(EX_PREFIX));
     }
 
     @Test public void protobufToStreamRDF_singleMessage() {

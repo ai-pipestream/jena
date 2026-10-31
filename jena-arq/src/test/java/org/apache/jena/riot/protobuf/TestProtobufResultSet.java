@@ -146,7 +146,7 @@ public class TestProtobufResultSet {
         rs0.reset();
 
         assertNotNull(headerRef.get());
-        assertEquals(VARS_X_Y, Protobuf2Binding.decodeVars(headerRef.get()));
+        assertEquals(VARS_X_Y, ProtobufRDF.decodeVars(headerRef.get()));
         assertEquals(7, rows.size());
 
         RowSet decoded = ProtobufRDF.readRowSet(headerRef.get(), rows.iterator());
@@ -165,7 +165,7 @@ public class TestProtobufResultSet {
         assertEquals(TermCase.VALINTEGER, rows.get(0).getRow(0).getTermCase());
         assertEquals(1L, rows.get(0).getRow(0).getValInteger());
 
-        RowSet decoded = ProtobufRDF.readRowSet(Protobuf2Binding.decodeVars(headerRef.get()), rows.iterator());
+        RowSet decoded = ProtobufRDF.readRowSet(ProtobufRDF.decodeVars(headerRef.get()), rows.iterator());
         ResultSetRewindable decodedRewindable = ResultSetFactory.makeRewindable(decoded);
         assertTrue(ResultsCompare.equalsExact(rs1, decodedRewindable));
         rs1.reset();
@@ -173,7 +173,7 @@ public class TestProtobufResultSet {
 
     @Test public void resultSet_bindingDirectEncodeDecode() {
         RDF_VarTuple varTuple = Binding2Protobuf.encodeVars(VARS_X_Y);
-        assertEquals(VARS_X_Y, Protobuf2Binding.decodeVars(varTuple));
+        assertEquals(VARS_X_Y, ProtobufRDF.decodeVars(varTuple));
 
         List<RDF_DataTuple> captured = new ArrayList<>();
         try ( Binding2Protobuf encoder = new Binding2Protobuf(captured::add, VARS_X_Y, false) ) {
@@ -199,6 +199,8 @@ public class TestProtobufResultSet {
 
     @Test public void resultSet_validation() {
         assertThrows(IllegalArgumentException.class, () -> Binding2Protobuf.encodeVars(null));
+        assertThrows(IllegalArgumentException.class, () -> new Binding2Protobuf(r -> {}, null, false));
+        assertThrows(IllegalArgumentException.class, () -> ProtobufRDF.decodeVars(null));
         assertThrows(IllegalArgumentException.class, () -> Protobuf2Binding.decodeVars(null));
         assertThrows(IllegalArgumentException.class,
             () -> ProtobufRDF.writeRowSet(null, h -> {}, r -> {}));

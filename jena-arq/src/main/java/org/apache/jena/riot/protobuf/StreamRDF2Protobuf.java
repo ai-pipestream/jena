@@ -99,6 +99,9 @@ public class StreamRDF2Protobuf implements StreamRDF, AutoCloseable
     /**
      * Create a {@link StreamRDF} that emits each event as an {@link RDF_StreamRow} to the given consumer
      * and runs a completion callback on {@link #finish()}.
+     * <p>
+     * Because prefix declarations update a stateful {@link PrefixMap} used to abbreviate subsequent IRIs,
+     * emitted {@link RDF_StreamRow} messages must be delivered to the consumer in stream order.
      *
      * @param rowHandler consumer receiving each encoded {@link RDF_StreamRow}
      * @param withValues {@code true} to encode numeric literals by value
@@ -117,6 +120,9 @@ public class StreamRDF2Protobuf implements StreamRDF, AutoCloseable
     /**
      * Create a {@link StreamRDF} that batches encoded {@link RDF_StreamRow} items into {@link RDF_Stream}
      * messages of at most {@code batchSize} rows.
+     * <p>
+     * Because prefix declarations update a stateful {@link PrefixMap} used to abbreviate subsequent IRIs,
+     * emitted {@link RDF_Stream} batches must be delivered to the consumer in stream order.
      *
      * @param batchHandler consumer receiving each non-empty {@link RDF_Stream} batch
      * @param batchSize maximum number of rows per emitted {@link RDF_Stream} message (must be positive)
@@ -131,6 +137,9 @@ public class StreamRDF2Protobuf implements StreamRDF, AutoCloseable
     /**
      * Create a {@link StreamRDF} that batches encoded {@link RDF_StreamRow} items into {@link RDF_Stream}
      * messages of at most {@code batchSize} rows and runs a completion callback on {@link #finish()}.
+     * <p>
+     * Because prefix declarations update a stateful {@link PrefixMap} used to abbreviate subsequent IRIs,
+     * emitted {@link RDF_Stream} batches must be delivered to the consumer in stream order.
      *
      * @param batchHandler consumer receiving each non-empty {@link RDF_Stream} batch
      * @param batchSize maximum number of rows per emitted {@link RDF_Stream} message (must be positive)

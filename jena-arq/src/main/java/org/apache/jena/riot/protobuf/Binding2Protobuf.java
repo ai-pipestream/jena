@@ -72,11 +72,13 @@ public class Binding2Protobuf implements AutoCloseable {
      * @param rowConsumer consumer receiving each encoded {@link RDF_DataTuple}
      * @param vars result set variables
      * @param encodeValues {@code true} to encode numeric literals by value
-     * @throws IllegalArgumentException Thrown if {@code rowConsumer} is {@code null}
+     * @throws IllegalArgumentException Thrown if {@code rowConsumer} or {@code vars} is {@code null}
      */
     public Binding2Protobuf(Consumer<RDF_DataTuple> rowConsumer, Collection<Var> vars, boolean encodeValues) {
         if ( rowConsumer == null )
             throw new IllegalArgumentException(ERR_ROW_CONSUMER_NULL);
+        if ( vars == null )
+            throw new IllegalArgumentException(ERR_VARS_NULL);
         this.rowConsumer = rowConsumer;
         this.vars = vars;
         this.encodeValues = encodeValues;
@@ -136,9 +138,7 @@ public class Binding2Protobuf implements AutoCloseable {
         if ( binding == null )
             throw new IllegalArgumentException(ERR_BINDING_NULL);
         row.clear();
-        Iterator<Var> vIter = (vars == null ? null : vars.iterator());
-        if ( vIter == null )
-            vIter = binding.vars();
+        Iterator<Var> vIter = vars.iterator();
         vIter.forEachRemaining(v -> {
             term.clear();
             Node n = binding.get(v);
