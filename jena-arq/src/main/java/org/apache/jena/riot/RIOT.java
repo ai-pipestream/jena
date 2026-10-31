@@ -23,6 +23,8 @@ package org.apache.jena.riot ;
 
 import org.apache.jena.atlas.lib.Version;
 import org.apache.jena.query.ARQ;
+import org.apache.jena.riot.out.NodeFormatter;
+import org.apache.jena.riot.out.NodeToLabel;
 import org.apache.jena.riot.resultset.ResultSetLang;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.writer.DirectiveStyle;
@@ -164,4 +166,14 @@ public class RIOT {
      * Print literals with newlines in multiple line form, using triple quotes.
      */
     public static final Symbol symTurtleMultilineLiterals = SystemARQ.allocSymbol(TURTLE_SYMBOL_BASE, "multiline_literals") ;
+
+    /**
+     * Custom {@link NodeFormatter} for N-Triples, N-Quads, Turtle and TriG writers.
+     */
+    public static final Symbol symNodeFormatter = SystemARQ.allocSymbol(TURTLE_SYMBOL_BASE, "nodeFormatter");
+
+    /**
+     * {@link NodeToLabel} policy for blank node label output in N-Triples, N-Quads, Turtle and TriG writers.
+     */
+    public static final Symbol symNodeToLabel = SystemARQ.allocSymbol(TURTLE_SYMBOL_BASE, "nodeToLabel");
 }

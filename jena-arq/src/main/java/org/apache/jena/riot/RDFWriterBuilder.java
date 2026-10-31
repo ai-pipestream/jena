@@ -26,6 +26,9 @@ import java.io.OutputStream;
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.riot.out.NodeFormatter;
+import org.apache.jena.riot.out.NodeToLabel;
+import org.apache.jena.riot.system.SyntaxLabels;
 import org.apache.jena.sparql.core.DatasetGraph ;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.ContextAccumulator;
@@ -35,11 +38,13 @@ import org.apache.jena.sys.JenaSystem;
 public class RDFWriterBuilder {
     static { JenaSystem.init(); }
 
-    private DatasetGraph dataset = null;
-    private Graph        graph   = null;
-    private Lang         lang    = null;
-    private RDFFormat    format  = null;
-    private String       baseURI = null;
+    private DatasetGraph  dataset       = null;
+    private Graph         graph         = null;
+    private Lang          lang          = null;
+    private RDFFormat     format        = null;
+    private String        baseURI       = null;
+    private NodeToLabel   nodeToLabel   = null;
+    private NodeFormatter nodeFormatter = null;
     private ContextAccumulator contextAcc = ContextAccumulator.newBuilder(()->RIOT.getContext());
 
     /** A new {@code RDFWriterBuilder}.
@@ -100,11 +105,36 @@ public class RDFWriterBuilder {
         return source(dataset.asDatasetGraph());
     }
 
-//    // Not implemented
-//    public RDFWriterBuilder labels(NodeToLabel nodeToLabel) { return this; }
-//
-//    // Not implemented
-//    public RDFWriterBuilder formatter(NodeFormatter nodeFormatter) { return this; }
+    /**
+     * Set the {@link NodeToLabel} policy for converting blank nodes to labels when writing.
+     * <p>
+     * Passing {@code null} clears any previous setting.
+     *
+     * @param nodeToLabel A {@link NodeToLabel} policy.
+     * @return this
+     * @see NodeToLabel
+     * @see SyntaxLabels#createNodeToLabel
+     */
+    public RDFWriterBuilder labels(NodeToLabel nodeToLabel) {
+        this.nodeToLabel = nodeToLabel;
+        contextAcc.set(RIOT.symNodeToLabel, nodeToLabel);
+        return this;
+    }
+
+    /**
+     * Set the {@link NodeFormatter} used for formatting RDF terms in N-Triples, N-Quads, Turtle and TriG writers.
+     * <p>
+     * Passing {@code null} clears any previous setting.
+     *
+     * @param nodeFormatter A {@link NodeFormatter}.
+     * @return this
+     * @see NodeFormatter
+     */
+    public RDFWriterBuilder formatter(NodeFormatter nodeFormatter) {
+        this.nodeFormatter = nodeFormatter;
+        contextAcc.set(RIOT.symNodeFormatter, nodeFormatter);
+        return this;
+    }
 
     /**
      * Set the context for the writer when built.
@@ -192,11 +222,21 @@ public class RDFWriterBuilder {
         clone.lang          = this.lang;
         clone.format        = this.format;
         clone.baseURI       = this.baseURI;
+        clone.nodeToLabel   = this.nodeToLabel;
+        clone.nodeFormatter = this.nodeFormatter;
         return clone;
     }
 
     public RDFWriter build() {
         Context context = contextAcc.context();
+        if ( nodeFormatter != null && !context.isDefined(RIOT.symNodeFormatter) ) {
+            context = context.copy();
+            context.set(RIOT.symNodeFormatter, nodeFormatter);
+        }
+        if ( nodeToLabel != null && !context.isDefined(RIOT.symNodeToLabel) ) {
+            context = context.copy();
+            context.set(RIOT.symNodeToLabel, nodeToLabel);
+        }
         if ( dataset == null && graph == null )
             throw new RiotException("No source to be written");
         return new RDFWriter(dataset, graph, format, lang, baseURI, context);
