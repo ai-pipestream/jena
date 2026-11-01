@@ -31,6 +31,7 @@ import org.apache.jena.riot.out.NodeFormatterNT;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.util.Context;
 
 /**
  * An output of triples / quads that is streaming. It writes N-triples/N-quads.
@@ -57,6 +58,18 @@ public class WriterStreamRDFPlain implements StreamRDF {
      */
     public WriterStreamRDFPlain(AWriter w, CharSpace charSpace) {
         this(w, new NodeFormatterNT(charSpace));
+    }
+
+    /**
+     * Output tuples, choosing ASCII or UTF8 and applying any custom {@link NodeFormatter}
+     * or {@link org.apache.jena.riot.out.NodeToLabel} from {@code context}.
+     *
+     * @param w Output writer.
+     * @param charSpace Character space (UTF-8 or ASCII).
+     * @param context Context, may be {@code null}.
+     */
+    public WriterStreamRDFPlain(AWriter w, CharSpace charSpace, Context context) {
+        this(w, WriterLib.nodeFormatterNT(charSpace, context));
     }
 
     /**

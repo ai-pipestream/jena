@@ -24,6 +24,7 @@ package org.apache.jena.riot.out;
 import org.apache.jena.atlas.io.AWriter;
 import org.apache.jena.atlas.lib.CharSpace;
 import org.apache.jena.atlas.lib.EscapeStr;
+import org.apache.jena.graph.Node;
 import org.apache.jena.riot.out.quoted.QuotedStringOutput;
 import org.apache.jena.riot.out.quoted.QuotedStringOutputNT;
 import org.apache.jena.riot.out.quoted.QuotedURI;
@@ -35,12 +36,29 @@ public class NodeFormatterNT extends NodeFormatterBase
 
     private final QuotedStringOutput quotedStringProc;
     private final QuotedURI quotedUriProc;
+    private final NodeToLabel nodeToLabel;
 
-    public NodeFormatterNT() { this(CharSpace.UTF8); }
+    public NodeFormatterNT() { this(CharSpace.UTF8, null); }
 
-    public NodeFormatterNT(CharSpace charSpace) {
+    public NodeFormatterNT(CharSpace charSpace) { this(charSpace, null); }
+
+    /**
+     * Create a formatter for N-Triples/N-Quads using UTF-8 and the given {@link NodeToLabel} policy.
+     *
+     * @param nodeToLabel Policy for mapping blank nodes to labels, or {@code null} for default encoding.
+     */
+    public NodeFormatterNT(NodeToLabel nodeToLabel) { this(CharSpace.UTF8, nodeToLabel); }
+
+    /**
+     * Create a formatter for N-Triples/N-Quads with the given {@link CharSpace} and {@link NodeToLabel} policy.
+     *
+     * @param charSpace Character space (UTF-8 or ASCII).
+     * @param nodeToLabel Policy for mapping blank nodes to labels, or {@code null} for default encoding.
+     */
+    public NodeFormatterNT(CharSpace charSpace, NodeToLabel nodeToLabel) {
         quotedStringProc = new QuotedStringOutputNT(charSpace);
         quotedUriProc = new QuotedURI(charSpace);
+        this.nodeToLabel = nodeToLabel;
     }
 
     @Override
@@ -52,6 +70,16 @@ public class NodeFormatterNT extends NodeFormatterBase
     public void formatVar(AWriter w, String name) {
         w.print('?');
         EscapeStr.stringEsc(w, name, false);
+    }
+
+    @Override
+    public void formatBNode(AWriter w, Node n) {
+        if ( nodeToLabel != null ) {
+            String x = nodeToLabel.get(null, n);
+            w.print(x);
+            return;
+        }
+        super.formatBNode(w, n);
     }
 
     @Override
