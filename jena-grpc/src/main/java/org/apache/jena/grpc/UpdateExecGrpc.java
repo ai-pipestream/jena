@@ -21,21 +21,26 @@
 
 package org.apache.jena.grpc;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-
-import com.google.protobuf.StringValue;
 
 import io.grpc.CallOptions;
 import io.grpc.Channel;
+import io.grpc.ClientCall;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCalls;
-import org.apache.jena.sparql.core.DatasetGraph;
+import io.grpc.stub.StreamObserver;
+import org.apache.jena.grpc.wire.PB_RDFService.ExecuteUpdateRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.ExecuteUpdateResponse;
+import org.apache.jena.sparql.ARQException;
 import org.apache.jena.sparql.exec.UpdateExec;
 import org.apache.jena.sparql.util.Context;
 
 /**
- * {@link UpdateExec} implementation executing SPARQL Updates over a gRPC {@link Channel}.
+ * {@link UpdateExec} implementation executing SPARQL Updates over a gRPC {@link Channel}
+ * using the client-streaming {@code ExecuteUpdate} RPC.
  */
 public class UpdateExecGrpc implements UpdateExec {
 
@@ -70,15 +75,49 @@ public class UpdateExecGrpc implements UpdateExec {
     /** {@inheritDoc} */
     @Override
     public void execute() {
+        CallOptions opts = callOptionsSupplier.get();
+        if ( timeout > 0 && timeoutUnit != null ) {
+            opts = opts.withDeadlineAfter(timeout, timeoutUnit);
+        }
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Throwable> errorRef = new AtomicReference<>();
+        ClientCall<ExecuteUpdateRequest, ExecuteUpdateResponse> call =
+            channel.newCall(RDFGrpcProtocol.EXECUTE_UPDATE_METHOD, opts);
+        StreamObserver<ExecuteUpdateRequest> reqObs = ClientCalls.asyncClientStreamingCall(
+            call,
+            new StreamObserver<>() {
+                @Override
+                public void onNext(ExecuteUpdateResponse value) {}
+
+                @Override
+                public void onError(Throwable t) {
+                    errorRef.set(t);
+                    latch.countDown();
+                }
+
+                @Override
+                public void onCompleted() {
+                    latch.countDown();
+                }
+            });
         try {
-            CallOptions opts = callOptionsSupplier.get();
-            if ( timeout > 0 && timeoutUnit != null ) {
-                opts = opts.withDeadlineAfter(timeout, timeoutUnit);
+            reqObs.onNext(ExecuteUpdateRequest.newBuilder().setUpdate(updateString).build());
+            reqObs.onCompleted();
+            latch.await();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            call.cancel("Interrupted during SPARQL update", ex);
+            throw new ARQException("Interrupted during SPARQL update", ex);
+        } catch (RuntimeException ex) {
+            reqObs.onError(ex);
+            throw ex;
+        }
+        Throwable err = errorRef.get();
+        if ( err != null ) {
+            if ( err instanceof StatusRuntimeException sre ) {
+                throw RDFGrpcProtocol.fromStatusException(sre);
             }
-            ClientCalls.blockingUnaryCall(
-                channel, RDFGrpcProtocol.EXECUTE_UPDATE_METHOD, opts, StringValue.of(updateString));
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
+            throw new ARQException(err.getMessage(), err);
         }
     }
 }

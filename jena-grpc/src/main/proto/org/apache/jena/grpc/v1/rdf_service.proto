@@ -1,0 +1,237 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+ *   SPDX-License-Identifier: Apache-2.0
+ */
+
+syntax = "proto3";
+
+package org.apache.jena.grpc.v1;
+
+import "binary-rdf.proto";
+
+option java_outer_classname = "PB_RDFService";
+option java_package = "org.apache.jena.grpc.wire";
+option optimize_for = SPEED;
+
+// Disposition for streaming RDF writes into a graph or dataset.
+enum WriteDisposition {
+  WRITE_DISPOSITION_UNSPECIFIED = 0;
+  // Append streamed triples, quads, and prefixes into the target (GSP POST / load).
+  WRITE_DISPOSITION_APPEND = 1;
+  // Clear the target before streaming triples, quads, and prefixes into it (GSP PUT / put).
+  WRITE_DISPOSITION_REPLACE = 2;
+  // Clear or delete the target without writing any triples or quads (GSP DELETE / clear).
+  WRITE_DISPOSITION_CLEAR = 3;
+}
+
+// Expected SPARQL query result form.
+enum QueryResultForm {
+  QUERY_RESULT_FORM_UNSPECIFIED = 0;
+  QUERY_RESULT_FORM_SELECT = 1;
+  QUERY_RESULT_FORM_GRAPH = 2;
+  QUERY_RESULT_FORM_DATASET = 3;
+  QUERY_RESULT_FORM_ASK = 4;
+  QUERY_RESULT_FORM_JSON = 5;
+}
+
+// Transaction type requested when opening a remote transaction session.
+enum TransactionType {
+  TRANSACTION_TYPE_UNSPECIFIED = 0;
+  TRANSACTION_TYPE_READ = 1;
+  TRANSACTION_TYPE_WRITE = 2;
+  TRANSACTION_TYPE_READ_PROMOTE = 3;
+  TRANSACTION_TYPE_READ_COMMITTED_PROMOTE = 4;
+}
+
+// Promotion isolation mode when promoting a read transaction to write.
+enum PromoteMode {
+  PROMOTE_MODE_UNSPECIFIED = 0;
+  PROMOTE_MODE_ISOLATED = 1;
+  PROMOTE_MODE_READ_COMMITTED = 2;
+}
+
+// Control command sent over a bidirectional Transaction stream.
+enum TransactionCommand {
+  TRANSACTION_COMMAND_UNSPECIFIED = 0;
+  TRANSACTION_COMMAND_BEGIN = 1;
+  TRANSACTION_COMMAND_PROMOTE = 2;
+  TRANSACTION_COMMAND_COMMIT = 3;
+  TRANSACTION_COMMAND_ABORT = 4;
+  TRANSACTION_COMMAND_END = 5;
+}
+
+// Identifies a target graph (either the default graph or a named graph term).
+message GraphTarget {
+  oneof target {
+    bool default_graph = 1;
+    .RDF_Term graph_name = 2;
+  }
+}
+
+// Request to stream RDF quads, triples, and prefixes from a dataset.
+message StreamRdfRequest {
+  oneof selector {
+    // Stream quads matching a pattern where RDF_ANY or unset terms act as wildcards.
+    .RDF_Quad quad_pattern = 1;
+    // Stream triples and prefixes from the default or named graph.
+    GraphTarget graph = 2;
+    // Stream all quads and prefixes from the entire dataset.
+    bool entire_dataset = 3;
+  }
+  string txn_id = 4;
+}
+
+// Chunk of streamed RDF rows (prefix declarations, triples, or quads).
+message StreamRdfResponse {
+  repeated .RDF_StreamRow rows = 1;
+}
+
+// Header frame sent first in a WriteRdf stream to select target and write disposition.
+message WriteRdfHeader {
+  oneof target {
+    bool entire_dataset = 1;
+    GraphTarget graph = 2;
+  }
+  WriteDisposition disposition = 3;
+  string txn_id = 4;
+}
+
+// Client-streamed frame for writing or clearing RDF data in a graph or dataset.
+message WriteRdfRequest {
+  oneof item {
+    WriteRdfHeader header = 1;
+    .RDF_Stream batch = 2;
+    .RDF_StreamRow row = 3;
+  }
+}
+
+// Summary returned when a WriteRdf stream completes.
+message WriteRdfResponse {
+  int64 quad_count = 1;
+  int64 prefix_count = 2;
+}
+
+// Request to execute a SPARQL query and stream back its results.
+message ExecuteQueryRequest {
+  string query = 1;
+  string base_uri = 2;
+  repeated string default_graph_uris = 3;
+  repeated string named_graph_uris = 4;
+  QueryResultForm result_form = 5;
+  string txn_id = 6;
+}
+
+// Batch of SPARQL SELECT binding rows.
+message SelectRowBatch {
+  repeated .RDF_DataTuple rows = 1;
+}
+
+// Server-streamed frame emitted during SPARQL query evaluation.
+message ExecuteQueryResponse {
+  oneof result {
+    // Emitted first for SELECT queries: the ordered result variable names.
+    .RDF_VarTuple select_header = 1;
+    // Subsequent chunks of SELECT binding rows.
+    SelectRowBatch select_rows = 2;
+    // Chunks of triples, quads, and prefixes for CONSTRUCT and DESCRIBE queries.
+    .RDF_Stream rdf_batch = 3;
+    // Boolean result for ASK queries.
+    bool ask_result = 4;
+    // Serialized JSON array for JSON queries.
+    string json_result = 5;
+  }
+}
+
+// Client-streamed frame for executing one or more SPARQL Update requests.
+message ExecuteUpdateRequest {
+  string update = 1;
+  string base_uri = 2;
+  repeated string using_graph_uris = 3;
+  repeated string using_named_graph_uris = 4;
+  string txn_id = 5;
+}
+
+// Summary returned when an ExecuteUpdate stream completes.
+message ExecuteUpdateResponse {
+  int64 update_count = 1;
+}
+
+// Client-streamed frame carrying RDF Patch rows to apply to the dataset.
+message ApplyPatchRequest {
+  string txn_id = 1;
+  repeated .RDF_Patch_Row rows = 2;
+}
+
+// Summary returned when an ApplyPatch stream completes.
+message ApplyPatchResponse {
+  int64 row_count = 1;
+}
+
+// Request to subscribe to committed RDF Patch updates on the server dataset.
+message SubscribePatchesRequest {
+  GraphTarget graph_filter = 1;
+}
+
+// Server-streamed event for a live RDF Patch subscription.
+message SubscribePatchesResponse {
+  oneof event {
+    // Emitted immediately upon registration to confirm the subscription is active.
+    bool subscribed = 1;
+    // Committed RDF Patch rows delivered in commit order.
+    .RDF_Patch patch = 2;
+  }
+}
+
+// Client control frame on a bidirectional Transaction stream.
+message TransactionRequest {
+  TransactionCommand command = 1;
+  TransactionType txn_type = 2;
+  PromoteMode promote_mode = 3;
+}
+
+// Server acknowledgement frame on a bidirectional Transaction stream.
+message TransactionResponse {
+  TransactionCommand command = 1;
+  string txn_id = 2;
+  bool promoted = 3;
+}
+
+// Stream-first gRPC service exposing an Apache Jena DatasetGraph over PB_RDF wire messages.
+service RdfDatasetService {
+  // Stream RDF quads, triples, and prefixes from a graph, quad pattern, or entire dataset.
+  rpc StreamRdf(StreamRdfRequest) returns (stream StreamRdfResponse);
+
+  // Stream RDF triples, quads, and prefixes into a graph or dataset, or clear/delete a target.
+  rpc WriteRdf(stream WriteRdfRequest) returns (WriteRdfResponse);
+
+  // Execute a SPARQL query (SELECT, CONSTRUCT, DESCRIBE, ASK, or JSON) and stream its results.
+  rpc ExecuteQuery(ExecuteQueryRequest) returns (stream ExecuteQueryResponse);
+
+  // Stream one or more SPARQL Update requests to the dataset.
+  rpc ExecuteUpdate(stream ExecuteUpdateRequest) returns (ExecuteUpdateResponse);
+
+  // Stream RDF Patch rows to apply to the dataset in O(1) server memory.
+  rpc ApplyPatch(stream ApplyPatchRequest) returns (ApplyPatchResponse);
+
+  // Subscribe to a live server stream of committed RDF Patches.
+  rpc SubscribePatches(SubscribePatchesRequest) returns (stream SubscribePatchesResponse);
+
+  // Open a connection-bound bidirectional transaction control stream.
+  rpc Transaction(stream TransactionRequest) returns (stream TransactionResponse);
+}

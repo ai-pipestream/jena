@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -45,6 +46,7 @@ import org.junit.jupiter.api.Test;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.ReadWrite;
@@ -426,6 +428,89 @@ public class TestRDFLinkGrpcInProcess extends AbstractTestRDFLink {
             link.commit();
             link.end();
             assertEquals(1, link.get().size());
+        }
+    }
+
+    @Test
+    public void abruptTransactionStreamDisconnect_immediatelyAbortsAndReleasesWriteLock() throws Exception {
+        String name = "jena-grpc-bidi-abort-" + SERVER_SEQ.incrementAndGet();
+        DatasetGraph dsg = DatasetGraphFactory.createTxnMem();
+        try ( RDFGrpcServer longTimeoutServer = RDFGrpcServer.newBuilder()
+                  .inProcessName(name)
+                  .dataset(dsg)
+                  .txnIdleTimeout(Duration.ofMinutes(10))
+                  .build()
+                  .start();
+              RDFLinkGrpc disconnected = RDFLinkGrpc.connectInProcess(name);
+              RDFLinkGrpc other = RDFLinkGrpc.connectInProcess(name) ) {
+
+            disconnected.begin(ReadWrite.WRITE);
+            disconnected.update("INSERT DATA { <http://example/s> <http://example/p> 'uncommitted' }");
+            assertEquals(1, longTimeoutServer.getService().activeTxnCount());
+
+            // Simulate an abrupt client stream disconnect without waiting for the 10-minute idle timeout.
+            disconnected.cancelTransactionStreamAbruptly();
+
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while ( longTimeoutServer.getService().activeTxnCount() > 0 && System.nanoTime() < deadline ) {
+                Thread.sleep(10);
+            }
+            assertEquals(0, longTimeoutServer.getService().activeTxnCount());
+
+            // Another client can immediately acquire the write lock, and uncommitted data was rolled back.
+            assertTimeoutPreemptively(Duration.ofSeconds(5),
+                () -> other.update("INSERT DATA { <http://example/s> <http://example/p> 'committed' }"));
+            assertEquals(1, other.get().size());
+        }
+    }
+
+    @Test
+    public void constructTriples_describeTriples_constructQuads_streamLazily() {
+        DatasetGraph source = SSE.parseDatasetGraph(
+            "(dataset (graph (:s1 :p1 :o1) (:s2 :p1 :o2) (:s3 :p1 :o3)) (graph :g1 (:s4 :p2 :o4)))");
+        try ( RDFLinkGrpc link = RDFLinkGrpc.newBuilder().inProcessName(serverName).batchSize(1).build() ) {
+            link.putDataset(source);
+
+            try ( QueryExec qExec = link.query("CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }") ) {
+                Iterator<Triple> iter = qExec.constructTriples();
+                assertTrue(iter.hasNext());
+                iter.next();
+                qExec.abort();
+                assertFalse(iter.hasNext());
+            }
+
+            try ( QueryExec qExec = link.query("DESCRIBE <http://example/s1>") ) {
+                Iterator<Triple> iter = qExec.describeTriples();
+                assertTrue(iter.hasNext());
+                assertEquals(SSE.parseNode(":s1"), iter.next().getSubject());
+            }
+
+            try ( QueryExec qExec = link.query("CONSTRUCT { GRAPH ?g { ?s ?p ?o } } WHERE { GRAPH ?g { ?s ?p ?o } }") ) {
+                Iterator<Quad> iter = qExec.constructQuads();
+                assertTrue(iter.hasNext());
+                assertEquals(SSE.parseNode(":g1"), iter.next().getGraph());
+            }
+        }
+    }
+
+    @Test
+    public void findStream_earlyCloseCancelsServerStream() {
+        String name = "jena-grpc-small-batch-" + SERVER_SEQ.incrementAndGet();
+        DatasetGraph dsg = SSE.parseDatasetGraph(
+            "(dataset (graph (:s1 :p1 :o1) (:s2 :p1 :o2) (:s3 :p1 :o3) (:s4 :p1 :o4)))");
+        try ( RDFGrpcServer smallBatchServer = RDFGrpcServer.newBuilder()
+                  .inProcessName(name)
+                  .dataset(dsg)
+                  .batchSize(1)
+                  .build()
+                  .start();
+              RDFLinkGrpc link = RDFLinkGrpc.newBuilder().inProcessName(name).batchSize(1).build() ) {
+            try ( Stream<Quad> stream = link.findStream(Node.ANY, Node.ANY, Node.ANY, Node.ANY) ) {
+                assertTrue(stream.findFirst().isPresent());
+            }
+            try ( Stream<Quad> fullStream = link.findStream(Node.ANY, Node.ANY, Node.ANY, Node.ANY) ) {
+                assertEquals(4, fullStream.count());
+            }
         }
     }
 

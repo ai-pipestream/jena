@@ -21,16 +21,15 @@
 
 package org.apache.jena.grpc;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.StringValue;
 
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -44,14 +43,18 @@ import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.atlas.json.JsonValue;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.grpc.wire.PB_RDFService.ExecuteQueryRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.ExecuteQueryResponse;
+import org.apache.jena.grpc.wire.PB_RDFService.QueryResultForm;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.riot.protobuf.ProtobufRDF;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple;
-import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_VarTuple;
 import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFBase;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
@@ -63,7 +66,7 @@ import org.apache.jena.sparql.util.Context;
 
 /**
  * {@link QueryExec} implementation executing SPARQL queries over a gRPC {@link Channel}
- * using {@code PB_RDF} wire messages.
+ * using the stream-first {@code ExecuteQuery} RPC.
  */
 public class QueryExecGrpc implements QueryExec {
 
@@ -129,23 +132,38 @@ public class QueryExecGrpc implements QueryExec {
     @Override
     public RowSet select() {
         try {
-            ClientCall<StringValue, RDFSelectMessage> call = newTrackedCall(RDFGrpcProtocol.QUERY_SELECT_METHOD);
-            Iterator<RDFSelectMessage> msgIter = ClientCalls.blockingServerStreamingCall(
-                call, StringValue.of(queryString));
+            ClientCall<ExecuteQueryRequest, ExecuteQueryResponse> call =
+                newTrackedCall(RDFGrpcProtocol.EXECUTE_QUERY_METHOD);
+            Iterator<ExecuteQueryResponse> msgIter = ClientCalls.blockingServerStreamingCall(
+                call, buildQueryRequest(QueryResultForm.QUERY_RESULT_FORM_SELECT));
             RDF_VarTuple header = RDF_VarTuple.getDefaultInstance();
+            Iterator<RDF_DataTuple> firstBatchIter = Collections.emptyIterator();
             if ( msgIter.hasNext() ) {
-                RDFSelectMessage first = msgIter.next();
-                if ( first.isHeader() ) {
-                    header = first.getHeader();
+                ExecuteQueryResponse first = msgIter.next();
+                if ( first.getResultCase() == ExecuteQueryResponse.ResultCase.SELECT_HEADER ) {
+                    header = first.getSelectHeader();
+                } else if ( first.getResultCase() == ExecuteQueryResponse.ResultCase.SELECT_ROWS ) {
+                    firstBatchIter = first.getSelectRows().getRowsList().iterator();
                 }
             }
+            Iterator<RDF_DataTuple> initialBatch = firstBatchIter;
             Iterator<RDF_DataTuple> rowIter = new Iterator<>() {
+                private Iterator<RDF_DataTuple> currentBatch = initialBatch;
+
                 @Override
                 public boolean hasNext() {
                     if ( closed )
                         return false;
                     try {
-                        return msgIter.hasNext();
+                        while ( !currentBatch.hasNext() ) {
+                            if ( !msgIter.hasNext() )
+                                return false;
+                            ExecuteQueryResponse nextMsg = msgIter.next();
+                            if ( nextMsg.getResultCase() == ExecuteQueryResponse.ResultCase.SELECT_ROWS ) {
+                                currentBatch = nextMsg.getSelectRows().getRowsList().iterator();
+                            }
+                        }
+                        return true;
                     } catch (StatusRuntimeException sre) {
                         if ( closed )
                             return false;
@@ -157,12 +175,7 @@ public class QueryExecGrpc implements QueryExec {
                 public RDF_DataTuple next() {
                     if ( !hasNext() )
                         throw new NoSuchElementException();
-                    try {
-                        RDFSelectMessage msg = msgIter.next();
-                        return msg.getRow();
-                    } catch (StatusRuntimeException sre) {
-                        throw RDFGrpcProtocol.fromStatusException(sre);
-                    }
+                    return currentBatch.next();
                 }
             };
             return ProtobufRDF.readRowSet(header, rowIter);
@@ -186,13 +199,59 @@ public class QueryExecGrpc implements QueryExec {
     /** {@inheritDoc} */
     @Override
     public Iterator<Triple> constructTriples() {
-        return construct().find();
+        return streamGraphTriples();
     }
 
     /** {@inheritDoc} */
     @Override
     public Iterator<Quad> constructQuads() {
-        return constructDataset().find();
+        try {
+            ClientCall<ExecuteQueryRequest, ExecuteQueryResponse> call =
+                newTrackedCall(RDFGrpcProtocol.EXECUTE_QUERY_METHOD);
+            Iterator<ExecuteQueryResponse> msgIter = ClientCalls.blockingServerStreamingCall(
+                call, buildQueryRequest(QueryResultForm.QUERY_RESULT_FORM_DATASET));
+            ArrayDeque<Quad> buffer = new ArrayDeque<>();
+            Consumer<RDF_Stream> sink = ProtobufRDF.batchConsumerToStreamRDF(new StreamRDFBase() {
+                @Override
+                public void triple(Triple triple) {
+                    buffer.addLast(Quad.create(Quad.defaultGraphIRI, triple));
+                }
+
+                @Override
+                public void quad(Quad quad) {
+                    buffer.addLast(quad);
+                }
+            });
+            return new Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    if ( closed )
+                        return false;
+                    try {
+                        while ( buffer.isEmpty() && msgIter.hasNext() ) {
+                            ExecuteQueryResponse resp = msgIter.next();
+                            if ( resp.getResultCase() == ExecuteQueryResponse.ResultCase.RDF_BATCH ) {
+                                sink.accept(resp.getRdfBatch());
+                            }
+                        }
+                        return !buffer.isEmpty();
+                    } catch (StatusRuntimeException sre) {
+                        if ( closed )
+                            return false;
+                        throw RDFGrpcProtocol.fromStatusException(sre);
+                    }
+                }
+
+                @Override
+                public Quad next() {
+                    if ( !hasNext() )
+                        throw new NoSuchElementException();
+                    return buffer.removeFirst();
+                }
+            };
+        } catch (StatusRuntimeException sre) {
+            throw RDFGrpcProtocol.fromStatusException(sre);
+        }
     }
 
     /** {@inheritDoc} */
@@ -205,14 +264,18 @@ public class QueryExecGrpc implements QueryExec {
     @Override
     public DatasetGraph constructDataset(DatasetGraph dataset) {
         try {
-            ClientCall<StringValue, RDF_StreamRow> call = newTrackedCall(RDFGrpcProtocol.QUERY_DATASET_METHOD);
-            Iterator<RDF_StreamRow> iter = ClientCalls.blockingServerStreamingCall(
-                call, StringValue.of(queryString));
+            ClientCall<ExecuteQueryRequest, ExecuteQueryResponse> call =
+                newTrackedCall(RDFGrpcProtocol.EXECUTE_QUERY_METHOD);
+            Iterator<ExecuteQueryResponse> iter = ClientCalls.blockingServerStreamingCall(
+                call, buildQueryRequest(QueryResultForm.QUERY_RESULT_FORM_DATASET));
             StreamRDF dest = StreamRDFLib.dataset(dataset);
-            Consumer<RDF_StreamRow> sink = ProtobufRDF.rowConsumerToStreamRDF(dest);
+            Consumer<RDF_Stream> sink = ProtobufRDF.batchConsumerToStreamRDF(dest);
             dest.start();
             while ( iter.hasNext() ) {
-                sink.accept(iter.next());
+                ExecuteQueryResponse resp = iter.next();
+                if ( resp.getResultCase() == ExecuteQueryResponse.ResultCase.RDF_BATCH ) {
+                    sink.accept(resp.getRdfBatch());
+                }
             }
             dest.finish();
             return dataset;
@@ -236,17 +299,21 @@ public class QueryExecGrpc implements QueryExec {
     /** {@inheritDoc} */
     @Override
     public Iterator<Triple> describeTriples() {
-        return describe().find();
+        return streamGraphTriples();
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean ask() {
         try {
-            ClientCall<StringValue, BoolValue> call = newTrackedCall(RDFGrpcProtocol.QUERY_ASK_METHOD);
-            BoolValue resp = ClientCalls.blockingUnaryCall(
-                call, StringValue.of(queryString));
-            return resp.getValue();
+            ClientCall<ExecuteQueryRequest, ExecuteQueryResponse> call =
+                newTrackedCall(RDFGrpcProtocol.EXECUTE_QUERY_METHOD);
+            Iterator<ExecuteQueryResponse> iter = ClientCalls.blockingServerStreamingCall(
+                call, buildQueryRequest(QueryResultForm.QUERY_RESULT_FORM_ASK));
+            if ( iter.hasNext() ) {
+                return iter.next().getAskResult();
+            }
+            return false;
         } catch (StatusRuntimeException sre) {
             throw RDFGrpcProtocol.fromStatusException(sre);
         }
@@ -256,10 +323,12 @@ public class QueryExecGrpc implements QueryExec {
     @Override
     public JsonArray execJson() {
         try {
-            ClientCall<StringValue, StringValue> call = newTrackedCall(RDFGrpcProtocol.QUERY_JSON_METHOD);
-            StringValue resp = ClientCalls.blockingUnaryCall(
-                call, StringValue.of(queryString));
-            JsonValue val = JSON.parseAny(resp.getValue());
+            ClientCall<ExecuteQueryRequest, ExecuteQueryResponse> call =
+                newTrackedCall(RDFGrpcProtocol.EXECUTE_QUERY_METHOD);
+            Iterator<ExecuteQueryResponse> iter = ClientCalls.blockingServerStreamingCall(
+                call, buildQueryRequest(QueryResultForm.QUERY_RESULT_FORM_JSON));
+            String jsonStr = iter.hasNext() ? iter.next().getJsonResult() : "[]";
+            JsonValue val = JSON.parseAny(jsonStr);
             return val.getAsArray();
         } catch (StatusRuntimeException sre) {
             throw RDFGrpcProtocol.fromStatusException(sre);
@@ -303,16 +372,77 @@ public class QueryExecGrpc implements QueryExec {
         return closed;
     }
 
+    private ExecuteQueryRequest buildQueryRequest(QueryResultForm form) {
+        return ExecuteQueryRequest.newBuilder()
+            .setQuery(queryString)
+            .setResultForm(form)
+            .build();
+    }
+
+    private Iterator<Triple> streamGraphTriples() {
+        try {
+            ClientCall<ExecuteQueryRequest, ExecuteQueryResponse> call =
+                newTrackedCall(RDFGrpcProtocol.EXECUTE_QUERY_METHOD);
+            Iterator<ExecuteQueryResponse> msgIter = ClientCalls.blockingServerStreamingCall(
+                call, buildQueryRequest(QueryResultForm.QUERY_RESULT_FORM_GRAPH));
+            ArrayDeque<Triple> buffer = new ArrayDeque<>();
+            Consumer<RDF_Stream> sink = ProtobufRDF.batchConsumerToStreamRDF(new StreamRDFBase() {
+                @Override
+                public void triple(Triple triple) {
+                    buffer.addLast(triple);
+                }
+
+                @Override
+                public void quad(Quad quad) {
+                    buffer.addLast(quad.asTriple());
+                }
+            });
+            return new Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    if ( closed )
+                        return false;
+                    try {
+                        while ( buffer.isEmpty() && msgIter.hasNext() ) {
+                            ExecuteQueryResponse resp = msgIter.next();
+                            if ( resp.getResultCase() == ExecuteQueryResponse.ResultCase.RDF_BATCH ) {
+                                sink.accept(resp.getRdfBatch());
+                            }
+                        }
+                        return !buffer.isEmpty();
+                    } catch (StatusRuntimeException sre) {
+                        if ( closed )
+                            return false;
+                        throw RDFGrpcProtocol.fromStatusException(sre);
+                    }
+                }
+
+                @Override
+                public Triple next() {
+                    if ( !hasNext() )
+                        throw new NoSuchElementException();
+                    return buffer.removeFirst();
+                }
+            };
+        } catch (StatusRuntimeException sre) {
+            throw RDFGrpcProtocol.fromStatusException(sre);
+        }
+    }
+
     private Graph executeGraphQuery(Graph target) {
         try {
-            ClientCall<StringValue, RDF_StreamRow> call = newTrackedCall(RDFGrpcProtocol.QUERY_GRAPH_METHOD);
-            Iterator<RDF_StreamRow> iter = ClientCalls.blockingServerStreamingCall(
-                call, StringValue.of(queryString));
+            ClientCall<ExecuteQueryRequest, ExecuteQueryResponse> call =
+                newTrackedCall(RDFGrpcProtocol.EXECUTE_QUERY_METHOD);
+            Iterator<ExecuteQueryResponse> iter = ClientCalls.blockingServerStreamingCall(
+                call, buildQueryRequest(QueryResultForm.QUERY_RESULT_FORM_GRAPH));
             StreamRDF dest = StreamRDFLib.graph(target);
-            Consumer<RDF_StreamRow> sink = ProtobufRDF.rowConsumerToStreamRDF(dest);
+            Consumer<RDF_Stream> sink = ProtobufRDF.batchConsumerToStreamRDF(dest);
             dest.start();
             while ( iter.hasNext() ) {
-                sink.accept(iter.next());
+                ExecuteQueryResponse resp = iter.next();
+                if ( resp.getResultCase() == ExecuteQueryResponse.ResultCase.RDF_BATCH ) {
+                    sink.accept(resp.getRdfBatch());
+                }
             }
             dest.finish();
             return target;

@@ -21,22 +21,22 @@
 
 package org.apache.jena.grpc;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
 
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -55,6 +55,17 @@ import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.grpc.wire.PB_RDFService.ApplyPatchRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.StreamRdfRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.StreamRdfResponse;
+import org.apache.jena.grpc.wire.PB_RDFService.SubscribePatchesRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.SubscribePatchesResponse;
+import org.apache.jena.grpc.wire.PB_RDFService.TransactionCommand;
+import org.apache.jena.grpc.wire.PB_RDFService.TransactionRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.TransactionResponse;
+import org.apache.jena.grpc.wire.PB_RDFService.WriteDisposition;
+import org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeader;
+import org.apache.jena.grpc.wire.PB_RDFService.WriteRdfRequest;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
@@ -70,7 +81,6 @@ import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Quad;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow;
-import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFBase;
 import org.apache.jena.riot.system.StreamRDFLib;
@@ -84,19 +94,18 @@ import org.apache.jena.sparql.core.Transactional.Promote;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecApp;
-import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.RowSet;
-import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.system.Txn;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 
 /**
- * Jetty-free gRPC implementation of {@link RDFLink} communicating over {@code PB_RDF}
- * Protobuf messages, supporting streaming quad pattern matching ({@link #findStream}),
- * streaming dataset/graph ingest, transactional {@link RDFPatch} application and
- * subscription, and SPARQL Query/Update.
+ * Jetty-free, stream-first gRPC implementation of {@link RDFLink} communicating over
+ * {@code PB_RDF} and {@code PB_RDFService} Protobuf messages, supporting lazy streaming
+ * quad pattern matching ({@link #findStream}), O(1)-memory streaming dataset/graph ingest,
+ * connection-bound bidirectional transactions, transactional {@link RDFPatch} application
+ * and subscription, and SPARQL Query/Update.
  */
 public class RDFLinkGrpc implements RDFLink {
 
@@ -105,6 +114,7 @@ public class RDFLinkGrpc implements RDFLink {
     private static final String ERR_PRODUCER_NULL = "producer must not be null";
     private static final String ERR_TARGET_NULL = "target must not be null";
     private static final String ERR_DEST_NULL = "dest must not be null";
+    private static final Object STREAM_EOF = new Object();
 
     private final Channel rawChannel;
     private final Channel interceptedChannel;
@@ -113,9 +123,7 @@ public class RDFLinkGrpc implements RDFLink {
     private final boolean parseCheckUpdates;
     private final boolean encodeValues;
     private final int batchSize;
-    private final ThreadLocal<String> currentTxnId = new ThreadLocal<>();
-    private final ThreadLocal<TxnType> currentTxnType = new ThreadLocal<>();
-    private final ThreadLocal<ReadWrite> currentTxnMode = new ThreadLocal<>();
+    private final ThreadLocal<ClientTxnSession> currentTxn = new ThreadLocal<>();
     private volatile boolean open = true;
 
     RDFLinkGrpc(
@@ -184,41 +192,81 @@ public class RDFLinkGrpc implements RDFLink {
     }
 
     /**
-     * Stream quads matching {@code (g, s, p, o)} from the remote dataset using {@code RDF_ANY}
+     * Lazily stream quads matching {@code (g, s, p, o)} from the remote dataset using {@code RDF_ANY}
      * wildcards for {@code null} or {@link Node#ANY} components.
      * <p>
-     * This convenience method collects matching quads from the streaming RPC into an in-memory list
-     * before returning the {@link Stream}. For non-buffering streaming consumption of large datasets,
-     * use {@link #findStream(Node, Node, Node, Node, StreamRDF)} or
-     * {@link #findStreamBatched(Node, Node, Node, Node, StreamRDF)}.
+     * The returned {@link Stream} pulls chunks from the server on demand without buffering the
+     * full result set in memory. Closing the returned {@link Stream} (for example via try-with-resources
+     * after {@link Stream#findFirst()} or {@link Stream#limit(long)}) cancels the underlying gRPC call.
      *
      * @param g graph node pattern, or {@code null} / {@link Node#ANY} for any graph
      * @param s subject node pattern, or {@code null} / {@link Node#ANY} for any subject
      * @param p predicate node pattern, or {@code null} / {@link Node#ANY} for any predicate
      * @param o object node pattern, or {@code null} / {@link Node#ANY} for any object
-     * @return a {@link Stream} of matching {@link Quad} instances
+     * @return a lazy {@link Stream} of matching {@link Quad} instances
      */
     public Stream<Quad> findStream(Node g, Node s, Node p, Node o) {
         checkOpen();
-        List<Quad> quads = new ArrayList<>();
-        findStream(g, s, p, o, new StreamRDFBase() {
+        RDF_Quad pattern = RDFGrpcProtocol.encodeQuadPattern(g, s, p, o);
+        StreamRdfRequest request = StreamRdfRequest.newBuilder().setQuadPattern(pattern).build();
+        ClientCall<StreamRdfRequest, StreamRdfResponse> call =
+            interceptedChannel.newCall(RDFGrpcProtocol.STREAM_RDF_METHOD, CallOptions.DEFAULT);
+        Iterator<StreamRdfResponse> responseIter = ClientCalls.blockingServerStreamingCall(call, request);
+        ArrayDeque<Quad> buffer = new ArrayDeque<>();
+        StreamRDF collector = new StreamRDFBase() {
             @Override
             public void triple(Triple triple) {
-                quads.add(Quad.create(Quad.defaultGraphIRI, triple));
+                buffer.addLast(Quad.create(Quad.defaultGraphIRI, triple));
             }
 
             @Override
             public void quad(Quad quad) {
-                quads.add(quad);
+                buffer.addLast(quad);
             }
-        });
-        return StreamSupport.stream(
-            Spliterators.spliterator(quads, Spliterator.ORDERED | Spliterator.NONNULL), false);
+        };
+        Consumer<RDF_StreamRow> decoder = ProtobufRDF.rowConsumerToStreamRDF(collector);
+        collector.start();
+
+        Iterator<Quad> quadIter = new Iterator<>() {
+            private boolean finished;
+
+            @Override
+            public boolean hasNext() {
+                try {
+                    while ( buffer.isEmpty() && !finished ) {
+                        if ( !responseIter.hasNext() ) {
+                            finished = true;
+                            collector.finish();
+                            return false;
+                        }
+                        StreamRdfResponse chunk = responseIter.next();
+                        for ( RDF_StreamRow row : chunk.getRowsList() ) {
+                            decoder.accept(row);
+                        }
+                    }
+                    return !buffer.isEmpty();
+                } catch (StatusRuntimeException sre) {
+                    throw RDFGrpcProtocol.fromStatusException(sre);
+                }
+            }
+
+            @Override
+            public Quad next() {
+                if ( !hasNext() ) {
+                    throw new NoSuchElementException();
+                }
+                return buffer.removeFirst();
+            }
+        };
+
+        Spliterator<Quad> spliterator =
+            Spliterators.spliteratorUnknownSize(quadIter, Spliterator.ORDERED | Spliterator.NONNULL);
+        return StreamSupport.stream(spliterator, false)
+            .onClose(() -> call.cancel("findStream closed by caller", null));
     }
 
     /**
-     * Stream quads matching {@code (g, s, p, o)} from the remote dataset into {@code dest}
-     * as individual {@link RDF_StreamRow} messages.
+     * Stream quads matching {@code (g, s, p, o)} from the remote dataset into {@code dest}.
      *
      * @param g graph node pattern, or {@code null} / {@link Node#ANY} for any graph
      * @param s subject node pattern, or {@code null} / {@link Node#ANY} for any subject
@@ -232,23 +280,12 @@ public class RDFLinkGrpc implements RDFLink {
             throw new IllegalArgumentException(ERR_DEST_NULL);
         checkOpen();
         RDF_Quad pattern = RDFGrpcProtocol.encodeQuadPattern(g, s, p, o);
-        try {
-            Iterator<RDF_StreamRow> iter = ClientCalls.blockingServerStreamingCall(
-                interceptedChannel, RDFGrpcProtocol.FIND_STREAM_METHOD, CallOptions.DEFAULT, pattern);
-            Consumer<RDF_StreamRow> sink = ProtobufRDF.rowConsumerToStreamRDF(dest);
-            dest.start();
-            while ( iter.hasNext() ) {
-                sink.accept(iter.next());
-            }
-            dest.finish();
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
-        }
+        streamRdfToSink(StreamRdfRequest.newBuilder().setQuadPattern(pattern).build(), dest);
     }
 
     /**
      * Stream quads matching {@code (g, s, p, o)} from the remote dataset into {@code dest}
-     * using batched {@link RDF_Stream} messages.
+     * using batched {@link StreamRdfResponse} messages.
      *
      * @param g graph node pattern, or {@code null} / {@link Node#ANY} for any graph
      * @param s subject node pattern, or {@code null} / {@link Node#ANY} for any subject
@@ -258,41 +295,18 @@ public class RDFLinkGrpc implements RDFLink {
      * @throws IllegalArgumentException Thrown if {@code dest} is {@code null}
      */
     public void findStreamBatched(Node g, Node s, Node p, Node o, StreamRDF dest) {
-        if ( dest == null )
-            throw new IllegalArgumentException(ERR_DEST_NULL);
-        checkOpen();
-        RDF_Quad pattern = RDFGrpcProtocol.encodeQuadPattern(g, s, p, o);
-        try {
-            Iterator<RDF_Stream> iter = ClientCalls.blockingServerStreamingCall(
-                interceptedChannel, RDFGrpcProtocol.FIND_STREAM_BATCHED_METHOD, CallOptions.DEFAULT, pattern);
-            Consumer<RDF_Stream> sink = ProtobufRDF.batchConsumerToStreamRDF(dest);
-            dest.start();
-            while ( iter.hasNext() ) {
-                sink.accept(iter.next());
-            }
-            dest.finish();
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
-        }
+        findStream(g, s, p, o, dest);
     }
 
     /**
      * Stream RDF triples and quads produced by {@code producer} into the remote dataset
-     * as {@link RDF_StreamRow} messages without buffering the dataset in memory.
+     * without buffering the dataset in memory.
      *
      * @param producer callback that writes to the provided {@link StreamRDF}
      * @throws IllegalArgumentException Thrown if {@code producer} is {@code null}
      */
     public void streamLoadDataset(Consumer<StreamRDF> producer) {
-        if ( producer == null )
-            throw new IllegalArgumentException(ERR_PRODUCER_NULL);
-        checkOpen();
-        executeClientStream(interceptedChannel, RDFGrpcProtocol.LOAD_DATASET_METHOD, requestObserver -> {
-            StreamRDF stream = ProtobufRDF.streamToRowConsumer(requestObserver::onNext, encodeValues);
-            stream.start();
-            producer.accept(stream);
-            stream.finish();
-        });
+        streamLoadDatasetBatched(producer, batchSize);
     }
 
     /**
@@ -309,17 +323,15 @@ public class RDFLinkGrpc implements RDFLink {
         if ( streamBatchSize <= 0 )
             throw new IllegalArgumentException("streamBatchSize must be positive: " + streamBatchSize);
         checkOpen();
-        executeClientStream(interceptedChannel, RDFGrpcProtocol.LOAD_DATASET_BATCHED_METHOD, requestObserver -> {
-            StreamRDF stream = ProtobufRDF.streamToBatchConsumer(
-                requestObserver::onNext, streamBatchSize, encodeValues);
-            stream.start();
-            producer.accept(stream);
-            stream.finish();
-        });
+        WriteRdfHeader header = WriteRdfHeader.newBuilder()
+            .setEntireDataset(true)
+            .setDisposition(WriteDisposition.WRITE_DISPOSITION_APPEND)
+            .build();
+        writeRdfStream(header, streamBatchSize, producer);
     }
 
     /**
-     * Apply an {@link RDFPatch} to the remote dataset by streaming {@link RDF_Patch_Row} messages.
+     * Apply an {@link RDFPatch} to the remote dataset by streaming {@link ApplyPatchRequest} chunks.
      *
      * @param patch the patch to apply
      * @throws IllegalArgumentException Thrown if {@code patch} is {@code null}
@@ -332,7 +344,7 @@ public class RDFLinkGrpc implements RDFLink {
 
     /**
      * Apply changes emitted to an {@link RDFChanges} sink to the remote dataset by streaming
-     * {@link RDF_Patch_Row} messages.
+     * bounded {@link ApplyPatchRequest} chunks in O(1) memory.
      *
      * @param producer callback that emits patch changes
      * @throws IllegalArgumentException Thrown if {@code producer} is {@code null}
@@ -342,18 +354,29 @@ public class RDFLinkGrpc implements RDFLink {
             throw new IllegalArgumentException(ERR_PRODUCER_NULL);
         checkOpen();
         executeClientStream(interceptedChannel, RDFGrpcProtocol.APPLY_PATCH_METHOD, requestObserver -> {
-            RDFChanges writer = RDFPatchOps.protobufWriter(requestObserver::onNext);
+            List<RDF_Patch_Row> rowBuffer = new ArrayList<>(batchSize);
+            RDFChanges writer = RDFPatchOps.protobufWriter(row -> {
+                rowBuffer.add(row);
+                if ( rowBuffer.size() >= batchSize ) {
+                    requestObserver.onNext(ApplyPatchRequest.newBuilder().addAllRows(rowBuffer).build());
+                    rowBuffer.clear();
+                }
+            });
             writer.start();
             try {
                 producer.accept(writer);
             } finally {
                 writer.finish();
+                if ( !rowBuffer.isEmpty() ) {
+                    requestObserver.onNext(ApplyPatchRequest.newBuilder().addAllRows(rowBuffer).build());
+                    rowBuffer.clear();
+                }
             }
         });
     }
 
     /**
-     * Apply an {@link RDFPatch} to the remote dataset as a single batched {@link RDF_Patch} message.
+     * Apply an {@link RDFPatch} to the remote dataset as a single batched {@link ApplyPatchRequest} frame.
      *
      * @param patch the patch to apply
      * @throws IllegalArgumentException Thrown if {@code patch} is {@code null}
@@ -363,12 +386,8 @@ public class RDFLinkGrpc implements RDFLink {
             throw new IllegalArgumentException(ERR_PATCH_NULL);
         checkOpen();
         RDF_Patch batch = RDFChangesWriterProtobuf.toProtobuf(patch);
-        try {
-            ClientCalls.blockingUnaryCall(
-                interceptedChannel, RDFGrpcProtocol.APPLY_PATCH_BATCH_METHOD, CallOptions.DEFAULT, batch);
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
-        }
+        executeClientStream(interceptedChannel, RDFGrpcProtocol.APPLY_PATCH_METHOD, requestObserver ->
+            requestObserver.onNext(ApplyPatchRequest.newBuilder().addAllRows(batch.getRowList()).build()));
     }
 
     /**
@@ -414,41 +433,44 @@ public class RDFLinkGrpc implements RDFLink {
         if ( target == null )
             throw new IllegalArgumentException(ERR_TARGET_NULL);
         checkOpen();
-        ClientCall<Empty, RDF_Patch_Row> call =
+        ClientCall<SubscribePatchesRequest, SubscribePatchesResponse> call =
             interceptedChannel.newCall(RDFGrpcProtocol.SUBSCRIBE_PATCHES_METHOD, CallOptions.DEFAULT);
         Consumer<RDF_Patch_Row> sink = RDFPatchOps.protobufChangesReceiver(target);
         CountDownLatch readyLatch = new CountDownLatch(1);
         AtomicReference<Throwable> errorRef = new AtomicReference<>();
-        ClientCalls.asyncServerStreamingCall(call, Empty.getDefaultInstance(), new StreamObserver<>() {
-            @Override
-            public void onNext(RDF_Patch_Row value) {
-                if ( value.getRowCase() == RDF_Patch_Row.RowCase.ROW_NOT_SET ) {
+        ClientCalls.asyncServerStreamingCall(
+            call,
+            SubscribePatchesRequest.getDefaultInstance(),
+            new StreamObserver<>() {
+                @Override
+                public void onNext(SubscribePatchesResponse value) {
                     readyLatch.countDown();
-                    return;
+                    if ( value.hasPatch() ) {
+                        for ( RDF_Patch_Row row : value.getPatch().getRowList() ) {
+                            sink.accept(row);
+                        }
+                    }
                 }
-                readyLatch.countDown();
-                sink.accept(value);
-            }
 
-            @Override
-            public void onError(Throwable t) {
-                readyLatch.countDown();
-                if ( t instanceof StatusRuntimeException sre
-                        && sre.getStatus().getCode() == Status.Code.CANCELLED ) {
-                    return;
+                @Override
+                public void onError(Throwable t) {
+                    readyLatch.countDown();
+                    if ( t instanceof StatusRuntimeException sre
+                            && sre.getStatus().getCode() == Status.Code.CANCELLED ) {
+                        return;
+                    }
+                    errorRef.set(t);
+                    if ( errorHandler != null ) {
+                        errorHandler.accept(t);
+                    }
                 }
-                errorRef.set(t);
-                if ( errorHandler != null ) {
-                    errorHandler.accept(t);
-                }
-            }
 
-            @Override
-            public void onCompleted() {
-                readyLatch.countDown();
-                target.finish();
-            }
-        });
+                @Override
+                public void onCompleted() {
+                    readyLatch.countDown();
+                    target.finish();
+                }
+            });
         try {
             readyLatch.await(5, TimeUnit.SECONDS);
         } catch (InterruptedException ie) {
@@ -578,22 +600,12 @@ public class RDFLinkGrpc implements RDFLink {
     @Override
     public Graph get(Node graphName) {
         checkOpen();
-        RDF_Term term = RDFGrpcProtocol.encodeGraphNode(graphName);
-        try {
-            Iterator<RDF_StreamRow> iter = ClientCalls.blockingServerStreamingCall(
-                interceptedChannel, RDFGrpcProtocol.GET_GRAPH_METHOD, CallOptions.DEFAULT, term);
-            Graph graph = GraphFactory.createDefaultGraph();
-            StreamRDF dest = StreamRDFLib.graph(graph);
-            Consumer<RDF_StreamRow> sink = ProtobufRDF.rowConsumerToStreamRDF(dest);
-            dest.start();
-            while ( iter.hasNext() ) {
-                sink.accept(iter.next());
-            }
-            dest.finish();
-            return graph;
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
-        }
+        StreamRdfRequest request = StreamRdfRequest.newBuilder()
+            .setGraph(RDFGrpcProtocol.encodeGraphTarget(graphName))
+            .build();
+        Graph graph = GraphFactory.createDefaultGraph();
+        streamRdfToSink(request, StreamRDFLib.graph(graph));
+        return graph;
     }
 
     /** {@inheritDoc} */
@@ -622,13 +634,11 @@ public class RDFLinkGrpc implements RDFLink {
     public void load(Node graphName, Graph graph) {
         Objects.requireNonNull(graph);
         checkOpen();
-        Channel graphChannel = withGraphHeader(graphName);
-        executeClientStream(graphChannel, RDFGrpcProtocol.LOAD_GRAPH_METHOD, requestObserver -> {
-            StreamRDF encoder = ProtobufRDF.streamToRowConsumer(requestObserver::onNext, encodeValues);
-            encoder.start();
-            StreamRDFOps.sendGraphToStream(graph, encoder);
-            encoder.finish();
-        });
+        WriteRdfHeader header = WriteRdfHeader.newBuilder()
+            .setGraph(RDFGrpcProtocol.encodeGraphTarget(graphName))
+            .setDisposition(WriteDisposition.WRITE_DISPOSITION_APPEND)
+            .build();
+        writeRdfStream(header, batchSize, encoder -> StreamRDFOps.sendGraphToStream(graph, encoder));
     }
 
     /** {@inheritDoc} */
@@ -657,13 +667,11 @@ public class RDFLinkGrpc implements RDFLink {
     public void put(Node graphName, Graph graph) {
         Objects.requireNonNull(graph);
         checkOpen();
-        Channel graphChannel = withGraphHeader(graphName);
-        executeClientStream(graphChannel, RDFGrpcProtocol.PUT_GRAPH_METHOD, requestObserver -> {
-            StreamRDF encoder = ProtobufRDF.streamToRowConsumer(requestObserver::onNext, encodeValues);
-            encoder.start();
-            StreamRDFOps.sendGraphToStream(graph, encoder);
-            encoder.finish();
-        });
+        WriteRdfHeader header = WriteRdfHeader.newBuilder()
+            .setGraph(RDFGrpcProtocol.encodeGraphTarget(graphName))
+            .setDisposition(WriteDisposition.WRITE_DISPOSITION_REPLACE)
+            .build();
+        writeRdfStream(header, batchSize, encoder -> StreamRDFOps.sendGraphToStream(graph, encoder));
     }
 
     /** {@inheritDoc} */
@@ -676,13 +684,11 @@ public class RDFLinkGrpc implements RDFLink {
     @Override
     public void delete(Node graphName) {
         checkOpen();
-        RDF_Term term = RDFGrpcProtocol.encodeGraphNode(graphName);
-        try {
-            ClientCalls.blockingUnaryCall(
-                interceptedChannel, RDFGrpcProtocol.DELETE_GRAPH_METHOD, CallOptions.DEFAULT, term);
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
-        }
+        WriteRdfHeader header = WriteRdfHeader.newBuilder()
+            .setGraph(RDFGrpcProtocol.encodeGraphTarget(graphName))
+            .setDisposition(WriteDisposition.WRITE_DISPOSITION_CLEAR)
+            .build();
+        writeRdfStream(header, batchSize, null);
     }
 
     /** {@inheritDoc} */
@@ -695,21 +701,12 @@ public class RDFLinkGrpc implements RDFLink {
     @Override
     public DatasetGraph getDataset() {
         checkOpen();
-        try {
-            Iterator<RDF_StreamRow> iter = ClientCalls.blockingServerStreamingCall(
-                interceptedChannel, RDFGrpcProtocol.GET_DATASET_METHOD, CallOptions.DEFAULT, Empty.getDefaultInstance());
-            DatasetGraph dsg = DatasetGraphFactory.createTxnMem();
-            StreamRDF dest = StreamRDFLib.dataset(dsg);
-            Consumer<RDF_StreamRow> sink = ProtobufRDF.rowConsumerToStreamRDF(dest);
-            dest.start();
-            while ( iter.hasNext() ) {
-                sink.accept(iter.next());
-            }
-            dest.finish();
-            return dsg;
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
-        }
+        StreamRdfRequest request = StreamRdfRequest.newBuilder()
+            .setEntireDataset(true)
+            .build();
+        DatasetGraph dsg = DatasetGraphFactory.createTxnMem();
+        streamRdfToSink(request, StreamRDFLib.dataset(dsg));
+        return dsg;
     }
 
     /** {@inheritDoc} */
@@ -733,10 +730,11 @@ public class RDFLinkGrpc implements RDFLink {
     public void putDataset(String file) {
         Objects.requireNonNull(file);
         checkOpen();
-        executeClientStream(interceptedChannel, RDFGrpcProtocol.PUT_DATASET_METHOD, requestObserver -> {
-            StreamRDF encoder = ProtobufRDF.streamToRowConsumer(requestObserver::onNext, encodeValues);
-            RDFDataMgr.parse(encoder, file);
-        });
+        WriteRdfHeader header = WriteRdfHeader.newBuilder()
+            .setEntireDataset(true)
+            .setDisposition(WriteDisposition.WRITE_DISPOSITION_REPLACE)
+            .build();
+        writeRdfStream(header, batchSize, encoder -> RDFDataMgr.parse(encoder, file));
     }
 
     /** {@inheritDoc} */
@@ -744,24 +742,22 @@ public class RDFLinkGrpc implements RDFLink {
     public void putDataset(DatasetGraph dataset) {
         Objects.requireNonNull(dataset);
         checkOpen();
-        executeClientStream(interceptedChannel, RDFGrpcProtocol.PUT_DATASET_METHOD, requestObserver -> {
-            StreamRDF encoder = ProtobufRDF.streamToRowConsumer(requestObserver::onNext, encodeValues);
-            encoder.start();
-            StreamRDFOps.sendDatasetToStream(dataset, encoder);
-            encoder.finish();
-        });
+        WriteRdfHeader header = WriteRdfHeader.newBuilder()
+            .setEntireDataset(true)
+            .setDisposition(WriteDisposition.WRITE_DISPOSITION_REPLACE)
+            .build();
+        writeRdfStream(header, batchSize, encoder -> StreamRDFOps.sendDatasetToStream(dataset, encoder));
     }
 
     /** {@inheritDoc} */
     @Override
     public void clearDataset() {
         checkOpen();
-        try {
-            ClientCalls.blockingUnaryCall(
-                interceptedChannel, RDFGrpcProtocol.CLEAR_DATASET_METHOD, CallOptions.DEFAULT, Empty.getDefaultInstance());
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
-        }
+        WriteRdfHeader header = WriteRdfHeader.newBuilder()
+            .setEntireDataset(true)
+            .setDisposition(WriteDisposition.WRITE_DISPOSITION_CLEAR)
+            .build();
+        writeRdfStream(header, batchSize, null);
     }
 
     /** {@inheritDoc} */
@@ -778,15 +774,9 @@ public class RDFLinkGrpc implements RDFLink {
         if ( isInTransaction() ) {
             throw new JenaTransactionException("Already in a transaction");
         }
-        try {
-            StringValue resp = ClientCalls.blockingUnaryCall(
-                rawChannel, RDFGrpcProtocol.BEGIN_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnType.name()));
-            currentTxnId.set(resp.getValue());
-            currentTxnType.set(txnType);
-            currentTxnMode.set(TxnType.initial(txnType));
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
-        }
+        ClientTxnSession session = new ClientTxnSession(rawChannel, txnType);
+        session.begin();
+        currentTxn.set(session);
     }
 
     /** {@inheritDoc} */
@@ -799,51 +789,43 @@ public class RDFLinkGrpc implements RDFLink {
     @Override
     public boolean promote(Promote promote) {
         checkOpen();
-        String txnId = currentTxnId.get();
-        if ( txnId == null ) {
+        ClientTxnSession session = currentTxn.get();
+        if ( session == null ) {
             throw new JenaTransactionException("Not in a transaction");
         }
-        if ( currentTxnMode.get() == ReadWrite.WRITE ) {
+        if ( session.txnMode == ReadWrite.WRITE ) {
             return true;
         }
-        TxnType txnType = currentTxnType.get();
-        if ( txnType == TxnType.READ ) {
+        if ( session.txnType == TxnType.READ ) {
             return false;
         }
         Promote mode = (promote != null) ? promote : Promote.ISOLATED;
-        try {
-            BoolValue resp = ClientCalls.blockingUnaryCall(
-                rawChannel,
-                RDFGrpcProtocol.PROMOTE_TXN_METHOD,
-                CallOptions.DEFAULT,
-                StringValue.of(txnId + ":" + mode.name()));
-            if ( resp.getValue() ) {
-                currentTxnMode.set(ReadWrite.WRITE);
-                return true;
-            }
-            return false;
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
+        TransactionResponse resp = session.sendCommand(TransactionRequest.newBuilder()
+            .setCommand(TransactionCommand.TRANSACTION_COMMAND_PROMOTE)
+            .setPromoteMode(RDFGrpcProtocol.encodePromoteMode(mode))
+            .build());
+        if ( resp.getPromoted() ) {
+            session.txnMode = ReadWrite.WRITE;
+            return true;
         }
+        return false;
     }
 
     /** {@inheritDoc} */
     @Override
     public void commit() {
         checkOpen();
-        String txnId = currentTxnId.get();
-        if ( txnId == null ) {
+        ClientTxnSession session = currentTxn.get();
+        if ( session == null ) {
             throw new JenaTransactionException("Not in a transaction");
         }
         try {
-            ClientCalls.blockingUnaryCall(
-                rawChannel, RDFGrpcProtocol.COMMIT_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
+            session.sendCommand(TransactionRequest.newBuilder()
+                .setCommand(TransactionCommand.TRANSACTION_COMMAND_COMMIT)
+                .build());
         } finally {
-            // Always release the server session and local state, even if the commit call failed.
-            clearLocalTxnState();
-            endRemoteTxn(txnId);
+            currentTxn.remove();
+            session.completeClientStream();
         }
     }
 
@@ -851,67 +833,63 @@ public class RDFLinkGrpc implements RDFLink {
     @Override
     public void abort() {
         checkOpen();
-        String txnId = currentTxnId.get();
-        if ( txnId == null ) {
+        ClientTxnSession session = currentTxn.get();
+        if ( session == null ) {
             throw new JenaTransactionException("Not in a transaction");
         }
         try {
-            ClientCalls.blockingUnaryCall(
-                rawChannel, RDFGrpcProtocol.ABORT_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
-        } catch (StatusRuntimeException sre) {
-            throw RDFGrpcProtocol.fromStatusException(sre);
+            session.sendCommand(TransactionRequest.newBuilder()
+                .setCommand(TransactionCommand.TRANSACTION_COMMAND_ABORT)
+                .build());
         } finally {
-            // Always release the server session and local state, even if the abort call failed.
-            clearLocalTxnState();
-            endRemoteTxn(txnId);
+            currentTxn.remove();
+            session.completeClientStream();
         }
-    }
-
-    private void endRemoteTxn(String txnId) {
-        try {
-            ClientCalls.blockingUnaryCall(
-                rawChannel, RDFGrpcProtocol.END_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
-        } catch (StatusRuntimeException ignored) {
-            // Best effort: the server also ends idle transactions after a timeout
-        }
-    }
-
-    private void clearLocalTxnState() {
-        currentTxnId.remove();
-        currentTxnType.remove();
-        currentTxnMode.remove();
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean isInTransaction() {
-        return currentTxnId.get() != null;
+        return currentTxn.get() != null;
     }
 
     /** {@inheritDoc} */
     @Override
     public void end() {
-        String txnId = currentTxnId.get();
-        ReadWrite mode = currentTxnMode.get();
-        clearLocalTxnState();
-        if ( txnId != null ) {
-            endRemoteTxn(txnId);
+        ClientTxnSession session = currentTxn.get();
+        currentTxn.remove();
+        if ( session != null ) {
+            ReadWrite mode = session.txnMode;
+            session.endAndClose();
             if ( mode == ReadWrite.WRITE ) {
                 throw new JenaTransactionException("Write transaction - no commit or abort before end()");
             }
         }
     }
 
+    /**
+     * Package-private helper for testing abrupt client stream cancellation during an active transaction.
+     */
+    void cancelTransactionStreamAbruptly() {
+        ClientTxnSession session = currentTxn.get();
+        currentTxn.remove();
+        if ( session != null ) {
+            session.cancelAbruptly();
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public ReadWrite transactionMode() {
-        return currentTxnMode.get();
+        ClientTxnSession session = currentTxn.get();
+        return session != null ? session.txnMode : null;
     }
 
     /** {@inheritDoc} */
     @Override
     public TxnType transactionType() {
-        return currentTxnType.get();
+        ClientTxnSession session = currentTxn.get();
+        return session != null ? session.txnType : null;
     }
 
     /** {@inheritDoc} */
@@ -926,15 +904,10 @@ public class RDFLinkGrpc implements RDFLink {
         if ( !open )
             return;
         open = false;
-        String txnId = currentTxnId.get();
-        clearLocalTxnState();
-        if ( txnId != null ) {
-            try {
-                ClientCalls.blockingUnaryCall(
-                    rawChannel, RDFGrpcProtocol.END_TXN_METHOD, CallOptions.DEFAULT, StringValue.of(txnId));
-            } catch (RuntimeException ignored) {
-                // Ignore during close
-            }
+        ClientTxnSession session = currentTxn.get();
+        currentTxn.remove();
+        if ( session != null ) {
+            session.endAndClose();
         }
         if ( ownChannel && rawChannel instanceof ManagedChannel mc ) {
             mc.shutdown();
@@ -954,6 +927,39 @@ public class RDFLinkGrpc implements RDFLink {
             throw new ARQException(ERR_CLOSED);
     }
 
+    private void streamRdfToSink(StreamRdfRequest request, StreamRDF dest) {
+        try {
+            Iterator<StreamRdfResponse> iter = ClientCalls.blockingServerStreamingCall(
+                interceptedChannel, RDFGrpcProtocol.STREAM_RDF_METHOD, CallOptions.DEFAULT, request);
+            Consumer<RDF_StreamRow> sink = ProtobufRDF.rowConsumerToStreamRDF(dest);
+            dest.start();
+            while ( iter.hasNext() ) {
+                StreamRdfResponse resp = iter.next();
+                for ( RDF_StreamRow row : resp.getRowsList() ) {
+                    sink.accept(row);
+                }
+            }
+            dest.finish();
+        } catch (StatusRuntimeException sre) {
+            throw RDFGrpcProtocol.fromStatusException(sre);
+        }
+    }
+
+    private void writeRdfStream(WriteRdfHeader header, int writeBatchSize, Consumer<StreamRDF> producer) {
+        executeClientStream(interceptedChannel, RDFGrpcProtocol.WRITE_RDF_METHOD, requestObserver -> {
+            requestObserver.onNext(WriteRdfRequest.newBuilder().setHeader(header).build());
+            if ( producer != null ) {
+                StreamRDF encoder = ProtobufRDF.streamToBatchConsumer(
+                    batch -> requestObserver.onNext(WriteRdfRequest.newBuilder().setBatch(batch).build()),
+                    writeBatchSize,
+                    encodeValues);
+                encoder.start();
+                producer.accept(encoder);
+                encoder.finish();
+            }
+        });
+    }
+
     private ClientInterceptor txnHeaderInterceptor() {
         return new ClientInterceptor() {
             @Override
@@ -964,9 +970,9 @@ public class RDFLinkGrpc implements RDFLink {
                 return new SimpleForwardingClientCall<>(next.newCall(method, callOptions)) {
                     @Override
                     public void start(Listener<RespT> responseListener, Metadata headers) {
-                        String txnId = currentTxnId.get();
-                        if ( txnId != null ) {
-                            headers.put(RDFGrpcProtocol.META_TXN_ID, txnId);
+                        ClientTxnSession session = currentTxn.get();
+                        if ( session != null && session.txnId != null ) {
+                            headers.put(RDFGrpcProtocol.META_TXN_ID, session.txnId);
                         }
                         super.start(responseListener, headers);
                     }
@@ -975,37 +981,16 @@ public class RDFLinkGrpc implements RDFLink {
         };
     }
 
-    private Channel withGraphHeader(Node graphName) {
-        RDF_Term term = RDFGrpcProtocol.encodeGraphNode(graphName);
-        byte[] termBytes = term.toByteArray();
-        ClientInterceptor graphInterceptor = new ClientInterceptor() {
-            @Override
-            public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(
-                    MethodDescriptor<ReqT, RespT> method,
-                    CallOptions callOptions,
-                    Channel next) {
-                return new SimpleForwardingClientCall<>(next.newCall(method, callOptions)) {
-                    @Override
-                    public void start(Listener<RespT> responseListener, Metadata headers) {
-                        headers.put(RDFGrpcProtocol.META_GRAPH_TERM_BIN, termBytes);
-                        super.start(responseListener, headers);
-                    }
-                };
-            }
-        };
-        return ClientInterceptors.intercept(interceptedChannel, graphInterceptor);
-    }
-
-    private <ReqT> void executeClientStream(
+    private <ReqT, RespT> void executeClientStream(
             Channel targetChannel,
-            MethodDescriptor<ReqT, Empty> method,
+            MethodDescriptor<ReqT, RespT> method,
             Consumer<StreamObserver<ReqT>> sender) {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Throwable> errorRef = new AtomicReference<>();
-        ClientCall<ReqT, Empty> call = targetChannel.newCall(method, CallOptions.DEFAULT);
+        ClientCall<ReqT, RespT> call = targetChannel.newCall(method, CallOptions.DEFAULT);
         StreamObserver<ReqT> requestObserver = ClientCalls.asyncClientStreamingCall(call, new StreamObserver<>() {
             @Override
-            public void onNext(Empty value) {}
+            public void onNext(RespT value) {}
 
             @Override
             public void onError(Throwable t) {
@@ -1035,6 +1020,117 @@ public class RDFLinkGrpc implements RDFLink {
             if ( err instanceof StatusRuntimeException sre )
                 throw RDFGrpcProtocol.fromStatusException(sre);
             throw new ARQException(err.getMessage(), err);
+        }
+    }
+
+    /**
+     * Client-side bidirectional transaction stream session. Binds the transaction lifecycle
+     * to a single HTTP/2 stream so server-side write locks are released immediately if the
+     * stream closes or is cancelled.
+     */
+    private static final class ClientTxnSession {
+        private final ClientCall<TransactionRequest, TransactionResponse> call;
+        private final StreamObserver<TransactionRequest> requestObserver;
+        private final BlockingQueue<Object> responses = new LinkedBlockingQueue<>();
+        private final TxnType txnType;
+        private ReadWrite txnMode;
+        private String txnId;
+        private volatile boolean streamTerminated;
+        private boolean closed;
+
+        ClientTxnSession(Channel channel, TxnType txnType) {
+            this.txnType = txnType;
+            this.txnMode = TxnType.initial(txnType);
+            this.call = channel.newCall(RDFGrpcProtocol.TRANSACTION_METHOD, CallOptions.DEFAULT);
+            this.requestObserver = ClientCalls.asyncBidiStreamingCall(call, new StreamObserver<>() {
+                @Override
+                public void onNext(TransactionResponse value) {
+                    responses.offer(value);
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    streamTerminated = true;
+                    responses.offer(t);
+                }
+
+                @Override
+                public void onCompleted() {
+                    streamTerminated = true;
+                    responses.offer(STREAM_EOF);
+                }
+            });
+        }
+
+        void begin() {
+            try {
+                TransactionResponse resp = sendCommand(TransactionRequest.newBuilder()
+                    .setCommand(TransactionCommand.TRANSACTION_COMMAND_BEGIN)
+                    .setTxnType(RDFGrpcProtocol.encodeTxnType(txnType))
+                    .build());
+                this.txnId = resp.getTxnId();
+            } catch (RuntimeException ex) {
+                cancelAbruptly();
+                throw ex;
+            }
+        }
+
+        TransactionResponse sendCommand(TransactionRequest request) {
+            if ( streamTerminated ) {
+                throw new JenaTransactionException("Transaction stream is already closed");
+            }
+            requestObserver.onNext(request);
+            try {
+                Object event = responses.poll(30, TimeUnit.SECONDS);
+                if ( event instanceof TransactionResponse resp ) {
+                    return resp;
+                }
+                if ( event instanceof StatusRuntimeException sre ) {
+                    throw RDFGrpcProtocol.fromStatusException(sre);
+                }
+                if ( event instanceof Throwable t ) {
+                    throw new JenaTransactionException(t.getMessage(), t);
+                }
+                throw new JenaTransactionException("Transaction stream closed before response arrived");
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                cancelAbruptly();
+                throw new JenaTransactionException("Interrupted waiting for transaction response", ie);
+            }
+        }
+
+        void completeClientStream() {
+            if ( closed )
+                return;
+            closed = true;
+            try {
+                requestObserver.onCompleted();
+            } catch (RuntimeException ignored) {
+                call.cancel("Closing transaction stream", null);
+            }
+        }
+
+        void endAndClose() {
+            if ( closed )
+                return;
+            closed = true;
+            try {
+                if ( !streamTerminated ) {
+                    sendCommand(TransactionRequest.newBuilder()
+                        .setCommand(TransactionCommand.TRANSACTION_COMMAND_END)
+                        .build());
+                }
+                requestObserver.onCompleted();
+            } catch (RuntimeException ignored) {
+                call.cancel("Closing transaction stream", null);
+            }
+        }
+
+        void cancelAbruptly() {
+            if ( closed )
+                return;
+            closed = true;
+            call.cancel("Abrupt transaction stream cancellation", null);
         }
     }
 }

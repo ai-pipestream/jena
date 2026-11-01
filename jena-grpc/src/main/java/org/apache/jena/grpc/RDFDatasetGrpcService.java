@@ -37,11 +37,8 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
 
 import io.grpc.BindableService;
 import io.grpc.Context;
@@ -60,6 +57,26 @@ import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.grpc.wire.PB_RDFService.ApplyPatchRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.ApplyPatchResponse;
+import org.apache.jena.grpc.wire.PB_RDFService.ExecuteQueryRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.ExecuteQueryResponse;
+import org.apache.jena.grpc.wire.PB_RDFService.ExecuteUpdateRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.ExecuteUpdateResponse;
+import org.apache.jena.grpc.wire.PB_RDFService.QueryResultForm;
+import org.apache.jena.grpc.wire.PB_RDFService.SelectRowBatch;
+import org.apache.jena.grpc.wire.PB_RDFService.StreamRdfRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.StreamRdfResponse;
+import org.apache.jena.grpc.wire.PB_RDFService.SubscribePatchesRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.SubscribePatchesResponse;
+import org.apache.jena.grpc.wire.PB_RDFService.TransactionCommand;
+import org.apache.jena.grpc.wire.PB_RDFService.TransactionRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.TransactionResponse;
+import org.apache.jena.grpc.wire.PB_RDFService.WriteDisposition;
+import org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeader;
+import org.apache.jena.grpc.wire.PB_RDFService.WriteRdfRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.WriteRdfResponse;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ReadWrite;
@@ -70,15 +87,16 @@ import org.apache.jena.rdfpatch.RDFPatchOps;
 import org.apache.jena.rdfpatch.changes.RDFChangesApply;
 import org.apache.jena.riot.protobuf.ProtobufConvert;
 import org.apache.jena.riot.protobuf.ProtobufRDF;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Quad;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow;
-import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.riot.system.StreamRDFOps;
+import org.apache.jena.riot.system.StreamRDFWrapper;
 import org.apache.jena.sparql.JenaTransactionException;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
@@ -91,9 +109,8 @@ import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
 
 /**
- * gRPC {@link BindableService} exposing a Jena {@link DatasetGraph} over {@code PB_RDF}
- * streaming messages, SPARQL Query/Update, and {@link RDFPatch} replication without
- * Jetty or Servlet dependencies.
+ * Stream-first gRPC {@link BindableService} exposing a Jena {@link DatasetGraph} over
+ * {@code PB_RDF} and {@code PB_RDFService} messages without Jetty or Servlet dependencies.
  */
 public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
 
@@ -127,7 +144,7 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
      *
      * @param dsg the backing {@link DatasetGraph}
      * @param encodeValues {@code true} to encode numeric literals by value in {@code PB_RDF} terms
-     * @param batchSize number of rows per {@link RDF_Stream} batch
+     * @param batchSize number of rows per streamed batch message
      * @throws IllegalArgumentException Thrown if {@code dsg} is {@code null} or {@code batchSize <= 0}
      */
     public RDFDatasetGrpcService(DatasetGraph dsg, boolean encodeValues, int batchSize) {
@@ -137,13 +154,10 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     /**
      * Create a gRPC service backed by {@code dsg} with configurable value encoding, batch size,
      * and remote transaction idle timeout.
-     * <p>
-     * A remote transaction that has had no request for longer than {@code txnIdleTimeout} is aborted
-     * and ended by the server, so a client that disappears cannot hold the dataset's writer lock forever.
      *
      * @param dsg the backing {@link DatasetGraph}
      * @param encodeValues {@code true} to encode numeric literals by value in {@code PB_RDF} terms
-     * @param batchSize number of rows per {@link RDF_Stream} batch
+     * @param batchSize number of rows per streamed batch message
      * @param txnIdleTimeout maximum idle time of a remote transaction
      * @throws IllegalArgumentException Thrown if {@code dsg} or {@code txnIdleTimeout} is {@code null},
      *     {@code batchSize <= 0}, or {@code txnIdleTimeout} is not positive
@@ -181,62 +195,26 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     @Override
     public ServerServiceDefinition bindService() {
         ServerServiceDefinition raw = ServerServiceDefinition.builder(RDFGrpcProtocol.SERVICE_NAME)
-            .addMethod(RDFGrpcProtocol.FIND_STREAM_METHOD,
-                ServerCalls.asyncServerStreamingCall(this::findStream))
-            .addMethod(RDFGrpcProtocol.FIND_STREAM_BATCHED_METHOD,
-                ServerCalls.asyncServerStreamingCall(this::findStreamBatched))
-            .addMethod(RDFGrpcProtocol.GET_GRAPH_METHOD,
-                ServerCalls.asyncServerStreamingCall(this::getGraph))
-            .addMethod(RDFGrpcProtocol.LOAD_GRAPH_METHOD,
-                ServerCalls.asyncClientStreamingCall(this::loadGraph))
-            .addMethod(RDFGrpcProtocol.PUT_GRAPH_METHOD,
-                ServerCalls.asyncClientStreamingCall(this::putGraph))
-            .addMethod(RDFGrpcProtocol.DELETE_GRAPH_METHOD,
-                ServerCalls.asyncUnaryCall(this::deleteGraph))
-            .addMethod(RDFGrpcProtocol.GET_DATASET_METHOD,
-                ServerCalls.asyncServerStreamingCall(this::getDataset))
-            .addMethod(RDFGrpcProtocol.LOAD_DATASET_METHOD,
-                ServerCalls.asyncClientStreamingCall(this::loadDataset))
-            .addMethod(RDFGrpcProtocol.LOAD_DATASET_BATCHED_METHOD,
-                ServerCalls.asyncClientStreamingCall(this::loadDatasetBatched))
-            .addMethod(RDFGrpcProtocol.PUT_DATASET_METHOD,
-                ServerCalls.asyncClientStreamingCall(this::putDataset))
-            .addMethod(RDFGrpcProtocol.CLEAR_DATASET_METHOD,
-                ServerCalls.asyncUnaryCall(this::clearDataset))
-            .addMethod(RDFGrpcProtocol.QUERY_SELECT_METHOD,
-                ServerCalls.asyncServerStreamingCall(this::querySelect))
-            .addMethod(RDFGrpcProtocol.QUERY_GRAPH_METHOD,
-                ServerCalls.asyncServerStreamingCall(this::queryGraph))
-            .addMethod(RDFGrpcProtocol.QUERY_DATASET_METHOD,
-                ServerCalls.asyncServerStreamingCall(this::queryDataset))
-            .addMethod(RDFGrpcProtocol.QUERY_ASK_METHOD,
-                ServerCalls.asyncUnaryCall(this::queryAsk))
-            .addMethod(RDFGrpcProtocol.QUERY_JSON_METHOD,
-                ServerCalls.asyncUnaryCall(this::queryJson))
+            .addMethod(RDFGrpcProtocol.STREAM_RDF_METHOD,
+                ServerCalls.asyncServerStreamingCall(this::streamRdf))
+            .addMethod(RDFGrpcProtocol.WRITE_RDF_METHOD,
+                ServerCalls.asyncClientStreamingCall(this::writeRdf))
+            .addMethod(RDFGrpcProtocol.EXECUTE_QUERY_METHOD,
+                ServerCalls.asyncServerStreamingCall(this::executeQuery))
             .addMethod(RDFGrpcProtocol.EXECUTE_UPDATE_METHOD,
-                ServerCalls.asyncUnaryCall(this::executeUpdate))
+                ServerCalls.asyncClientStreamingCall(this::executeUpdate))
             .addMethod(RDFGrpcProtocol.APPLY_PATCH_METHOD,
                 ServerCalls.asyncClientStreamingCall(this::applyPatch))
-            .addMethod(RDFGrpcProtocol.APPLY_PATCH_BATCH_METHOD,
-                ServerCalls.asyncUnaryCall(this::applyPatchBatch))
             .addMethod(RDFGrpcProtocol.SUBSCRIBE_PATCHES_METHOD,
                 ServerCalls.asyncServerStreamingCall(this::subscribePatches))
-            .addMethod(RDFGrpcProtocol.BEGIN_TXN_METHOD,
-                ServerCalls.asyncUnaryCall(this::beginTxn))
-            .addMethod(RDFGrpcProtocol.COMMIT_TXN_METHOD,
-                ServerCalls.asyncUnaryCall(this::commitTxn))
-            .addMethod(RDFGrpcProtocol.ABORT_TXN_METHOD,
-                ServerCalls.asyncUnaryCall(this::abortTxn))
-            .addMethod(RDFGrpcProtocol.END_TXN_METHOD,
-                ServerCalls.asyncUnaryCall(this::endTxn))
-            .addMethod(RDFGrpcProtocol.PROMOTE_TXN_METHOD,
-                ServerCalls.asyncUnaryCall(this::promoteTxn))
+            .addMethod(RDFGrpcProtocol.TRANSACTION_METHOD,
+                ServerCalls.asyncBidiStreamingCall(this::transaction))
             .build();
         return ServerInterceptors.intercept(raw, metadataInterceptor());
     }
 
     /**
-     * Broadcast an {@link RDFPatch} as {@link RDF_Patch_Row} messages to all active patch subscribers.
+     * Broadcast an {@link RDFPatch} to all active patch subscribers.
      *
      * @param patch the patch to broadcast
      * @throws IllegalArgumentException Thrown if {@code patch} is {@code null}
@@ -264,7 +242,7 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
         patchPublisher.close();
     }
 
-    /** Number of open remote transactions (for tests). */
+    /** Number of open remote transactions (package-private for tests). */
     int activeTxnCount() {
         return activeTxns.size();
     }
@@ -291,347 +269,53 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
                 if ( txnId != null ) {
                     ctx = ctx.withValue(RDFGrpcProtocol.CTX_TXN_ID, txnId);
                 }
-                byte[] graphBytes = headers.get(RDFGrpcProtocol.META_GRAPH_TERM_BIN);
-                if ( graphBytes != null ) {
-                    ctx = ctx.withValue(RDFGrpcProtocol.CTX_GRAPH_TERM_BIN, graphBytes);
-                }
                 return Contexts.interceptCall(ctx, call, headers, next);
             }
         };
     }
 
-    private void findStream(RDF_Quad request, StreamObserver<RDF_StreamRow> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
+    private String resolveTxnId(String requestTxnId) {
+        if ( requestTxnId != null && !requestTxnId.isEmpty() ) {
+            return requestTxnId;
+        }
+        return RDFGrpcProtocol.CTX_TXN_ID.get();
+    }
+
+    private void streamRdf(StreamRdfRequest request, StreamObserver<StreamRdfResponse> responseObserver) {
+        String txnId = resolveTxnId(request.getTxnId());
         try {
-            Quad pattern = ProtobufConvert.convert(request);
-            Node g = normalizePatternNode(pattern.getGraph());
-            Node s = normalizePatternNode(pattern.getSubject());
-            Node p = normalizePatternNode(pattern.getPredicate());
-            Node o = normalizePatternNode(pattern.getObject());
             executeRead(txnId, () -> {
-                StreamRDF encoder = ProtobufRDF.streamToRowConsumer(responseObserver::onNext, encodeValues);
+                StreamRDF encoder = ProtobufRDF.streamToBatchConsumer(
+                    batch -> responseObserver.onNext(
+                        StreamRdfResponse.newBuilder().addAllRows(batch.getRowList()).build()),
+                    batchSize,
+                    encodeValues);
                 encoder.start();
-                Iterator<Quad> iter = dsg.find(g, s, p, o);
-                while ( iter.hasNext() ) {
-                    encoder.quad(iter.next());
-                }
-                encoder.finish();
-            });
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void findStreamBatched(RDF_Quad request, StreamObserver<RDF_Stream> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            Quad pattern = ProtobufConvert.convert(request);
-            Node g = normalizePatternNode(pattern.getGraph());
-            Node s = normalizePatternNode(pattern.getSubject());
-            Node p = normalizePatternNode(pattern.getPredicate());
-            Node o = normalizePatternNode(pattern.getObject());
-            executeRead(txnId, () -> {
-                StreamRDF encoder = ProtobufRDF.streamToBatchConsumer(responseObserver::onNext, batchSize, encodeValues);
-                encoder.start();
-                Iterator<Quad> iter = dsg.find(g, s, p, o);
-                while ( iter.hasNext() ) {
-                    encoder.quad(iter.next());
-                }
-                encoder.finish();
-            });
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void getGraph(RDF_Term request, StreamObserver<RDF_StreamRow> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            Node graphName = RDFGrpcProtocol.decodeGraphNode(request);
-            executeRead(txnId, () -> {
-                Graph graph = (graphName == null) ? dsg.getDefaultGraph() : dsg.getGraph(graphName);
-                StreamRDF encoder = ProtobufRDF.streamToRowConsumer(responseObserver::onNext, encodeValues);
-                encoder.start();
-                if ( graph != null ) {
-                    StreamRDFOps.sendGraphToStream(graph, encoder);
-                }
-                encoder.finish();
-            });
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private StreamObserver<RDF_StreamRow> loadGraph(StreamObserver<Empty> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        Node graphName = RDFGrpcProtocol.decodeGraphNodeBytes(RDFGrpcProtocol.CTX_GRAPH_TERM_BIN.get());
-        return collectRowsObserver(responseObserver, rows -> executeWrite(txnId, () -> {
-            Graph target = (graphName == null) ? dsg.getDefaultGraph() : dsg.getGraph(graphName);
-            StreamRDF dest = StreamRDFLib.graph(target);
-            Consumer<RDF_StreamRow> sink = ProtobufRDF.rowConsumerToStreamRDF(dest);
-            dest.start();
-            rows.forEach(sink);
-            dest.finish();
-        }));
-    }
-
-    private StreamObserver<RDF_StreamRow> putGraph(StreamObserver<Empty> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        Node graphName = RDFGrpcProtocol.decodeGraphNodeBytes(RDFGrpcProtocol.CTX_GRAPH_TERM_BIN.get());
-        return collectRowsObserver(responseObserver, rows -> executeWrite(txnId, () -> {
-            Graph target = (graphName == null) ? dsg.getDefaultGraph() : dsg.getGraph(graphName);
-            target.clear();
-            StreamRDF dest = StreamRDFLib.graph(target);
-            Consumer<RDF_StreamRow> sink = ProtobufRDF.rowConsumerToStreamRDF(dest);
-            dest.start();
-            rows.forEach(sink);
-            dest.finish();
-        }));
-    }
-
-    private void deleteGraph(RDF_Term request, StreamObserver<Empty> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            Node graphName = RDFGrpcProtocol.decodeGraphNode(request);
-            executeWrite(txnId, () -> {
-                if ( graphName == null ) {
-                    dsg.getDefaultGraph().clear();
-                } else {
-                    dsg.removeGraph(graphName);
-                }
-            });
-            responseObserver.onNext(Empty.getDefaultInstance());
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void getDataset(Empty request, StreamObserver<RDF_StreamRow> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            executeRead(txnId, () -> {
-                StreamRDF encoder = ProtobufRDF.streamToRowConsumer(responseObserver::onNext, encodeValues);
-                encoder.start();
-                StreamRDFOps.sendDatasetToStream(dsg, encoder);
-                encoder.finish();
-            });
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private StreamObserver<RDF_StreamRow> loadDataset(StreamObserver<Empty> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        return collectRowsObserver(responseObserver, rows -> executeWrite(txnId, () -> {
-            StreamRDF dest = StreamRDFLib.dataset(dsg);
-            Consumer<RDF_StreamRow> sink = ProtobufRDF.rowConsumerToStreamRDF(dest);
-            dest.start();
-            rows.forEach(sink);
-            dest.finish();
-        }));
-    }
-
-    private StreamObserver<RDF_Stream> loadDatasetBatched(StreamObserver<Empty> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        List<RDF_Stream> batches = new ArrayList<>();
-        return new StreamObserver<>() {
-            @Override
-            public void onNext(RDF_Stream value) {
-                batches.add(value);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                batches.clear();
-            }
-
-            @Override
-            public void onCompleted() {
-                try {
-                    executeWrite(txnId, () -> {
-                        StreamRDF dest = StreamRDFLib.dataset(dsg);
-                        Consumer<RDF_Stream> sink = ProtobufRDF.batchConsumerToStreamRDF(dest);
-                        dest.start();
-                        batches.forEach(sink);
-                        dest.finish();
-                    });
-                    responseObserver.onNext(Empty.getDefaultInstance());
-                    responseObserver.onCompleted();
-                } catch (Throwable ex) {
-                    responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-                }
-            }
-        };
-    }
-
-    private StreamObserver<RDF_StreamRow> putDataset(StreamObserver<Empty> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        return collectRowsObserver(responseObserver, rows -> executeWrite(txnId, () -> {
-            dsg.clear();
-            StreamRDF dest = StreamRDFLib.dataset(dsg);
-            Consumer<RDF_StreamRow> sink = ProtobufRDF.rowConsumerToStreamRDF(dest);
-            dest.start();
-            rows.forEach(sink);
-            dest.finish();
-        }));
-    }
-
-    private void clearDataset(Empty request, StreamObserver<Empty> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            executeWrite(txnId, dsg::clear);
-            responseObserver.onNext(Empty.getDefaultInstance());
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void querySelect(StringValue request, StreamObserver<RDFSelectMessage> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            Query query = QueryFactory.create(request.getValue(), Syntax.syntaxARQ);
-            executeRead(txnId, () -> {
-                try ( QueryExec qExec = QueryExec.dataset(dsg).query(query).build() ) {
-                    RowSet rs = qExec.select();
-                    ProtobufRDF.writeRowSet(
-                        rs,
-                        hdr -> responseObserver.onNext(RDFSelectMessage.ofHeader(hdr)),
-                        row -> responseObserver.onNext(RDFSelectMessage.ofRow(row)),
-                        encodeValues);
-                }
-            });
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void queryGraph(StringValue request, StreamObserver<RDF_StreamRow> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            Query query = QueryFactory.create(request.getValue(), Syntax.syntaxARQ);
-            executeRead(txnId, () -> {
-                try ( QueryExec qExec = QueryExec.dataset(dsg).query(query).build() ) {
-                    StreamRDF encoder = ProtobufRDF.streamToRowConsumer(responseObserver::onNext, encodeValues);
-                    encoder.start();
-                    if ( query.isDescribeType() ) {
-                        Graph g = qExec.describe();
-                        StreamRDFOps.sendGraphToStream(g, encoder);
-                    } else {
-                        Graph g = qExec.construct();
-                        StreamRDFOps.sendGraphToStream(g, encoder);
+                switch ( request.getSelectorCase() ) {
+                    case QUAD_PATTERN -> {
+                        Quad pattern = ProtobufConvert.convert(request.getQuadPattern());
+                        Node g = normalizePatternNode(pattern.getGraph());
+                        Node s = normalizePatternNode(pattern.getSubject());
+                        Node p = normalizePatternNode(pattern.getPredicate());
+                        Node o = normalizePatternNode(pattern.getObject());
+                        Iterator<Quad> iter = dsg.find(g, s, p, o);
+                        while ( iter.hasNext() ) {
+                            if ( isCancelled(responseObserver) )
+                                break;
+                            encoder.quad(iter.next());
+                        }
                     }
-                    encoder.finish();
+                    case GRAPH -> {
+                        Node graphName = RDFGrpcProtocol.decodeGraphTarget(request.getGraph());
+                        Graph graph = (graphName == null) ? dsg.getDefaultGraph() : dsg.getGraph(graphName);
+                        if ( graph != null ) {
+                            StreamRDFOps.sendGraphToStream(graph, encoder);
+                        }
+                    }
+                    case ENTIRE_DATASET, SELECTOR_NOT_SET -> StreamRDFOps.sendDatasetToStream(dsg, encoder);
                 }
+                encoder.finish();
             });
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void queryDataset(StringValue request, StreamObserver<RDF_StreamRow> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            Query query = QueryFactory.create(request.getValue(), Syntax.syntaxARQ);
-            executeRead(txnId, () -> {
-                try ( QueryExec qExec = QueryExec.dataset(dsg).query(query).build() ) {
-                    DatasetGraph resultDsg = qExec.constructDataset();
-                    StreamRDF encoder = ProtobufRDF.streamToRowConsumer(responseObserver::onNext, encodeValues);
-                    encoder.start();
-                    StreamRDFOps.sendDatasetToStream(resultDsg, encoder);
-                    encoder.finish();
-                }
-            });
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void queryAsk(StringValue request, StreamObserver<BoolValue> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            Query query = QueryFactory.create(request.getValue(), Syntax.syntaxARQ);
-            boolean answer = calculateRead(txnId, () -> {
-                try ( QueryExec qExec = QueryExec.dataset(dsg).query(query).build() ) {
-                    return qExec.ask();
-                }
-            });
-            responseObserver.onNext(BoolValue.of(answer));
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void queryJson(StringValue request, StreamObserver<StringValue> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            Query query = QueryFactory.create(request.getValue(), Syntax.syntaxARQ);
-            String jsonText = calculateRead(txnId, () -> {
-                try ( QueryExec qExec = QueryExec.dataset(dsg).query(query).build() ) {
-                    JsonArray array = qExec.execJson();
-                    return JSON.toString(array);
-                }
-            });
-            responseObserver.onNext(StringValue.of(jsonText));
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void executeUpdate(StringValue request, StreamObserver<Empty> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            UpdateRequest updateRequest = UpdateFactory.create(request.getValue(), Syntax.syntaxARQ);
-            executeWrite(txnId, () -> UpdateExec.dataset(dsg).update(updateRequest).execute());
-            responseObserver.onNext(Empty.getDefaultInstance());
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private StreamObserver<RDF_Patch_Row> applyPatch(StreamObserver<Empty> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        List<RDF_Patch_Row> rows = new ArrayList<>();
-        return new StreamObserver<>() {
-            @Override
-            public void onNext(RDF_Patch_Row value) {
-                rows.add(value);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                rows.clear();
-            }
-
-            @Override
-            public void onCompleted() {
-                try {
-                    applyPatchRows(txnId, rows);
-                    responseObserver.onNext(Empty.getDefaultInstance());
-                    responseObserver.onCompleted();
-                } catch (Throwable ex) {
-                    responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-                }
-            }
-        };
-    }
-
-    private void applyPatchBatch(RDF_Patch request, StreamObserver<Empty> responseObserver) {
-        String txnId = RDFGrpcProtocol.CTX_TXN_ID.get();
-        try {
-            applyPatchRows(txnId, request.getRowList());
-            responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
         } catch (Throwable ex) {
             responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
@@ -639,118 +323,571 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     }
 
     /**
-     * Apply patch rows. Without a remote transaction the patch is applied in its own write transaction
-     * and published to subscribers after it commits, in commit order. Inside a remote transaction the rows
-     * are held by the session and published only when that transaction commits.
+     * True O(1)-memory streaming RDF write handler. Opens or attaches to a single-thread write
+     * session on the first frame and streams every incoming batch or row directly into the target
+     * {@link Graph} or {@link DatasetGraph} as it arrives.
      */
-    private void applyPatchRows(String txnId, List<RDF_Patch_Row> rows) throws Exception {
-        List<RDF_Patch_Row> rowsCopy = List.copyOf(rows);
-        if ( txnId != null ) {
-            ServerTxnSession session = requireSession(txnId);
-            session.run(() -> {
-                applyRows(rowsCopy);
-                session.addPendingPatchRows(rowsCopy);
-            });
-            return;
-        }
-        // The ticket is taken while holding the write lock, so ticket order is commit order.
-        PatchPublisher.Ticket[] ticket = new PatchPublisher.Ticket[1];
+    private StreamObserver<WriteRdfRequest> writeRdf(StreamObserver<WriteRdfResponse> responseObserver) {
+        String headerTxnId = RDFGrpcProtocol.CTX_TXN_ID.get();
+        return new StreamObserver<>() {
+            private ServerTxnSession writeSession;
+            private boolean ownsSession;
+            private StreamRDF dest;
+            private Consumer<RDF_StreamRow> rowSink;
+            private Consumer<RDF_Stream> batchSink;
+            private final AtomicLong quadCount = new AtomicLong();
+            private final AtomicLong prefixCount = new AtomicLong();
+            private boolean failed;
+
+            private void ensureInitialized(WriteRdfHeader header) throws Exception {
+                if ( writeSession != null ) {
+                    return;
+                }
+                String effectiveTxnId = (header != null && !header.getTxnId().isEmpty())
+                    ? header.getTxnId()
+                    : headerTxnId;
+                if ( effectiveTxnId != null ) {
+                    writeSession = requireSession(effectiveTxnId);
+                    ownsSession = false;
+                } else {
+                    writeSession = new ServerTxnSession(dsg, TxnType.WRITE);
+                    ownsSession = true;
+                }
+
+                WriteDisposition disp = (header != null && header.getDisposition() != WriteDisposition.WRITE_DISPOSITION_UNSPECIFIED)
+                    ? header.getDisposition()
+                    : WriteDisposition.WRITE_DISPOSITION_APPEND;
+                boolean targetGraph = header != null && header.getTargetCase() == WriteRdfHeader.TargetCase.GRAPH;
+                Node graphName = targetGraph ? RDFGrpcProtocol.decodeGraphTarget(header.getGraph()) : null;
+
+                writeSession.run(() -> {
+                    if ( disp == WriteDisposition.WRITE_DISPOSITION_CLEAR ) {
+                        if ( targetGraph ) {
+                            if ( graphName == null ) {
+                                dsg.getDefaultGraph().clear();
+                            } else {
+                                dsg.removeGraph(graphName);
+                            }
+                        } else {
+                            dsg.clear();
+                        }
+                        return;
+                    }
+                    if ( disp == WriteDisposition.WRITE_DISPOSITION_REPLACE ) {
+                        if ( targetGraph ) {
+                            Graph g = (graphName == null) ? dsg.getDefaultGraph() : dsg.getGraph(graphName);
+                            g.clear();
+                        } else {
+                            dsg.clear();
+                        }
+                    }
+                    StreamRDF rawDest = targetGraph
+                        ? StreamRDFLib.graph((graphName == null) ? dsg.getDefaultGraph() : dsg.getGraph(graphName))
+                        : StreamRDFLib.dataset(dsg);
+                    dest = new StreamRDFWrapper(rawDest) {
+                        @Override
+                        public void triple(Triple triple) {
+                            quadCount.incrementAndGet();
+                            super.triple(triple);
+                        }
+
+                        @Override
+                        public void quad(Quad quad) {
+                            quadCount.incrementAndGet();
+                            super.quad(quad);
+                        }
+
+                        @Override
+                        public void prefix(String prefix, String iri) {
+                            prefixCount.incrementAndGet();
+                            super.prefix(prefix, iri);
+                        }
+                    };
+                    rowSink = ProtobufRDF.rowConsumerToStreamRDF(dest);
+                    batchSink = ProtobufRDF.batchConsumerToStreamRDF(dest);
+                    dest.start();
+                });
+            }
+
+            @Override
+            public void onNext(WriteRdfRequest request) {
+                if ( failed )
+                    return;
+                try {
+                    switch ( request.getItemCase() ) {
+                        case HEADER -> ensureInitialized(request.getHeader());
+                        case BATCH -> {
+                            ensureInitialized(null);
+                            if ( batchSink != null ) {
+                                RDF_Stream batch = request.getBatch();
+                                writeSession.run(() -> batchSink.accept(batch));
+                            }
+                        }
+                        case ROW -> {
+                            ensureInitialized(null);
+                            if ( rowSink != null ) {
+                                RDF_StreamRow row = request.getRow();
+                                writeSession.run(() -> rowSink.accept(row));
+                            }
+                        }
+                        case ITEM_NOT_SET -> { }
+                    }
+                } catch (Throwable ex) {
+                    failed = true;
+                    cleanupOnFailure();
+                    responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                failed = true;
+                cleanupOnFailure();
+            }
+
+            @Override
+            public void onCompleted() {
+                if ( failed )
+                    return;
+                try {
+                    ensureInitialized(null);
+                    if ( dest != null ) {
+                        writeSession.run(dest::finish);
+                    }
+                    if ( ownsSession ) {
+                        writeSession.commit(patchPublisher);
+                        writeSession.close();
+                    }
+                    responseObserver.onNext(WriteRdfResponse.newBuilder()
+                        .setQuadCount(quadCount.get())
+                        .setPrefixCount(prefixCount.get())
+                        .build());
+                    responseObserver.onCompleted();
+                } catch (Throwable ex) {
+                    cleanupOnFailure();
+                    responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
+                }
+            }
+
+            private void cleanupOnFailure() {
+                if ( ownsSession && writeSession != null ) {
+                    try {
+                        writeSession.abort();
+                    } catch (Exception ignored) {
+                    } finally {
+                        writeSession.close();
+                    }
+                }
+            }
+        };
+    }
+
+    private void executeQuery(ExecuteQueryRequest request, StreamObserver<ExecuteQueryResponse> responseObserver) {
+        String txnId = resolveTxnId(request.getTxnId());
         try {
-            Txn.executeWrite(dsg, () -> {
-                applyRows(rowsCopy);
-                ticket[0] = patchPublisher.reserve();
+            String baseUri = request.getBaseUri().isEmpty() ? null : request.getBaseUri();
+            Query query = QueryFactory.create(request.getQuery(), baseUri, Syntax.syntaxARQ);
+            for ( String uri : request.getDefaultGraphUrisList() ) {
+                query.addGraphURI(uri);
+            }
+            for ( String uri : request.getNamedGraphUrisList() ) {
+                query.addNamedGraphURI(uri);
+            }
+            QueryResultForm form = request.getResultForm();
+            executeRead(txnId, () -> {
+                try ( QueryExec qExec = QueryExec.dataset(dsg).query(query).build() ) {
+                    if ( form == QueryResultForm.QUERY_RESULT_FORM_SELECT || query.isSelectType() ) {
+                        streamSelectQuery(qExec, responseObserver);
+                    } else if ( form == QueryResultForm.QUERY_RESULT_FORM_ASK || query.isAskType() ) {
+                        boolean ans = qExec.ask();
+                        responseObserver.onNext(ExecuteQueryResponse.newBuilder().setAskResult(ans).build());
+                    } else if ( form == QueryResultForm.QUERY_RESULT_FORM_JSON || query.isJsonType() ) {
+                        JsonArray array = qExec.execJson();
+                        responseObserver.onNext(ExecuteQueryResponse.newBuilder()
+                            .setJsonResult(JSON.toString(array))
+                            .build());
+                    } else if ( form == QueryResultForm.QUERY_RESULT_FORM_DATASET || query.isConstructQuad() ) {
+                        streamDatasetQuery(query, qExec, responseObserver);
+                    } else {
+                        streamGraphQuery(query, qExec, responseObserver);
+                    }
+                }
             });
+            responseObserver.onCompleted();
         } catch (Throwable ex) {
-            if ( ticket[0] != null )
-                ticket[0].cancel();
-            throw ex;
+            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
         }
-        ticket[0].publish(rowsCopy);
     }
 
-    private void applyRows(List<RDF_Patch_Row> rows) {
-        RDFChangesApply changes = new NonTransactionalChangesApply(dsg);
-        Consumer<RDF_Patch_Row> sink = RDFPatchOps.protobufChangesReceiver(changes);
-        changes.start();
-        for ( RDF_Patch_Row row : rows ) {
-            sink.accept(row);
+    private void streamSelectQuery(QueryExec qExec, StreamObserver<ExecuteQueryResponse> responseObserver) {
+        RowSet rs = qExec.select();
+        List<RDF_DataTuple> rowBuffer = new ArrayList<>(batchSize);
+        ProtobufRDF.writeRowSet(
+            rs,
+            hdr -> responseObserver.onNext(ExecuteQueryResponse.newBuilder().setSelectHeader(hdr).build()),
+            row -> {
+                rowBuffer.add(row);
+                if ( rowBuffer.size() >= batchSize ) {
+                    flushSelectBatch(rowBuffer, responseObserver);
+                }
+            },
+            encodeValues);
+        if ( !rowBuffer.isEmpty() ) {
+            flushSelectBatch(rowBuffer, responseObserver);
         }
-        changes.finish();
     }
 
-    private void subscribePatches(Empty request, StreamObserver<RDF_Patch_Row> responseObserver) {
-        if ( responseObserver instanceof ServerCallStreamObserver<RDF_Patch_Row> serverObs ) {
+    private static void flushSelectBatch(
+            List<RDF_DataTuple> rowBuffer, StreamObserver<ExecuteQueryResponse> responseObserver) {
+        SelectRowBatch batch = SelectRowBatch.newBuilder().addAllRows(rowBuffer).build();
+        rowBuffer.clear();
+        responseObserver.onNext(ExecuteQueryResponse.newBuilder().setSelectRows(batch).build());
+    }
+
+    /**
+     * Streams CONSTRUCT or DESCRIBE triples directly from {@link QueryExec#constructTriples()}
+     * or {@link QueryExec#describeTriples()} without materializing an in-memory {@link Graph}.
+     */
+    private void streamGraphQuery(Query query, QueryExec qExec, StreamObserver<ExecuteQueryResponse> responseObserver) {
+        StreamRDF encoder = ProtobufRDF.streamToBatchConsumer(
+            batch -> responseObserver.onNext(ExecuteQueryResponse.newBuilder().setRdfBatch(batch).build()),
+            batchSize,
+            encodeValues);
+        encoder.start();
+        query.getPrefixMapping().getNsPrefixMap().forEach(encoder::prefix);
+        Iterator<Triple> iter = query.isDescribeType() ? qExec.describeTriples() : qExec.constructTriples();
+        while ( iter.hasNext() ) {
+            if ( isCancelled(responseObserver) )
+                break;
+            encoder.triple(iter.next());
+        }
+        encoder.finish();
+    }
+
+    /**
+     * Streams CONSTRUCT dataset quads directly from {@link QueryExec#constructQuads()}
+     * without materializing an in-memory {@link DatasetGraph}.
+     */
+    private void streamDatasetQuery(Query query, QueryExec qExec, StreamObserver<ExecuteQueryResponse> responseObserver) {
+        StreamRDF encoder = ProtobufRDF.streamToBatchConsumer(
+            batch -> responseObserver.onNext(ExecuteQueryResponse.newBuilder().setRdfBatch(batch).build()),
+            batchSize,
+            encodeValues);
+        encoder.start();
+        query.getPrefixMapping().getNsPrefixMap().forEach(encoder::prefix);
+        Iterator<Quad> iter = qExec.constructQuads();
+        while ( iter.hasNext() ) {
+            if ( isCancelled(responseObserver) )
+                break;
+            encoder.quad(iter.next());
+        }
+        encoder.finish();
+    }
+
+    private StreamObserver<ExecuteUpdateRequest> executeUpdate(StreamObserver<ExecuteUpdateResponse> responseObserver) {
+        String headerTxnId = RDFGrpcProtocol.CTX_TXN_ID.get();
+        return new StreamObserver<>() {
+            private ServerTxnSession writeSession;
+            private boolean ownsSession;
+            private long updateCount;
+            private boolean failed;
+
+            private void ensureSession(String reqTxnId) throws Exception {
+                if ( writeSession != null )
+                    return;
+                String effectiveTxnId = (reqTxnId != null && !reqTxnId.isEmpty()) ? reqTxnId : headerTxnId;
+                if ( effectiveTxnId != null ) {
+                    writeSession = requireSession(effectiveTxnId);
+                    ownsSession = false;
+                } else {
+                    writeSession = new ServerTxnSession(dsg, TxnType.WRITE);
+                    ownsSession = true;
+                }
+            }
+
+            @Override
+            public void onNext(ExecuteUpdateRequest request) {
+                if ( failed )
+                    return;
+                try {
+                    String baseUri = request.getBaseUri().isEmpty() ? null : request.getBaseUri();
+                    UpdateRequest updateReq = UpdateFactory.create(request.getUpdate(), baseUri, Syntax.syntaxARQ);
+                    ensureSession(request.getTxnId());
+                    writeSession.run(() -> UpdateExec.dataset(dsg).update(updateReq).execute());
+                    updateCount++;
+                } catch (Throwable ex) {
+                    failed = true;
+                    cleanupOnFailure();
+                    responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                failed = true;
+                cleanupOnFailure();
+            }
+
+            @Override
+            public void onCompleted() {
+                if ( failed )
+                    return;
+                try {
+                    if ( ownsSession && writeSession != null ) {
+                        writeSession.commit(patchPublisher);
+                        writeSession.close();
+                    }
+                    responseObserver.onNext(ExecuteUpdateResponse.newBuilder()
+                        .setUpdateCount(updateCount)
+                        .build());
+                    responseObserver.onCompleted();
+                } catch (Throwable ex) {
+                    cleanupOnFailure();
+                    responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
+                }
+            }
+
+            private void cleanupOnFailure() {
+                if ( ownsSession && writeSession != null ) {
+                    try {
+                        writeSession.abort();
+                    } catch (Exception ignored) {
+                    } finally {
+                        writeSession.close();
+                    }
+                }
+            }
+        };
+    }
+
+    /**
+     * True O(1)-memory streaming RDF Patch handler. Applies incoming {@link RDF_Patch_Row}
+     * messages directly on the write transaction thread as each {@link ApplyPatchRequest}
+     * arrives instead of buffering the entire stream in memory.
+     */
+    private StreamObserver<ApplyPatchRequest> applyPatch(StreamObserver<ApplyPatchResponse> responseObserver) {
+        String headerTxnId = RDFGrpcProtocol.CTX_TXN_ID.get();
+        return new StreamObserver<>() {
+            private ServerTxnSession writeSession;
+            private boolean ownsSession;
+            private NonTransactionalChangesApply changes;
+            private Consumer<RDF_Patch_Row> sink;
+            private long rowCount;
+            private boolean failed;
+
+            private void ensureInitialized(String reqTxnId) throws Exception {
+                if ( writeSession != null )
+                    return;
+                String effectiveTxnId = (reqTxnId != null && !reqTxnId.isEmpty()) ? reqTxnId : headerTxnId;
+                if ( effectiveTxnId != null ) {
+                    writeSession = requireSession(effectiveTxnId);
+                    ownsSession = false;
+                } else {
+                    writeSession = new ServerTxnSession(dsg, TxnType.WRITE);
+                    ownsSession = true;
+                }
+                writeSession.run(() -> {
+                    changes = new NonTransactionalChangesApply(dsg);
+                    sink = RDFPatchOps.protobufChangesReceiver(changes);
+                    changes.start();
+                });
+            }
+
+            @Override
+            public void onNext(ApplyPatchRequest request) {
+                if ( failed )
+                    return;
+                try {
+                    ensureInitialized(request.getTxnId());
+                    List<RDF_Patch_Row> rows = request.getRowsList();
+                    if ( !rows.isEmpty() ) {
+                        boolean captureForSubscribers = patchPublisher.hasSubscribers();
+                        writeSession.run(() -> {
+                            for ( RDF_Patch_Row row : rows ) {
+                                sink.accept(row);
+                            }
+                            if ( captureForSubscribers ) {
+                                writeSession.addPendingPatchRows(rows);
+                            }
+                        });
+                        rowCount += rows.size();
+                    }
+                } catch (Throwable ex) {
+                    failed = true;
+                    cleanupOnFailure();
+                    responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                failed = true;
+                cleanupOnFailure();
+            }
+
+            @Override
+            public void onCompleted() {
+                if ( failed )
+                    return;
+                try {
+                    if ( writeSession != null ) {
+                        writeSession.run(() -> {
+                            if ( changes != null ) {
+                                changes.finish();
+                            }
+                        });
+                        if ( ownsSession ) {
+                            writeSession.commit(patchPublisher);
+                            writeSession.close();
+                        }
+                    }
+                    responseObserver.onNext(ApplyPatchResponse.newBuilder().setRowCount(rowCount).build());
+                    responseObserver.onCompleted();
+                } catch (Throwable ex) {
+                    cleanupOnFailure();
+                    responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
+                }
+            }
+
+            private void cleanupOnFailure() {
+                if ( ownsSession && writeSession != null ) {
+                    try {
+                        writeSession.abort();
+                    } catch (Exception ignored) {
+                    } finally {
+                        writeSession.close();
+                    }
+                }
+            }
+        };
+    }
+
+    private void subscribePatches(
+            SubscribePatchesRequest request, StreamObserver<SubscribePatchesResponse> responseObserver) {
+        if ( responseObserver instanceof ServerCallStreamObserver<SubscribePatchesResponse> serverObs ) {
             serverObs.setOnCancelHandler(() -> patchPublisher.unsubscribe(responseObserver));
         }
         patchPublisher.subscribe(responseObserver);
     }
 
-    private void beginTxn(StringValue request, StreamObserver<StringValue> responseObserver) {
-        try {
-            String modeStr = request.getValue();
-            TxnType txnType = parseTxnType(modeStr);
-            String txnId = UUID.randomUUID().toString();
-            ServerTxnSession session = new ServerTxnSession(dsg, txnType);
-            activeTxns.put(txnId, session);
-            responseObserver.onNext(StringValue.of(txnId));
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
+    /**
+     * Bidirectional streaming transaction session. The lifetime of the transaction is bound
+     * to the stream: if the client disconnects or cancels the stream before committing,
+     * the server immediately aborts and ends the transaction.
+     */
+    private StreamObserver<TransactionRequest> transaction(StreamObserver<TransactionResponse> responseObserver) {
+        return new StreamObserver<>() {
+            private String sessionTxnId;
+            private ServerTxnSession session;
 
-    private void commitTxn(StringValue request, StreamObserver<Empty> responseObserver) {
-        try {
-            ServerTxnSession session = requireSession(request.getValue());
-            session.commit(patchPublisher);
-            responseObserver.onNext(Empty.getDefaultInstance());
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void abortTxn(StringValue request, StreamObserver<Empty> responseObserver) {
-        try {
-            ServerTxnSession session = requireSession(request.getValue());
-            session.abort();
-            responseObserver.onNext(Empty.getDefaultInstance());
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
-
-    private void endTxn(StringValue request, StreamObserver<Empty> responseObserver) {
-        try {
-            String txnId = request.getValue();
-            ServerTxnSession session = activeTxns.remove(txnId);
-            if ( session != null ) {
-                session.end();
+            {
+                if ( responseObserver instanceof ServerCallStreamObserver<TransactionResponse> serverObs ) {
+                    serverObs.setOnCancelHandler(this::closeBoundSession);
+                }
             }
-            responseObserver.onNext(Empty.getDefaultInstance());
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
-    }
 
-    private void promoteTxn(StringValue request, StreamObserver<BoolValue> responseObserver) {
-        try {
-            String raw = request.getValue();
-            int sep = raw.lastIndexOf(':');
-            String txnId = (sep > 0) ? raw.substring(0, sep) : raw;
-            String modeStr = (sep > 0) ? raw.substring(sep + 1) : Promote.ISOLATED.name();
-            Promote promoteMode = "READ_COMMITTED".equalsIgnoreCase(modeStr)
-                ? Promote.READ_COMMITTED
-                : Promote.ISOLATED;
-            ServerTxnSession session = requireSession(txnId);
-            boolean promoted = session.call(() -> dsg.promote(promoteMode));
-            responseObserver.onNext(BoolValue.of(promoted));
-            responseObserver.onCompleted();
-        } catch (Throwable ex) {
-            responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-        }
+            @Override
+            public void onNext(TransactionRequest request) {
+                try {
+                    TransactionCommand cmd = request.getCommand();
+                    switch ( cmd ) {
+                        case TRANSACTION_COMMAND_BEGIN -> {
+                            synchronized (this) {
+                                if ( session != null ) {
+                                    throw new JenaTransactionException("Transaction already active on this stream");
+                                }
+                                TxnType txnType = RDFGrpcProtocol.decodeTxnType(request.getTxnType());
+                                String id = UUID.randomUUID().toString();
+                                ServerTxnSession created = new ServerTxnSession(dsg, txnType);
+                                activeTxns.put(id, created);
+                                this.sessionTxnId = id;
+                                this.session = created;
+                            }
+                            responseObserver.onNext(TransactionResponse.newBuilder()
+                                .setCommand(TransactionCommand.TRANSACTION_COMMAND_BEGIN)
+                                .setTxnId(sessionTxnId)
+                                .build());
+                        }
+                        case TRANSACTION_COMMAND_PROMOTE -> {
+                            ServerTxnSession current = currentOrThrow();
+                            Promote promoteMode = RDFGrpcProtocol.decodePromoteMode(request.getPromoteMode());
+                            boolean promoted = current.call(() -> dsg.promote(promoteMode));
+                            responseObserver.onNext(TransactionResponse.newBuilder()
+                                .setCommand(TransactionCommand.TRANSACTION_COMMAND_PROMOTE)
+                                .setTxnId(sessionTxnId)
+                                .setPromoted(promoted)
+                                .build());
+                        }
+                        case TRANSACTION_COMMAND_COMMIT -> {
+                            String committedId = sessionTxnId;
+                            ServerTxnSession current = currentOrThrow();
+                            current.commit(patchPublisher);
+                            closeBoundSession();
+                            responseObserver.onNext(TransactionResponse.newBuilder()
+                                .setCommand(TransactionCommand.TRANSACTION_COMMAND_COMMIT)
+                                .setTxnId(committedId)
+                                .build());
+                            responseObserver.onCompleted();
+                        }
+                        case TRANSACTION_COMMAND_ABORT -> {
+                            String abortedId = sessionTxnId;
+                            ServerTxnSession current = currentOrThrow();
+                            current.abort();
+                            closeBoundSession();
+                            responseObserver.onNext(TransactionResponse.newBuilder()
+                                .setCommand(TransactionCommand.TRANSACTION_COMMAND_ABORT)
+                                .setTxnId(abortedId)
+                                .build());
+                            responseObserver.onCompleted();
+                        }
+                        case TRANSACTION_COMMAND_END -> {
+                            String endedId = sessionTxnId != null ? sessionTxnId : "";
+                            closeBoundSession();
+                            responseObserver.onNext(TransactionResponse.newBuilder()
+                                .setCommand(TransactionCommand.TRANSACTION_COMMAND_END)
+                                .setTxnId(endedId)
+                                .build());
+                            responseObserver.onCompleted();
+                        }
+                        default -> throw new JenaTransactionException("Unsupported transaction command: " + cmd);
+                    }
+                } catch (Throwable ex) {
+                    closeBoundSession();
+                    responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                closeBoundSession();
+            }
+
+            @Override
+            public void onCompleted() {
+                closeBoundSession();
+                responseObserver.onCompleted();
+            }
+
+            private synchronized ServerTxnSession currentOrThrow() {
+                if ( sessionTxnId == null ) {
+                    throw new JenaTransactionException("No active transaction on this stream");
+                }
+                return requireSession(sessionTxnId);
+            }
+
+            private synchronized void closeBoundSession() {
+                String id = sessionTxnId;
+                ServerTxnSession s = session;
+                sessionTxnId = null;
+                session = null;
+                if ( id != null ) {
+                    activeTxns.remove(id, s);
+                }
+                if ( s != null ) {
+                    s.close();
+                }
+            }
+        };
     }
 
     private ServerTxnSession requireSession(String txnId) {
@@ -768,74 +905,12 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
         }
     }
 
-    private <T> T calculateRead(String txnId, Callable<T> action) throws Exception {
-        if ( txnId != null ) {
-            return requireSession(txnId).call(action);
-        }
-        return Txn.calculateRead(dsg, () -> {
-            try {
-                return action.call();
-            } catch (RuntimeException rex) {
-                throw rex;
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-    }
-
-    private void executeWrite(String txnId, Runnable action) throws Exception {
-        if ( txnId != null ) {
-            requireSession(txnId).run(action);
-        } else {
-            Txn.executeWrite(dsg, action);
-        }
-    }
-
-    private StreamObserver<RDF_StreamRow> collectRowsObserver(
-            StreamObserver<Empty> responseObserver,
-            ThrowingConsumer<List<RDF_StreamRow>> onCompleteAction) {
-        List<RDF_StreamRow> rows = new ArrayList<>();
-        return new StreamObserver<>() {
-            @Override
-            public void onNext(RDF_StreamRow value) {
-                rows.add(value);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                rows.clear();
-            }
-
-            @Override
-            public void onCompleted() {
-                try {
-                    onCompleteAction.accept(rows);
-                    responseObserver.onNext(Empty.getDefaultInstance());
-                    responseObserver.onCompleted();
-                } catch (Throwable ex) {
-                    responseObserver.onError(RDFGrpcProtocol.toStatusException(ex));
-                }
-            }
-        };
+    private static boolean isCancelled(StreamObserver<?> observer) {
+        return observer instanceof ServerCallStreamObserver<?> scso && scso.isCancelled();
     }
 
     private Node normalizePatternNode(Node node) {
         return (node == null) ? Node.ANY : node;
-    }
-
-    private TxnType parseTxnType(String modeStr) {
-        if ( "READ".equalsIgnoreCase(modeStr) )
-            return TxnType.READ;
-        if ( "READ_PROMOTE".equalsIgnoreCase(modeStr) )
-            return TxnType.READ_PROMOTE;
-        if ( "READ_COMMITTED_PROMOTE".equalsIgnoreCase(modeStr) )
-            return TxnType.READ_COMMITTED_PROMOTE;
-        return TxnType.WRITE;
-    }
-
-    @FunctionalInterface
-    private interface ThrowingConsumer<T> {
-        void accept(T value) throws Exception;
     }
 
     /**
@@ -849,12 +924,12 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
 
         @Override
         public void txnBegin() {
-            // Enclosing executeWrite manages the transaction lifecycle
+            // Enclosing write session manages the transaction lifecycle
         }
 
         @Override
         public void txnCommit() {
-            // Enclosing executeWrite manages the transaction lifecycle
+            // Enclosing write session manages the transaction lifecycle
         }
 
         @Override
@@ -864,16 +939,12 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     }
 
     /**
-     * Delivers patch rows to subscribers one patch at a time, in the order tickets were reserved.
-     * All calls to a subscriber's {@link StreamObserver} happen while holding this object's lock,
-     * because a gRPC {@link StreamObserver} must not be called concurrently.
+     * Delivers committed patch batches to subscribers in commit order.
      */
     private static final class PatchPublisher {
-        // Guarded by "this"
-        private final List<StreamObserver<RDF_Patch_Row>> subscribers = new ArrayList<>();
+        private final List<StreamObserver<SubscribePatchesResponse>> subscribers = new ArrayList<>();
         private final ArrayDeque<Ticket> tickets = new ArrayDeque<>();
 
-        /** A reserved place in the delivery order. Resolve it with {@link #publish} or {@link #cancel}. */
         final class Ticket {
             private List<RDF_Patch_Row> rows;
             private boolean resolved;
@@ -897,13 +968,12 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
             return !subscribers.isEmpty();
         }
 
-        synchronized void subscribe(StreamObserver<RDF_Patch_Row> subscriber) {
+        synchronized void subscribe(StreamObserver<SubscribePatchesResponse> subscriber) {
             subscribers.add(subscriber);
-            // Ready marker: tells the client the subscription is registered.
-            send(subscriber, RDF_Patch_Row.getDefaultInstance());
+            send(subscriber, SubscribePatchesResponse.newBuilder().setSubscribed(true).build());
         }
 
-        synchronized void unsubscribe(StreamObserver<RDF_Patch_Row> subscriber) {
+        synchronized void unsubscribe(StreamObserver<SubscribePatchesResponse> subscriber) {
             subscribers.remove(subscriber);
         }
 
@@ -920,20 +990,18 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
         private void deliver(List<RDF_Patch_Row> patchRows) {
             if ( patchRows.isEmpty() )
                 return;
-            for ( StreamObserver<RDF_Patch_Row> sub : List.copyOf(subscribers) ) {
-                for ( RDF_Patch_Row row : patchRows ) {
-                    if ( !send(sub, row) )
-                        break;
-                }
+            RDF_Patch patch = RDF_Patch.newBuilder().addAllRow(patchRows).build();
+            SubscribePatchesResponse msg = SubscribePatchesResponse.newBuilder().setPatch(patch).build();
+            for ( StreamObserver<SubscribePatchesResponse> sub : List.copyOf(subscribers) ) {
+                send(sub, msg);
             }
         }
 
-        private boolean send(StreamObserver<RDF_Patch_Row> sub, RDF_Patch_Row row) {
+        private boolean send(StreamObserver<SubscribePatchesResponse> sub, SubscribePatchesResponse msg) {
             try {
-                sub.onNext(row);
+                sub.onNext(msg);
                 return true;
             } catch (RuntimeException ex) {
-                // Subscriber disconnected
                 subscribers.remove(sub);
                 return false;
             }
@@ -941,11 +1009,10 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
 
         synchronized void close() {
             tickets.clear();
-            for ( StreamObserver<RDF_Patch_Row> sub : subscribers ) {
+            for ( StreamObserver<SubscribePatchesResponse> sub : subscribers ) {
                 try {
                     sub.onCompleted();
                 } catch (RuntimeException ignored) {
-                    // Subscriber already disconnected
                 }
             }
             subscribers.clear();
@@ -955,13 +1022,11 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     /**
      * Pins a server-side {@link DatasetGraph} transaction to a dedicated single-thread executor
      * so multiple gRPC requests sharing a transaction ID execute on the same thread.
-     * Patch rows applied in the transaction are held until commit.
      */
     private static final class ServerTxnSession {
         private final DatasetGraph dsg;
         private final ExecutorService executor;
         private final AtomicInteger inFlight = new AtomicInteger();
-        // Only touched on the session thread
         private final List<RDF_Patch_Row> pendingPatchRows = new ArrayList<>();
         private volatile long lastUsed = System.nanoTime();
         private volatile boolean ended;
@@ -1007,14 +1072,12 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
             return inFlight.get() == 0 && System.nanoTime() - lastUsed > nanos;
         }
 
-        /** Call on the session thread. */
         void addPendingPatchRows(List<RDF_Patch_Row> rows) {
             pendingPatchRows.addAll(rows);
         }
 
         void commit(PatchPublisher publisher) throws Exception {
             run(() -> {
-                // Reserve while still holding the write lock so delivery follows commit order.
                 PatchPublisher.Ticket ticket = pendingPatchRows.isEmpty() ? null : publisher.reserve();
                 try {
                     dsg.commit();
