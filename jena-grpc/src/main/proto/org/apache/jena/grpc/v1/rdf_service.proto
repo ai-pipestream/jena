@@ -80,7 +80,7 @@ enum TransactionCommand {
 message GraphTarget {
   oneof target {
     bool default_graph = 1;
-    .RDF_Term graph_name = 2;
+    RDF_Term graph_name = 2;
   }
 }
 
@@ -88,7 +88,7 @@ message GraphTarget {
 message StreamRdfRequest {
   oneof selector {
     // Stream quads matching a pattern where RDF_ANY or unset terms act as wildcards.
-    .RDF_Quad quad_pattern = 1;
+    RDF_Quad quad_pattern = 1;
     // Stream triples and prefixes from the default or named graph.
     GraphTarget graph = 2;
     // Stream all quads and prefixes from the entire dataset.
@@ -99,7 +99,7 @@ message StreamRdfRequest {
 
 // Chunk of streamed RDF rows (prefix declarations, triples, or quads).
 message StreamRdfResponse {
-  repeated .RDF_StreamRow rows = 1;
+  repeated RDF_StreamRow rows = 1;
 }
 
 // Header frame sent first in a WriteRdf stream to select target and write disposition.
@@ -116,8 +116,8 @@ message WriteRdfHeader {
 message WriteRdfRequest {
   oneof item {
     WriteRdfHeader header = 1;
-    .RDF_Stream batch = 2;
-    .RDF_StreamRow row = 3;
+    RDF_Stream batch = 2;
+    RDF_StreamRow row = 3;
   }
 }
 
@@ -139,18 +139,18 @@ message ExecuteQueryRequest {
 
 // Batch of SPARQL SELECT binding rows.
 message SelectRowBatch {
-  repeated .RDF_DataTuple rows = 1;
+  repeated RDF_DataTuple rows = 1;
 }
 
 // Server-streamed frame emitted during SPARQL query evaluation.
 message ExecuteQueryResponse {
   oneof result {
     // Emitted first for SELECT queries: the ordered result variable names.
-    .RDF_VarTuple select_header = 1;
+    RDF_VarTuple select_header = 1;
     // Subsequent chunks of SELECT binding rows.
     SelectRowBatch select_rows = 2;
     // Chunks of triples, quads, and prefixes for CONSTRUCT and DESCRIBE queries.
-    .RDF_Stream rdf_batch = 3;
+    RDF_Stream rdf_batch = 3;
     // Boolean result for ASK queries.
     bool ask_result = 4;
     // Serialized JSON array for JSON queries.
@@ -175,7 +175,7 @@ message ExecuteUpdateResponse {
 // Client-streamed frame carrying RDF Patch rows to apply to the dataset.
 message ApplyPatchRequest {
   string txn_id = 1;
-  repeated .RDF_Patch_Row rows = 2;
+  repeated RDF_Patch_Row rows = 2;
 }
 
 // Summary returned when an ApplyPatch stream completes.
@@ -194,7 +194,7 @@ message SubscribePatchesResponse {
     // Emitted immediately upon registration to confirm the subscription is active.
     bool subscribed = 1;
     // Committed RDF Patch rows delivered in commit order.
-    .RDF_Patch patch = 2;
+    RDF_Patch patch = 2;
   }
 }
 
