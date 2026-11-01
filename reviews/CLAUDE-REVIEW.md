@@ -1,5 +1,48 @@
 # GH-4364 Review: claude
 
+# Round 2 (2026-11-01): stream-first v1 rework
+
+Reviewed heads: PR 1 `47fc5fdcf622aa71403cf88862358881d67ba830`, PR 2 `4b80f93683738f640e57da41d8953616c7a597b6`, PR 3 `b0c3301f18ede615b393bff475806c7183cf9ffe`, from a fresh clone of the fork. All trees clean.
+
+Ledger note: the PR 3 ledger listed HEAD as `b0c3301f1899a2ab493c98718b2d5a0eb01caaa4`, which is not an object in the fork. The real HEAD is `b0c3301f18ede615b393bff475806c7183cf9ffe`. I corrected the Branch line. The antigravity PR 3 row still records the non-existent SHA.
+
+## Test status
+
+- PR 1: `TS_RDFProtobuf` 53 tests, 0 failures. BUILD SUCCESS.
+- PR 2: `TS_RDFProtobuf` 40 and `TS_RDFPatch` 64 tests, 0 failures. BUILD SUCCESS.
+- PR 3: 53 + 64 + 137 tests (`TestRDFLinkGrpcInProcess` 56, `TestRDFLinkGrpcNetty` 42, `TestRDFConnectionGrpc` 39), 0 failures. BUILD SUCCESS. No `jetty` or `servlet` in `dependency:tree -pl jena-grpc`. `DependencyConvergence` passed. Dash check 0 for all three.
+- Same `-am -Dsurefire.failIfNoSpecifiedTests=false` addition as before.
+
+## PR 1 and PR 2
+
+Approved. The deltas make `Protobuf2Binding` package-private behind `ProtobufRDF.decodeVars`, validate `vars` in every `Binding2Protobuf` constructor, use `ERR_*` constants consistently, and add the Javadoc notes asked for in round 1 (stateful prefix decoding, `readHeader` consumes input, `PatchTxn` presence comment).
+
+## PR 3
+
+Still good: the round 1 fixes are intact (ordered `PatchPublisher`, patches published at commit, idle reaper for remote transactions, and their three tests). The bidirectional `Transaction` stream releases the server session when the stream is cancelled. `ExecuteQuery` honours `default_graph_uris` (checked with a probe). `PB_RDFService.java` has the ASF header and `@SuppressWarnings("all")`. `buf.yaml` uses `STANDARD` + `COMMENTS` with `FILE` breaking rules.
+
+I checked each blocking item below with a temporary in-process probe test (not committed). The probe used a server with `txnIdleTimeout(200ms)`.
+
+### Blocking
+
+1. `RDFDatasetGrpcService.java:353, 603, 686` (`writeRdf`, `executeUpdate`, `applyPatch` without a transaction id): the call opens its own `ServerTxnSession(dsg, WRITE)` on the first frame and keeps it until the client half-closes. These owned sessions are never put in `activeTxns`, so `reapIdleTxns` cannot see them. A client that sends one frame and stalls holds the dataset writer lock forever. Probe: a `WriteRdf` call that sent only a header, then waited 1.5 s. `activeTxnCount()` was 0, and a local `dsg.executeWrite` stayed blocked for 3 s until the call was cancelled. This is round 1 finding 3 again, through a new path. Fix: register owned sessions with the reaper (or track them in a second map). When one is reaped, abort it and cancel the call (`ServerCallStreamObserver` / `Context` cancellation). Add a test that stalls each of the three RPCs.
+2. `RDFDatasetGrpcService.java:704` (`applyPatch`): `captureForSubscribers = patchPublisher.hasSubscribers()` is evaluated once per `ApplyPatchRequest` chunk, so a subscriber that joins mid-stream receives only the rows after it joined. Probe: chunk 1 `[TX, A(o1)]`, then subscribe, then chunk 2 `[A(o2), TC]`. The subscriber received `[A(o2), TC]` with no `TX` and no `o1`. A replica applying that has the wrong history. Fix: always capture rows for the duration of the write session, or decide once when the session opens and publish nothing if there were no subscribers at that point. Add a test.
+3. `rdf_service.proto` `SubscribePatchesRequest.graph_filter` is documented as "restricting which committed patches are delivered", but the server never reads it. Probe: a subscriber with `graph_filter = <http://ex/g1>` received a patch that only touched the default graph. Because `buf.yaml` enforces `FILE` breaking rules on `v1`, removing or redefining the field after release is a breaking change. Fix: implement the filter (per row by graph, keeping `TX`/`TC` framing), or remove the field (or reserve it) before the contract is published.
+
+### Should fix
+
+- `RDFLinkGrpc.java` `ClientTxnSession.sendCommand`: a fixed 30 s `poll` for every transaction command. `begin(WRITE)` waiting for the writer lock for more than 30 s fails, although Jena's `begin` normally blocks. A `COMMIT` slower than 30 s is reported as a failure even though the server may then commit. On timeout the message is "Transaction stream closed before response arrived", which is wrong. Fix: make the wait configurable (or unbounded for `BEGIN`, with a call deadline). On a `COMMIT` timeout, throw an error that says the outcome is unknown.
+- Only `ApplyPatch` feeds `SubscribePatches`. `WriteRdf` and `ExecuteUpdate` commits are never published, so a replica built from the feed drifts from the server. Fix: either document that the feed carries only patches applied through `ApplyPatch`, or capture all changes (for example with `DatasetGraphChanges` and an `RDFChanges` recorder) in each write session.
+- Each non-transactional write call starts a new platform thread (`newSingleThreadExecutor` per `ServerTxnSession`). Consider a shared, bounded pool or virtual threads.
+
+### Minor
+
+- Server streams still do not use `isReady()` / `setOnReadyHandler` flow control, so large results are buffered in server memory while the read transaction stays open.
+- `transaction` `BEGIN` holds the stream monitor while it waits for the writer lock, so the cancel handler blocks a gRPC thread until `begin` returns.
+- The transaction id is a bearer token and the Netty server has no authentication. Document the security model.
+
+# Round 1 (2026-10-30)
+
 - Reviewer: `claude` (Claude Code, run on krick-1)
 - Date (UTC): 2026-10-30
 - Method: read `git diff upstream/main...HEAD` for each worktree (PR 2 excluding the generated `PB_RDF.java`, which was spot-checked), the `krickert-review` checklist, and `AGENTS.md`.
