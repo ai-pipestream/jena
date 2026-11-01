@@ -21,6 +21,7 @@ version: v2
 lint:
   use:
     - STANDARD
+    - COMMENTS
   ignore:
     - binary-rdf.proto
 breaking:

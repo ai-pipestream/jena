@@ -57,6 +57,10 @@ public final class PB_RDFService {
   public enum WriteDisposition
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
+     * <pre>
+     * Default unspecified disposition; treated as WRITE_DISPOSITION_APPEND by the server.
+     * </pre>
+     *
      * <code>WRITE_DISPOSITION_UNSPECIFIED = 0;</code>
      */
     WRITE_DISPOSITION_UNSPECIFIED(0),
@@ -97,6 +101,10 @@ public final class PB_RDFService {
         WriteDisposition.class.getName());
     }
     /**
+     * <pre>
+     * Default unspecified disposition; treated as WRITE_DISPOSITION_APPEND by the server.
+     * </pre>
+     *
      * <code>WRITE_DISPOSITION_UNSPECIFIED = 0;</code>
      */
     public static final int WRITE_DISPOSITION_UNSPECIFIED_VALUE = 0;
@@ -220,26 +228,50 @@ public final class PB_RDFService {
   public enum QueryResultForm
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
+     * <pre>
+     * Unspecified result form; inferred by the server from the parsed SPARQL query type.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_UNSPECIFIED = 0;</code>
      */
     QUERY_RESULT_FORM_UNSPECIFIED(0),
     /**
+     * <pre>
+     * Tabular variable bindings from a SPARQL SELECT query.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_SELECT = 1;</code>
      */
     QUERY_RESULT_FORM_SELECT(1),
     /**
+     * <pre>
+     * RDF triples and prefixes from a SPARQL CONSTRUCT or DESCRIBE query.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_GRAPH = 2;</code>
      */
     QUERY_RESULT_FORM_GRAPH(2),
     /**
+     * <pre>
+     * RDF quads and prefixes from a SPARQL CONSTRUCT dataset query.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_DATASET = 3;</code>
      */
     QUERY_RESULT_FORM_DATASET(3),
     /**
+     * <pre>
+     * Boolean outcome from a SPARQL ASK query.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_ASK = 4;</code>
      */
     QUERY_RESULT_FORM_ASK(4),
     /**
+     * <pre>
+     * JSON array result from an ARQ JSON query.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_JSON = 5;</code>
      */
     QUERY_RESULT_FORM_JSON(5),
@@ -256,26 +288,50 @@ public final class PB_RDFService {
         QueryResultForm.class.getName());
     }
     /**
+     * <pre>
+     * Unspecified result form; inferred by the server from the parsed SPARQL query type.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_UNSPECIFIED = 0;</code>
      */
     public static final int QUERY_RESULT_FORM_UNSPECIFIED_VALUE = 0;
     /**
+     * <pre>
+     * Tabular variable bindings from a SPARQL SELECT query.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_SELECT = 1;</code>
      */
     public static final int QUERY_RESULT_FORM_SELECT_VALUE = 1;
     /**
+     * <pre>
+     * RDF triples and prefixes from a SPARQL CONSTRUCT or DESCRIBE query.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_GRAPH = 2;</code>
      */
     public static final int QUERY_RESULT_FORM_GRAPH_VALUE = 2;
     /**
+     * <pre>
+     * RDF quads and prefixes from a SPARQL CONSTRUCT dataset query.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_DATASET = 3;</code>
      */
     public static final int QUERY_RESULT_FORM_DATASET_VALUE = 3;
     /**
+     * <pre>
+     * Boolean outcome from a SPARQL ASK query.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_ASK = 4;</code>
      */
     public static final int QUERY_RESULT_FORM_ASK_VALUE = 4;
     /**
+     * <pre>
+     * JSON array result from an ARQ JSON query.
+     * </pre>
+     *
      * <code>QUERY_RESULT_FORM_JSON = 5;</code>
      */
     public static final int QUERY_RESULT_FORM_JSON_VALUE = 5;
@@ -377,22 +433,42 @@ public final class PB_RDFService {
   public enum TransactionType
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
+     * <pre>
+     * Unspecified transaction type; defaults to TRANSACTION_TYPE_WRITE.
+     * </pre>
+     *
      * <code>TRANSACTION_TYPE_UNSPECIFIED = 0;</code>
      */
     TRANSACTION_TYPE_UNSPECIFIED(0),
     /**
+     * <pre>
+     * Read-only transaction that cannot be promoted to write.
+     * </pre>
+     *
      * <code>TRANSACTION_TYPE_READ = 1;</code>
      */
     TRANSACTION_TYPE_READ(1),
     /**
+     * <pre>
+     * Read-write transaction acquiring the dataset write lock on begin.
+     * </pre>
+     *
      * <code>TRANSACTION_TYPE_WRITE = 2;</code>
      */
     TRANSACTION_TYPE_WRITE(2),
     /**
+     * <pre>
+     * Read transaction that can be promoted to write if no conflicting write occurred.
+     * </pre>
+     *
      * <code>TRANSACTION_TYPE_READ_PROMOTE = 3;</code>
      */
     TRANSACTION_TYPE_READ_PROMOTE(3),
     /**
+     * <pre>
+     * Read transaction that can be promoted to write seeing any intermediate committed writes.
+     * </pre>
+     *
      * <code>TRANSACTION_TYPE_READ_COMMITTED_PROMOTE = 4;</code>
      */
     TRANSACTION_TYPE_READ_COMMITTED_PROMOTE(4),
@@ -409,22 +485,42 @@ public final class PB_RDFService {
         TransactionType.class.getName());
     }
     /**
+     * <pre>
+     * Unspecified transaction type; defaults to TRANSACTION_TYPE_WRITE.
+     * </pre>
+     *
      * <code>TRANSACTION_TYPE_UNSPECIFIED = 0;</code>
      */
     public static final int TRANSACTION_TYPE_UNSPECIFIED_VALUE = 0;
     /**
+     * <pre>
+     * Read-only transaction that cannot be promoted to write.
+     * </pre>
+     *
      * <code>TRANSACTION_TYPE_READ = 1;</code>
      */
     public static final int TRANSACTION_TYPE_READ_VALUE = 1;
     /**
+     * <pre>
+     * Read-write transaction acquiring the dataset write lock on begin.
+     * </pre>
+     *
      * <code>TRANSACTION_TYPE_WRITE = 2;</code>
      */
     public static final int TRANSACTION_TYPE_WRITE_VALUE = 2;
     /**
+     * <pre>
+     * Read transaction that can be promoted to write if no conflicting write occurred.
+     * </pre>
+     *
      * <code>TRANSACTION_TYPE_READ_PROMOTE = 3;</code>
      */
     public static final int TRANSACTION_TYPE_READ_PROMOTE_VALUE = 3;
     /**
+     * <pre>
+     * Read transaction that can be promoted to write seeing any intermediate committed writes.
+     * </pre>
+     *
      * <code>TRANSACTION_TYPE_READ_COMMITTED_PROMOTE = 4;</code>
      */
     public static final int TRANSACTION_TYPE_READ_COMMITTED_PROMOTE_VALUE = 4;
@@ -525,14 +621,26 @@ public final class PB_RDFService {
   public enum PromoteMode
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
+     * <pre>
+     * Unspecified promotion mode; defaults to PROMOTE_MODE_ISOLATED.
+     * </pre>
+     *
      * <code>PROMOTE_MODE_UNSPECIFIED = 0;</code>
      */
     PROMOTE_MODE_UNSPECIFIED(0),
     /**
+     * <pre>
+     * Isolated promotion; fails if any write transaction committed since this transaction began.
+     * </pre>
+     *
      * <code>PROMOTE_MODE_ISOLATED = 1;</code>
      */
     PROMOTE_MODE_ISOLATED(1),
     /**
+     * <pre>
+     * Read-committed promotion; succeeds and incorporates any intermediate committed writes.
+     * </pre>
+     *
      * <code>PROMOTE_MODE_READ_COMMITTED = 2;</code>
      */
     PROMOTE_MODE_READ_COMMITTED(2),
@@ -549,14 +657,26 @@ public final class PB_RDFService {
         PromoteMode.class.getName());
     }
     /**
+     * <pre>
+     * Unspecified promotion mode; defaults to PROMOTE_MODE_ISOLATED.
+     * </pre>
+     *
      * <code>PROMOTE_MODE_UNSPECIFIED = 0;</code>
      */
     public static final int PROMOTE_MODE_UNSPECIFIED_VALUE = 0;
     /**
+     * <pre>
+     * Isolated promotion; fails if any write transaction committed since this transaction began.
+     * </pre>
+     *
      * <code>PROMOTE_MODE_ISOLATED = 1;</code>
      */
     public static final int PROMOTE_MODE_ISOLATED_VALUE = 1;
     /**
+     * <pre>
+     * Read-committed promotion; succeeds and incorporates any intermediate committed writes.
+     * </pre>
+     *
      * <code>PROMOTE_MODE_READ_COMMITTED = 2;</code>
      */
     public static final int PROMOTE_MODE_READ_COMMITTED_VALUE = 2;
@@ -655,26 +775,50 @@ public final class PB_RDFService {
   public enum TransactionCommand
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
+     * <pre>
+     * Unspecified command.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_UNSPECIFIED = 0;</code>
      */
     TRANSACTION_COMMAND_UNSPECIFIED(0),
     /**
+     * <pre>
+     * Begin a new transaction bound to this bidirectional stream.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_BEGIN = 1;</code>
      */
     TRANSACTION_COMMAND_BEGIN(1),
     /**
+     * <pre>
+     * Promote the active read transaction on this stream to write mode.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_PROMOTE = 2;</code>
      */
     TRANSACTION_COMMAND_PROMOTE(2),
     /**
+     * <pre>
+     * Commit the active transaction on this stream and release its server session.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_COMMIT = 3;</code>
      */
     TRANSACTION_COMMAND_COMMIT(3),
     /**
+     * <pre>
+     * Abort the active transaction on this stream and release its server session.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_ABORT = 4;</code>
      */
     TRANSACTION_COMMAND_ABORT(4),
     /**
+     * <pre>
+     * End the active transaction session on this stream and close the stream.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_END = 5;</code>
      */
     TRANSACTION_COMMAND_END(5),
@@ -691,26 +835,50 @@ public final class PB_RDFService {
         TransactionCommand.class.getName());
     }
     /**
+     * <pre>
+     * Unspecified command.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_UNSPECIFIED = 0;</code>
      */
     public static final int TRANSACTION_COMMAND_UNSPECIFIED_VALUE = 0;
     /**
+     * <pre>
+     * Begin a new transaction bound to this bidirectional stream.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_BEGIN = 1;</code>
      */
     public static final int TRANSACTION_COMMAND_BEGIN_VALUE = 1;
     /**
+     * <pre>
+     * Promote the active read transaction on this stream to write mode.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_PROMOTE = 2;</code>
      */
     public static final int TRANSACTION_COMMAND_PROMOTE_VALUE = 2;
     /**
+     * <pre>
+     * Commit the active transaction on this stream and release its server session.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_COMMIT = 3;</code>
      */
     public static final int TRANSACTION_COMMAND_COMMIT_VALUE = 3;
     /**
+     * <pre>
+     * Abort the active transaction on this stream and release its server session.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_ABORT = 4;</code>
      */
     public static final int TRANSACTION_COMMAND_ABORT_VALUE = 4;
     /**
+     * <pre>
+     * End the active transaction session on this stream and close the stream.
+     * </pre>
+     *
      * <code>TRANSACTION_COMMAND_END = 5;</code>
      */
     public static final int TRANSACTION_COMMAND_END_VALUE = 5;
@@ -807,27 +975,47 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * True to target the dataset default graph.
+     * </pre>
+     *
      * <code>bool default_graph = 1;</code>
      * @return Whether the defaultGraph field is set.
      */
     boolean hasDefaultGraph();
     /**
+     * <pre>
+     * True to target the dataset default graph.
+     * </pre>
+     *
      * <code>bool default_graph = 1;</code>
      * @return The defaultGraph.
      */
     boolean getDefaultGraph();
 
     /**
+     * <pre>
+     * Named graph IRI or blank node term.
+     * </pre>
+     *
      * <code>.RDF_Term graph_name = 2;</code>
      * @return Whether the graphName field is set.
      */
     boolean hasGraphName();
     /**
+     * <pre>
+     * Named graph IRI or blank node term.
+     * </pre>
+     *
      * <code>.RDF_Term graph_name = 2;</code>
      * @return The graphName.
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getGraphName();
     /**
+     * <pre>
+     * Named graph IRI or blank node term.
+     * </pre>
+     *
      * <code>.RDF_Term graph_name = 2;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGraphNameOrBuilder();
@@ -919,6 +1107,10 @@ public final class PB_RDFService {
 
     public static final int DEFAULT_GRAPH_FIELD_NUMBER = 1;
     /**
+     * <pre>
+     * True to target the dataset default graph.
+     * </pre>
+     *
      * <code>bool default_graph = 1;</code>
      * @return Whether the defaultGraph field is set.
      */
@@ -927,6 +1119,10 @@ public final class PB_RDFService {
       return targetCase_ == 1;
     }
     /**
+     * <pre>
+     * True to target the dataset default graph.
+     * </pre>
+     *
      * <code>bool default_graph = 1;</code>
      * @return The defaultGraph.
      */
@@ -940,6 +1136,10 @@ public final class PB_RDFService {
 
     public static final int GRAPH_NAME_FIELD_NUMBER = 2;
     /**
+     * <pre>
+     * Named graph IRI or blank node term.
+     * </pre>
+     *
      * <code>.RDF_Term graph_name = 2;</code>
      * @return Whether the graphName field is set.
      */
@@ -948,6 +1148,10 @@ public final class PB_RDFService {
       return targetCase_ == 2;
     }
     /**
+     * <pre>
+     * Named graph IRI or blank node term.
+     * </pre>
+     *
      * <code>.RDF_Term graph_name = 2;</code>
      * @return The graphName.
      */
@@ -959,6 +1163,10 @@ public final class PB_RDFService {
       return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance();
     }
     /**
+     * <pre>
+     * Named graph IRI or blank node term.
+     * </pre>
+     *
      * <code>.RDF_Term graph_name = 2;</code>
      */
     @java.lang.Override
@@ -1341,6 +1549,10 @@ public final class PB_RDFService {
       private int bitField0_;
 
       /**
+       * <pre>
+       * True to target the dataset default graph.
+       * </pre>
+       *
        * <code>bool default_graph = 1;</code>
        * @return Whether the defaultGraph field is set.
        */
@@ -1348,6 +1560,10 @@ public final class PB_RDFService {
         return targetCase_ == 1;
       }
       /**
+       * <pre>
+       * True to target the dataset default graph.
+       * </pre>
+       *
        * <code>bool default_graph = 1;</code>
        * @return The defaultGraph.
        */
@@ -1358,6 +1574,10 @@ public final class PB_RDFService {
         return false;
       }
       /**
+       * <pre>
+       * True to target the dataset default graph.
+       * </pre>
+       *
        * <code>bool default_graph = 1;</code>
        * @param value The defaultGraph to set.
        * @return This builder for chaining.
@@ -1370,6 +1590,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * True to target the dataset default graph.
+       * </pre>
+       *
        * <code>bool default_graph = 1;</code>
        * @return This builder for chaining.
        */
@@ -1385,6 +1609,10 @@ public final class PB_RDFService {
       private com.google.protobuf.SingleFieldBuilder<
           org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> graphNameBuilder_;
       /**
+       * <pre>
+       * Named graph IRI or blank node term.
+       * </pre>
+       *
        * <code>.RDF_Term graph_name = 2;</code>
        * @return Whether the graphName field is set.
        */
@@ -1393,6 +1621,10 @@ public final class PB_RDFService {
         return targetCase_ == 2;
       }
       /**
+       * <pre>
+       * Named graph IRI or blank node term.
+       * </pre>
+       *
        * <code>.RDF_Term graph_name = 2;</code>
        * @return The graphName.
        */
@@ -1411,6 +1643,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Named graph IRI or blank node term.
+       * </pre>
+       *
        * <code>.RDF_Term graph_name = 2;</code>
        */
       public Builder setGraphName(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
@@ -1427,6 +1663,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Named graph IRI or blank node term.
+       * </pre>
+       *
        * <code>.RDF_Term graph_name = 2;</code>
        */
       public Builder setGraphName(
@@ -1441,6 +1681,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Named graph IRI or blank node term.
+       * </pre>
+       *
        * <code>.RDF_Term graph_name = 2;</code>
        */
       public Builder mergeGraphName(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
@@ -1464,6 +1708,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Named graph IRI or blank node term.
+       * </pre>
+       *
        * <code>.RDF_Term graph_name = 2;</code>
        */
       public Builder clearGraphName() {
@@ -1483,12 +1731,20 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Named graph IRI or blank node term.
+       * </pre>
+       *
        * <code>.RDF_Term graph_name = 2;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getGraphNameBuilder() {
         return getGraphNameFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Named graph IRI or blank node term.
+       * </pre>
+       *
        * <code>.RDF_Term graph_name = 2;</code>
        */
       @java.lang.Override
@@ -1503,6 +1759,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Named graph IRI or blank node term.
+       * </pre>
+       *
        * <code>.RDF_Term graph_name = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
@@ -1653,11 +1913,19 @@ public final class PB_RDFService {
     boolean getEntireDataset();
 
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the read within.
+     * </pre>
+     *
      * <code>string txn_id = 4;</code>
      * @return The txnId.
      */
     java.lang.String getTxnId();
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the read within.
+     * </pre>
+     *
      * <code>string txn_id = 4;</code>
      * @return The bytes for txnId.
      */
@@ -1871,6 +2139,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private volatile java.lang.Object txnId_ = "";
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the read within.
+     * </pre>
+     *
      * <code>string txn_id = 4;</code>
      * @return The txnId.
      */
@@ -1888,6 +2160,10 @@ public final class PB_RDFService {
       }
     }
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the read within.
+     * </pre>
+     *
      * <code>string txn_id = 4;</code>
      * @return The bytes for txnId.
      */
@@ -2750,6 +3026,10 @@ public final class PB_RDFService {
 
       private java.lang.Object txnId_ = "";
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the read within.
+       * </pre>
+       *
        * <code>string txn_id = 4;</code>
        * @return The txnId.
        */
@@ -2766,6 +3046,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the read within.
+       * </pre>
+       *
        * <code>string txn_id = 4;</code>
        * @return The bytes for txnId.
        */
@@ -2783,6 +3067,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the read within.
+       * </pre>
+       *
        * <code>string txn_id = 4;</code>
        * @param value The txnId to set.
        * @return This builder for chaining.
@@ -2796,6 +3084,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the read within.
+       * </pre>
+       *
        * <code>string txn_id = 4;</code>
        * @return This builder for chaining.
        */
@@ -2806,6 +3098,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the read within.
+       * </pre>
+       *
        * <code>string txn_id = 4;</code>
        * @param value The bytes for txnId to set.
        * @return This builder for chaining.
@@ -2876,24 +3172,44 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Ordered batch of RDF stream rows in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_StreamRow rows = 1;</code>
      */
     java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow> 
         getRowsList();
     /**
+     * <pre>
+     * Ordered batch of RDF stream rows in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_StreamRow rows = 1;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow getRows(int index);
     /**
+     * <pre>
+     * Ordered batch of RDF stream rows in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_StreamRow rows = 1;</code>
      */
     int getRowsCount();
     /**
+     * <pre>
+     * Ordered batch of RDF stream rows in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_StreamRow rows = 1;</code>
      */
     java.util.List<? extends org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRowOrBuilder> 
         getRowsOrBuilderList();
     /**
+     * <pre>
+     * Ordered batch of RDF stream rows in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_StreamRow rows = 1;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRowOrBuilder getRowsOrBuilder(
@@ -2945,6 +3261,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow> rows_;
     /**
+     * <pre>
+     * Ordered batch of RDF stream rows in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_StreamRow rows = 1;</code>
      */
     @java.lang.Override
@@ -2952,6 +3272,10 @@ public final class PB_RDFService {
       return rows_;
     }
     /**
+     * <pre>
+     * Ordered batch of RDF stream rows in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_StreamRow rows = 1;</code>
      */
     @java.lang.Override
@@ -2960,6 +3284,10 @@ public final class PB_RDFService {
       return rows_;
     }
     /**
+     * <pre>
+     * Ordered batch of RDF stream rows in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_StreamRow rows = 1;</code>
      */
     @java.lang.Override
@@ -2967,6 +3295,10 @@ public final class PB_RDFService {
       return rows_.size();
     }
     /**
+     * <pre>
+     * Ordered batch of RDF stream rows in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_StreamRow rows = 1;</code>
      */
     @java.lang.Override
@@ -2974,6 +3306,10 @@ public final class PB_RDFService {
       return rows_.get(index);
     }
     /**
+     * <pre>
+     * Ordered batch of RDF stream rows in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_StreamRow rows = 1;</code>
      */
     @java.lang.Override
@@ -3341,6 +3677,10 @@ public final class PB_RDFService {
           org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRowOrBuilder> rowsBuilder_;
 
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow> getRowsList() {
@@ -3351,6 +3691,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public int getRowsCount() {
@@ -3361,6 +3705,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow getRows(int index) {
@@ -3371,6 +3719,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public Builder setRows(
@@ -3388,6 +3740,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public Builder setRows(
@@ -3402,6 +3758,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public Builder addRows(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow value) {
@@ -3418,6 +3778,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public Builder addRows(
@@ -3435,6 +3799,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public Builder addRows(
@@ -3449,6 +3817,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public Builder addRows(
@@ -3463,6 +3835,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public Builder addAllRows(
@@ -3478,6 +3854,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public Builder clearRows() {
@@ -3491,6 +3871,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public Builder removeRows(int index) {
@@ -3504,6 +3888,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.Builder getRowsBuilder(
@@ -3511,6 +3899,10 @@ public final class PB_RDFService {
         return getRowsFieldBuilder().getBuilder(index);
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRowOrBuilder getRowsOrBuilder(
@@ -3521,6 +3913,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public java.util.List<? extends org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRowOrBuilder> 
@@ -3532,6 +3928,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.Builder addRowsBuilder() {
@@ -3539,6 +3939,10 @@ public final class PB_RDFService {
             org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.getDefaultInstance());
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.Builder addRowsBuilder(
@@ -3547,6 +3951,10 @@ public final class PB_RDFService {
             index, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.getDefaultInstance());
       }
       /**
+       * <pre>
+       * Ordered batch of RDF stream rows in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_StreamRow rows = 1;</code>
        */
       public java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.Builder> 
@@ -3624,48 +4032,84 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * True when writing to or clearing the entire dataset.
+     * </pre>
+     *
      * <code>bool entire_dataset = 1;</code>
      * @return Whether the entireDataset field is set.
      */
     boolean hasEntireDataset();
     /**
+     * <pre>
+     * True when writing to or clearing the entire dataset.
+     * </pre>
+     *
      * <code>bool entire_dataset = 1;</code>
      * @return The entireDataset.
      */
     boolean getEntireDataset();
 
     /**
+     * <pre>
+     * Target default or named graph for graph-scoped writes or deletes.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
      * @return Whether the graph field is set.
      */
     boolean hasGraph();
     /**
+     * <pre>
+     * Target default or named graph for graph-scoped writes or deletes.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
      * @return The graph.
      */
     org.apache.jena.grpc.wire.PB_RDFService.GraphTarget getGraph();
     /**
+     * <pre>
+     * Target default or named graph for graph-scoped writes or deletes.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
      */
     org.apache.jena.grpc.wire.PB_RDFService.GraphTargetOrBuilder getGraphOrBuilder();
 
     /**
+     * <pre>
+     * Write disposition controlling whether to append, replace, or clear the target.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.WriteDisposition disposition = 3;</code>
      * @return The enum numeric value on the wire for disposition.
      */
     int getDispositionValue();
     /**
+     * <pre>
+     * Write disposition controlling whether to append, replace, or clear the target.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.WriteDisposition disposition = 3;</code>
      * @return The disposition.
      */
     org.apache.jena.grpc.wire.PB_RDFService.WriteDisposition getDisposition();
 
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the write within.
+     * </pre>
+     *
      * <code>string txn_id = 4;</code>
      * @return The txnId.
      */
     java.lang.String getTxnId();
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the write within.
+     * </pre>
+     *
      * <code>string txn_id = 4;</code>
      * @return The bytes for txnId.
      */
@@ -3761,6 +4205,10 @@ public final class PB_RDFService {
 
     public static final int ENTIRE_DATASET_FIELD_NUMBER = 1;
     /**
+     * <pre>
+     * True when writing to or clearing the entire dataset.
+     * </pre>
+     *
      * <code>bool entire_dataset = 1;</code>
      * @return Whether the entireDataset field is set.
      */
@@ -3769,6 +4217,10 @@ public final class PB_RDFService {
       return targetCase_ == 1;
     }
     /**
+     * <pre>
+     * True when writing to or clearing the entire dataset.
+     * </pre>
+     *
      * <code>bool entire_dataset = 1;</code>
      * @return The entireDataset.
      */
@@ -3782,6 +4234,10 @@ public final class PB_RDFService {
 
     public static final int GRAPH_FIELD_NUMBER = 2;
     /**
+     * <pre>
+     * Target default or named graph for graph-scoped writes or deletes.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
      * @return Whether the graph field is set.
      */
@@ -3790,6 +4246,10 @@ public final class PB_RDFService {
       return targetCase_ == 2;
     }
     /**
+     * <pre>
+     * Target default or named graph for graph-scoped writes or deletes.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
      * @return The graph.
      */
@@ -3801,6 +4261,10 @@ public final class PB_RDFService {
       return org.apache.jena.grpc.wire.PB_RDFService.GraphTarget.getDefaultInstance();
     }
     /**
+     * <pre>
+     * Target default or named graph for graph-scoped writes or deletes.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
      */
     @java.lang.Override
@@ -3814,6 +4278,10 @@ public final class PB_RDFService {
     public static final int DISPOSITION_FIELD_NUMBER = 3;
     private int disposition_ = 0;
     /**
+     * <pre>
+     * Write disposition controlling whether to append, replace, or clear the target.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.WriteDisposition disposition = 3;</code>
      * @return The enum numeric value on the wire for disposition.
      */
@@ -3821,6 +4289,10 @@ public final class PB_RDFService {
       return disposition_;
     }
     /**
+     * <pre>
+     * Write disposition controlling whether to append, replace, or clear the target.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.WriteDisposition disposition = 3;</code>
      * @return The disposition.
      */
@@ -3833,6 +4305,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private volatile java.lang.Object txnId_ = "";
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the write within.
+     * </pre>
+     *
      * <code>string txn_id = 4;</code>
      * @return The txnId.
      */
@@ -3850,6 +4326,10 @@ public final class PB_RDFService {
       }
     }
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the write within.
+     * </pre>
+     *
      * <code>string txn_id = 4;</code>
      * @return The bytes for txnId.
      */
@@ -4286,6 +4766,10 @@ public final class PB_RDFService {
       private int bitField0_;
 
       /**
+       * <pre>
+       * True when writing to or clearing the entire dataset.
+       * </pre>
+       *
        * <code>bool entire_dataset = 1;</code>
        * @return Whether the entireDataset field is set.
        */
@@ -4293,6 +4777,10 @@ public final class PB_RDFService {
         return targetCase_ == 1;
       }
       /**
+       * <pre>
+       * True when writing to or clearing the entire dataset.
+       * </pre>
+       *
        * <code>bool entire_dataset = 1;</code>
        * @return The entireDataset.
        */
@@ -4303,6 +4791,10 @@ public final class PB_RDFService {
         return false;
       }
       /**
+       * <pre>
+       * True when writing to or clearing the entire dataset.
+       * </pre>
+       *
        * <code>bool entire_dataset = 1;</code>
        * @param value The entireDataset to set.
        * @return This builder for chaining.
@@ -4315,6 +4807,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * True when writing to or clearing the entire dataset.
+       * </pre>
+       *
        * <code>bool entire_dataset = 1;</code>
        * @return This builder for chaining.
        */
@@ -4330,6 +4826,10 @@ public final class PB_RDFService {
       private com.google.protobuf.SingleFieldBuilder<
           org.apache.jena.grpc.wire.PB_RDFService.GraphTarget, org.apache.jena.grpc.wire.PB_RDFService.GraphTarget.Builder, org.apache.jena.grpc.wire.PB_RDFService.GraphTargetOrBuilder> graphBuilder_;
       /**
+       * <pre>
+       * Target default or named graph for graph-scoped writes or deletes.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
        * @return Whether the graph field is set.
        */
@@ -4338,6 +4838,10 @@ public final class PB_RDFService {
         return targetCase_ == 2;
       }
       /**
+       * <pre>
+       * Target default or named graph for graph-scoped writes or deletes.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
        * @return The graph.
        */
@@ -4356,6 +4860,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Target default or named graph for graph-scoped writes or deletes.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
        */
       public Builder setGraph(org.apache.jena.grpc.wire.PB_RDFService.GraphTarget value) {
@@ -4372,6 +4880,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Target default or named graph for graph-scoped writes or deletes.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
        */
       public Builder setGraph(
@@ -4386,6 +4898,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Target default or named graph for graph-scoped writes or deletes.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
        */
       public Builder mergeGraph(org.apache.jena.grpc.wire.PB_RDFService.GraphTarget value) {
@@ -4409,6 +4925,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Target default or named graph for graph-scoped writes or deletes.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
        */
       public Builder clearGraph() {
@@ -4428,12 +4948,20 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Target default or named graph for graph-scoped writes or deletes.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
        */
       public org.apache.jena.grpc.wire.PB_RDFService.GraphTarget.Builder getGraphBuilder() {
         return getGraphFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Target default or named graph for graph-scoped writes or deletes.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
        */
       @java.lang.Override
@@ -4448,6 +4976,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Target default or named graph for graph-scoped writes or deletes.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
@@ -4471,6 +5003,10 @@ public final class PB_RDFService {
 
       private int disposition_ = 0;
       /**
+       * <pre>
+       * Write disposition controlling whether to append, replace, or clear the target.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteDisposition disposition = 3;</code>
        * @return The enum numeric value on the wire for disposition.
        */
@@ -4478,6 +5014,10 @@ public final class PB_RDFService {
         return disposition_;
       }
       /**
+       * <pre>
+       * Write disposition controlling whether to append, replace, or clear the target.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteDisposition disposition = 3;</code>
        * @param value The enum numeric value on the wire for disposition to set.
        * @return This builder for chaining.
@@ -4489,6 +5029,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Write disposition controlling whether to append, replace, or clear the target.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteDisposition disposition = 3;</code>
        * @return The disposition.
        */
@@ -4498,6 +5042,10 @@ public final class PB_RDFService {
         return result == null ? org.apache.jena.grpc.wire.PB_RDFService.WriteDisposition.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * Write disposition controlling whether to append, replace, or clear the target.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteDisposition disposition = 3;</code>
        * @param value The disposition to set.
        * @return This builder for chaining.
@@ -4512,6 +5060,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Write disposition controlling whether to append, replace, or clear the target.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteDisposition disposition = 3;</code>
        * @return This builder for chaining.
        */
@@ -4524,6 +5076,10 @@ public final class PB_RDFService {
 
       private java.lang.Object txnId_ = "";
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the write within.
+       * </pre>
+       *
        * <code>string txn_id = 4;</code>
        * @return The txnId.
        */
@@ -4540,6 +5096,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the write within.
+       * </pre>
+       *
        * <code>string txn_id = 4;</code>
        * @return The bytes for txnId.
        */
@@ -4557,6 +5117,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the write within.
+       * </pre>
+       *
        * <code>string txn_id = 4;</code>
        * @param value The txnId to set.
        * @return This builder for chaining.
@@ -4570,6 +5134,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the write within.
+       * </pre>
+       *
        * <code>string txn_id = 4;</code>
        * @return This builder for chaining.
        */
@@ -4580,6 +5148,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the write within.
+       * </pre>
+       *
        * <code>string txn_id = 4;</code>
        * @param value The bytes for txnId to set.
        * @return This builder for chaining.
@@ -4650,46 +5222,82 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Initial header selecting target, write disposition, and optional transaction ID.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
      * @return Whether the header field is set.
      */
     boolean hasHeader();
     /**
+     * <pre>
+     * Initial header selecting target, write disposition, and optional transaction ID.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
      * @return The header.
      */
     org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeader getHeader();
     /**
+     * <pre>
+     * Initial header selecting target, write disposition, and optional transaction ID.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
      */
     org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeaderOrBuilder getHeaderOrBuilder();
 
     /**
+     * <pre>
+     * Batched RDF stream rows (prefixes, triples, or quads).
+     * </pre>
+     *
      * <code>.RDF_Stream batch = 2;</code>
      * @return Whether the batch field is set.
      */
     boolean hasBatch();
     /**
+     * <pre>
+     * Batched RDF stream rows (prefixes, triples, or quads).
+     * </pre>
+     *
      * <code>.RDF_Stream batch = 2;</code>
      * @return The batch.
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream getBatch();
     /**
+     * <pre>
+     * Batched RDF stream rows (prefixes, triples, or quads).
+     * </pre>
+     *
      * <code>.RDF_Stream batch = 2;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamOrBuilder getBatchOrBuilder();
 
     /**
+     * <pre>
+     * Single RDF stream row (prefix, triple, or quad).
+     * </pre>
+     *
      * <code>.RDF_StreamRow row = 3;</code>
      * @return Whether the row field is set.
      */
     boolean hasRow();
     /**
+     * <pre>
+     * Single RDF stream row (prefix, triple, or quad).
+     * </pre>
+     *
      * <code>.RDF_StreamRow row = 3;</code>
      * @return The row.
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow getRow();
     /**
+     * <pre>
+     * Single RDF stream row (prefix, triple, or quad).
+     * </pre>
+     *
      * <code>.RDF_StreamRow row = 3;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRowOrBuilder getRowOrBuilder();
@@ -4783,6 +5391,10 @@ public final class PB_RDFService {
 
     public static final int HEADER_FIELD_NUMBER = 1;
     /**
+     * <pre>
+     * Initial header selecting target, write disposition, and optional transaction ID.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
      * @return Whether the header field is set.
      */
@@ -4791,6 +5403,10 @@ public final class PB_RDFService {
       return itemCase_ == 1;
     }
     /**
+     * <pre>
+     * Initial header selecting target, write disposition, and optional transaction ID.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
      * @return The header.
      */
@@ -4802,6 +5418,10 @@ public final class PB_RDFService {
       return org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeader.getDefaultInstance();
     }
     /**
+     * <pre>
+     * Initial header selecting target, write disposition, and optional transaction ID.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
      */
     @java.lang.Override
@@ -4814,6 +5434,10 @@ public final class PB_RDFService {
 
     public static final int BATCH_FIELD_NUMBER = 2;
     /**
+     * <pre>
+     * Batched RDF stream rows (prefixes, triples, or quads).
+     * </pre>
+     *
      * <code>.RDF_Stream batch = 2;</code>
      * @return Whether the batch field is set.
      */
@@ -4822,6 +5446,10 @@ public final class PB_RDFService {
       return itemCase_ == 2;
     }
     /**
+     * <pre>
+     * Batched RDF stream rows (prefixes, triples, or quads).
+     * </pre>
+     *
      * <code>.RDF_Stream batch = 2;</code>
      * @return The batch.
      */
@@ -4833,6 +5461,10 @@ public final class PB_RDFService {
       return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream.getDefaultInstance();
     }
     /**
+     * <pre>
+     * Batched RDF stream rows (prefixes, triples, or quads).
+     * </pre>
+     *
      * <code>.RDF_Stream batch = 2;</code>
      */
     @java.lang.Override
@@ -4845,6 +5477,10 @@ public final class PB_RDFService {
 
     public static final int ROW_FIELD_NUMBER = 3;
     /**
+     * <pre>
+     * Single RDF stream row (prefix, triple, or quad).
+     * </pre>
+     *
      * <code>.RDF_StreamRow row = 3;</code>
      * @return Whether the row field is set.
      */
@@ -4853,6 +5489,10 @@ public final class PB_RDFService {
       return itemCase_ == 3;
     }
     /**
+     * <pre>
+     * Single RDF stream row (prefix, triple, or quad).
+     * </pre>
+     *
      * <code>.RDF_StreamRow row = 3;</code>
      * @return The row.
      */
@@ -4864,6 +5504,10 @@ public final class PB_RDFService {
       return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.getDefaultInstance();
     }
     /**
+     * <pre>
+     * Single RDF stream row (prefix, triple, or quad).
+     * </pre>
+     *
      * <code>.RDF_StreamRow row = 3;</code>
      */
     @java.lang.Override
@@ -5287,6 +5931,10 @@ public final class PB_RDFService {
       private com.google.protobuf.SingleFieldBuilder<
           org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeader, org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeader.Builder, org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeaderOrBuilder> headerBuilder_;
       /**
+       * <pre>
+       * Initial header selecting target, write disposition, and optional transaction ID.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
        * @return Whether the header field is set.
        */
@@ -5295,6 +5943,10 @@ public final class PB_RDFService {
         return itemCase_ == 1;
       }
       /**
+       * <pre>
+       * Initial header selecting target, write disposition, and optional transaction ID.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
        * @return The header.
        */
@@ -5313,6 +5965,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Initial header selecting target, write disposition, and optional transaction ID.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
        */
       public Builder setHeader(org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeader value) {
@@ -5329,6 +5985,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Initial header selecting target, write disposition, and optional transaction ID.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
        */
       public Builder setHeader(
@@ -5343,6 +6003,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Initial header selecting target, write disposition, and optional transaction ID.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
        */
       public Builder mergeHeader(org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeader value) {
@@ -5366,6 +6030,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Initial header selecting target, write disposition, and optional transaction ID.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
        */
       public Builder clearHeader() {
@@ -5385,12 +6053,20 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Initial header selecting target, write disposition, and optional transaction ID.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
        */
       public org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeader.Builder getHeaderBuilder() {
         return getHeaderFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Initial header selecting target, write disposition, and optional transaction ID.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
        */
       @java.lang.Override
@@ -5405,6 +6081,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Initial header selecting target, write disposition, and optional transaction ID.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.WriteRdfHeader header = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
@@ -5429,6 +6109,10 @@ public final class PB_RDFService {
       private com.google.protobuf.SingleFieldBuilder<
           org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamOrBuilder> batchBuilder_;
       /**
+       * <pre>
+       * Batched RDF stream rows (prefixes, triples, or quads).
+       * </pre>
+       *
        * <code>.RDF_Stream batch = 2;</code>
        * @return Whether the batch field is set.
        */
@@ -5437,6 +6121,10 @@ public final class PB_RDFService {
         return itemCase_ == 2;
       }
       /**
+       * <pre>
+       * Batched RDF stream rows (prefixes, triples, or quads).
+       * </pre>
+       *
        * <code>.RDF_Stream batch = 2;</code>
        * @return The batch.
        */
@@ -5455,6 +6143,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Batched RDF stream rows (prefixes, triples, or quads).
+       * </pre>
+       *
        * <code>.RDF_Stream batch = 2;</code>
        */
       public Builder setBatch(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream value) {
@@ -5471,6 +6163,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Batched RDF stream rows (prefixes, triples, or quads).
+       * </pre>
+       *
        * <code>.RDF_Stream batch = 2;</code>
        */
       public Builder setBatch(
@@ -5485,6 +6181,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Batched RDF stream rows (prefixes, triples, or quads).
+       * </pre>
+       *
        * <code>.RDF_Stream batch = 2;</code>
        */
       public Builder mergeBatch(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream value) {
@@ -5508,6 +6208,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Batched RDF stream rows (prefixes, triples, or quads).
+       * </pre>
+       *
        * <code>.RDF_Stream batch = 2;</code>
        */
       public Builder clearBatch() {
@@ -5527,12 +6231,20 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Batched RDF stream rows (prefixes, triples, or quads).
+       * </pre>
+       *
        * <code>.RDF_Stream batch = 2;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream.Builder getBatchBuilder() {
         return getBatchFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Batched RDF stream rows (prefixes, triples, or quads).
+       * </pre>
+       *
        * <code>.RDF_Stream batch = 2;</code>
        */
       @java.lang.Override
@@ -5547,6 +6259,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Batched RDF stream rows (prefixes, triples, or quads).
+       * </pre>
+       *
        * <code>.RDF_Stream batch = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
@@ -5571,6 +6287,10 @@ public final class PB_RDFService {
       private com.google.protobuf.SingleFieldBuilder<
           org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRowOrBuilder> rowBuilder_;
       /**
+       * <pre>
+       * Single RDF stream row (prefix, triple, or quad).
+       * </pre>
+       *
        * <code>.RDF_StreamRow row = 3;</code>
        * @return Whether the row field is set.
        */
@@ -5579,6 +6299,10 @@ public final class PB_RDFService {
         return itemCase_ == 3;
       }
       /**
+       * <pre>
+       * Single RDF stream row (prefix, triple, or quad).
+       * </pre>
+       *
        * <code>.RDF_StreamRow row = 3;</code>
        * @return The row.
        */
@@ -5597,6 +6321,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Single RDF stream row (prefix, triple, or quad).
+       * </pre>
+       *
        * <code>.RDF_StreamRow row = 3;</code>
        */
       public Builder setRow(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow value) {
@@ -5613,6 +6341,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Single RDF stream row (prefix, triple, or quad).
+       * </pre>
+       *
        * <code>.RDF_StreamRow row = 3;</code>
        */
       public Builder setRow(
@@ -5627,6 +6359,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Single RDF stream row (prefix, triple, or quad).
+       * </pre>
+       *
        * <code>.RDF_StreamRow row = 3;</code>
        */
       public Builder mergeRow(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow value) {
@@ -5650,6 +6386,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Single RDF stream row (prefix, triple, or quad).
+       * </pre>
+       *
        * <code>.RDF_StreamRow row = 3;</code>
        */
       public Builder clearRow() {
@@ -5669,12 +6409,20 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Single RDF stream row (prefix, triple, or quad).
+       * </pre>
+       *
        * <code>.RDF_StreamRow row = 3;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.Builder getRowBuilder() {
         return getRowFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Single RDF stream row (prefix, triple, or quad).
+       * </pre>
+       *
        * <code>.RDF_StreamRow row = 3;</code>
        */
       @java.lang.Override
@@ -5689,6 +6437,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Single RDF stream row (prefix, triple, or quad).
+       * </pre>
+       *
        * <code>.RDF_StreamRow row = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
@@ -5766,12 +6518,20 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Total number of triples and quads written during the stream.
+     * </pre>
+     *
      * <code>int64 quad_count = 1;</code>
      * @return The quadCount.
      */
     long getQuadCount();
 
     /**
+     * <pre>
+     * Total number of prefix declarations written during the stream.
+     * </pre>
+     *
      * <code>int64 prefix_count = 2;</code>
      * @return The prefixCount.
      */
@@ -5821,6 +6581,10 @@ public final class PB_RDFService {
     public static final int QUAD_COUNT_FIELD_NUMBER = 1;
     private long quadCount_ = 0L;
     /**
+     * <pre>
+     * Total number of triples and quads written during the stream.
+     * </pre>
+     *
      * <code>int64 quad_count = 1;</code>
      * @return The quadCount.
      */
@@ -5832,6 +6596,10 @@ public final class PB_RDFService {
     public static final int PREFIX_COUNT_FIELD_NUMBER = 2;
     private long prefixCount_ = 0L;
     /**
+     * <pre>
+     * Total number of prefix declarations written during the stream.
+     * </pre>
+     *
      * <code>int64 prefix_count = 2;</code>
      * @return The prefixCount.
      */
@@ -6164,6 +6932,10 @@ public final class PB_RDFService {
 
       private long quadCount_ ;
       /**
+       * <pre>
+       * Total number of triples and quads written during the stream.
+       * </pre>
+       *
        * <code>int64 quad_count = 1;</code>
        * @return The quadCount.
        */
@@ -6172,6 +6944,10 @@ public final class PB_RDFService {
         return quadCount_;
       }
       /**
+       * <pre>
+       * Total number of triples and quads written during the stream.
+       * </pre>
+       *
        * <code>int64 quad_count = 1;</code>
        * @param value The quadCount to set.
        * @return This builder for chaining.
@@ -6184,6 +6960,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Total number of triples and quads written during the stream.
+       * </pre>
+       *
        * <code>int64 quad_count = 1;</code>
        * @return This builder for chaining.
        */
@@ -6196,6 +6976,10 @@ public final class PB_RDFService {
 
       private long prefixCount_ ;
       /**
+       * <pre>
+       * Total number of prefix declarations written during the stream.
+       * </pre>
+       *
        * <code>int64 prefix_count = 2;</code>
        * @return The prefixCount.
        */
@@ -6204,6 +6988,10 @@ public final class PB_RDFService {
         return prefixCount_;
       }
       /**
+       * <pre>
+       * Total number of prefix declarations written during the stream.
+       * </pre>
+       *
        * <code>int64 prefix_count = 2;</code>
        * @param value The prefixCount to set.
        * @return This builder for chaining.
@@ -6216,6 +7004,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Total number of prefix declarations written during the stream.
+       * </pre>
+       *
        * <code>int64 prefix_count = 2;</code>
        * @return This builder for chaining.
        */
@@ -6282,11 +7074,19 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * SPARQL query string.
+     * </pre>
+     *
      * <code>string query = 1;</code>
      * @return The query.
      */
     java.lang.String getQuery();
     /**
+     * <pre>
+     * SPARQL query string.
+     * </pre>
+     *
      * <code>string query = 1;</code>
      * @return The bytes for query.
      */
@@ -6294,11 +7094,19 @@ public final class PB_RDFService {
         getQueryBytes();
 
     /**
+     * <pre>
+     * Optional base URI for resolving relative IRIs in the query.
+     * </pre>
+     *
      * <code>string base_uri = 2;</code>
      * @return The baseUri.
      */
     java.lang.String getBaseUri();
     /**
+     * <pre>
+     * Optional base URI for resolving relative IRIs in the query.
+     * </pre>
+     *
      * <code>string base_uri = 2;</code>
      * @return The bytes for baseUri.
      */
@@ -6306,23 +7114,39 @@ public final class PB_RDFService {
         getBaseUriBytes();
 
     /**
+     * <pre>
+     * Optional default graph URIs overriding the dataset default graph.
+     * </pre>
+     *
      * <code>repeated string default_graph_uris = 3;</code>
      * @return A list containing the defaultGraphUris.
      */
     java.util.List<java.lang.String>
         getDefaultGraphUrisList();
     /**
+     * <pre>
+     * Optional default graph URIs overriding the dataset default graph.
+     * </pre>
+     *
      * <code>repeated string default_graph_uris = 3;</code>
      * @return The count of defaultGraphUris.
      */
     int getDefaultGraphUrisCount();
     /**
+     * <pre>
+     * Optional default graph URIs overriding the dataset default graph.
+     * </pre>
+     *
      * <code>repeated string default_graph_uris = 3;</code>
      * @param index The index of the element to return.
      * @return The defaultGraphUris at the given index.
      */
     java.lang.String getDefaultGraphUris(int index);
     /**
+     * <pre>
+     * Optional default graph URIs overriding the dataset default graph.
+     * </pre>
+     *
      * <code>repeated string default_graph_uris = 3;</code>
      * @param index The index of the value to return.
      * @return The bytes of the defaultGraphUris at the given index.
@@ -6331,23 +7155,39 @@ public final class PB_RDFService {
         getDefaultGraphUrisBytes(int index);
 
     /**
+     * <pre>
+     * Optional named graph URIs restricting the query dataset.
+     * </pre>
+     *
      * <code>repeated string named_graph_uris = 4;</code>
      * @return A list containing the namedGraphUris.
      */
     java.util.List<java.lang.String>
         getNamedGraphUrisList();
     /**
+     * <pre>
+     * Optional named graph URIs restricting the query dataset.
+     * </pre>
+     *
      * <code>repeated string named_graph_uris = 4;</code>
      * @return The count of namedGraphUris.
      */
     int getNamedGraphUrisCount();
     /**
+     * <pre>
+     * Optional named graph URIs restricting the query dataset.
+     * </pre>
+     *
      * <code>repeated string named_graph_uris = 4;</code>
      * @param index The index of the element to return.
      * @return The namedGraphUris at the given index.
      */
     java.lang.String getNamedGraphUris(int index);
     /**
+     * <pre>
+     * Optional named graph URIs restricting the query dataset.
+     * </pre>
+     *
      * <code>repeated string named_graph_uris = 4;</code>
      * @param index The index of the value to return.
      * @return The bytes of the namedGraphUris at the given index.
@@ -6356,22 +7196,38 @@ public final class PB_RDFService {
         getNamedGraphUrisBytes(int index);
 
     /**
+     * <pre>
+     * Optional expected query result form.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.QueryResultForm result_form = 5;</code>
      * @return The enum numeric value on the wire for resultForm.
      */
     int getResultFormValue();
     /**
+     * <pre>
+     * Optional expected query result form.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.QueryResultForm result_form = 5;</code>
      * @return The resultForm.
      */
     org.apache.jena.grpc.wire.PB_RDFService.QueryResultForm getResultForm();
 
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the query within.
+     * </pre>
+     *
      * <code>string txn_id = 6;</code>
      * @return The txnId.
      */
     java.lang.String getTxnId();
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the query within.
+     * </pre>
+     *
      * <code>string txn_id = 6;</code>
      * @return The bytes for txnId.
      */
@@ -6431,6 +7287,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private volatile java.lang.Object query_ = "";
     /**
+     * <pre>
+     * SPARQL query string.
+     * </pre>
+     *
      * <code>string query = 1;</code>
      * @return The query.
      */
@@ -6448,6 +7308,10 @@ public final class PB_RDFService {
       }
     }
     /**
+     * <pre>
+     * SPARQL query string.
+     * </pre>
+     *
      * <code>string query = 1;</code>
      * @return The bytes for query.
      */
@@ -6470,6 +7334,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private volatile java.lang.Object baseUri_ = "";
     /**
+     * <pre>
+     * Optional base URI for resolving relative IRIs in the query.
+     * </pre>
+     *
      * <code>string base_uri = 2;</code>
      * @return The baseUri.
      */
@@ -6487,6 +7355,10 @@ public final class PB_RDFService {
       }
     }
     /**
+     * <pre>
+     * Optional base URI for resolving relative IRIs in the query.
+     * </pre>
+     *
      * <code>string base_uri = 2;</code>
      * @return The bytes for baseUri.
      */
@@ -6510,6 +7382,10 @@ public final class PB_RDFService {
     private com.google.protobuf.LazyStringArrayList defaultGraphUris_ =
         com.google.protobuf.LazyStringArrayList.emptyList();
     /**
+     * <pre>
+     * Optional default graph URIs overriding the dataset default graph.
+     * </pre>
+     *
      * <code>repeated string default_graph_uris = 3;</code>
      * @return A list containing the defaultGraphUris.
      */
@@ -6518,6 +7394,10 @@ public final class PB_RDFService {
       return defaultGraphUris_;
     }
     /**
+     * <pre>
+     * Optional default graph URIs overriding the dataset default graph.
+     * </pre>
+     *
      * <code>repeated string default_graph_uris = 3;</code>
      * @return The count of defaultGraphUris.
      */
@@ -6525,6 +7405,10 @@ public final class PB_RDFService {
       return defaultGraphUris_.size();
     }
     /**
+     * <pre>
+     * Optional default graph URIs overriding the dataset default graph.
+     * </pre>
+     *
      * <code>repeated string default_graph_uris = 3;</code>
      * @param index The index of the element to return.
      * @return The defaultGraphUris at the given index.
@@ -6533,6 +7417,10 @@ public final class PB_RDFService {
       return defaultGraphUris_.get(index);
     }
     /**
+     * <pre>
+     * Optional default graph URIs overriding the dataset default graph.
+     * </pre>
+     *
      * <code>repeated string default_graph_uris = 3;</code>
      * @param index The index of the value to return.
      * @return The bytes of the defaultGraphUris at the given index.
@@ -6547,6 +7435,10 @@ public final class PB_RDFService {
     private com.google.protobuf.LazyStringArrayList namedGraphUris_ =
         com.google.protobuf.LazyStringArrayList.emptyList();
     /**
+     * <pre>
+     * Optional named graph URIs restricting the query dataset.
+     * </pre>
+     *
      * <code>repeated string named_graph_uris = 4;</code>
      * @return A list containing the namedGraphUris.
      */
@@ -6555,6 +7447,10 @@ public final class PB_RDFService {
       return namedGraphUris_;
     }
     /**
+     * <pre>
+     * Optional named graph URIs restricting the query dataset.
+     * </pre>
+     *
      * <code>repeated string named_graph_uris = 4;</code>
      * @return The count of namedGraphUris.
      */
@@ -6562,6 +7458,10 @@ public final class PB_RDFService {
       return namedGraphUris_.size();
     }
     /**
+     * <pre>
+     * Optional named graph URIs restricting the query dataset.
+     * </pre>
+     *
      * <code>repeated string named_graph_uris = 4;</code>
      * @param index The index of the element to return.
      * @return The namedGraphUris at the given index.
@@ -6570,6 +7470,10 @@ public final class PB_RDFService {
       return namedGraphUris_.get(index);
     }
     /**
+     * <pre>
+     * Optional named graph URIs restricting the query dataset.
+     * </pre>
+     *
      * <code>repeated string named_graph_uris = 4;</code>
      * @param index The index of the value to return.
      * @return The bytes of the namedGraphUris at the given index.
@@ -6582,6 +7486,10 @@ public final class PB_RDFService {
     public static final int RESULT_FORM_FIELD_NUMBER = 5;
     private int resultForm_ = 0;
     /**
+     * <pre>
+     * Optional expected query result form.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.QueryResultForm result_form = 5;</code>
      * @return The enum numeric value on the wire for resultForm.
      */
@@ -6589,6 +7497,10 @@ public final class PB_RDFService {
       return resultForm_;
     }
     /**
+     * <pre>
+     * Optional expected query result form.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.QueryResultForm result_form = 5;</code>
      * @return The resultForm.
      */
@@ -6601,6 +7513,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private volatile java.lang.Object txnId_ = "";
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the query within.
+     * </pre>
+     *
      * <code>string txn_id = 6;</code>
      * @return The txnId.
      */
@@ -6618,6 +7534,10 @@ public final class PB_RDFService {
       }
     }
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the query within.
+     * </pre>
+     *
      * <code>string txn_id = 6;</code>
      * @return The bytes for txnId.
      */
@@ -7084,6 +8004,10 @@ public final class PB_RDFService {
 
       private java.lang.Object query_ = "";
       /**
+       * <pre>
+       * SPARQL query string.
+       * </pre>
+       *
        * <code>string query = 1;</code>
        * @return The query.
        */
@@ -7100,6 +8024,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * SPARQL query string.
+       * </pre>
+       *
        * <code>string query = 1;</code>
        * @return The bytes for query.
        */
@@ -7117,6 +8045,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * SPARQL query string.
+       * </pre>
+       *
        * <code>string query = 1;</code>
        * @param value The query to set.
        * @return This builder for chaining.
@@ -7130,6 +8062,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * SPARQL query string.
+       * </pre>
+       *
        * <code>string query = 1;</code>
        * @return This builder for chaining.
        */
@@ -7140,6 +8076,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * SPARQL query string.
+       * </pre>
+       *
        * <code>string query = 1;</code>
        * @param value The bytes for query to set.
        * @return This builder for chaining.
@@ -7156,6 +8096,10 @@ public final class PB_RDFService {
 
       private java.lang.Object baseUri_ = "";
       /**
+       * <pre>
+       * Optional base URI for resolving relative IRIs in the query.
+       * </pre>
+       *
        * <code>string base_uri = 2;</code>
        * @return The baseUri.
        */
@@ -7172,6 +8116,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional base URI for resolving relative IRIs in the query.
+       * </pre>
+       *
        * <code>string base_uri = 2;</code>
        * @return The bytes for baseUri.
        */
@@ -7189,6 +8137,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional base URI for resolving relative IRIs in the query.
+       * </pre>
+       *
        * <code>string base_uri = 2;</code>
        * @param value The baseUri to set.
        * @return This builder for chaining.
@@ -7202,6 +8154,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional base URI for resolving relative IRIs in the query.
+       * </pre>
+       *
        * <code>string base_uri = 2;</code>
        * @return This builder for chaining.
        */
@@ -7212,6 +8168,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional base URI for resolving relative IRIs in the query.
+       * </pre>
+       *
        * <code>string base_uri = 2;</code>
        * @param value The bytes for baseUri to set.
        * @return This builder for chaining.
@@ -7235,6 +8195,10 @@ public final class PB_RDFService {
         bitField0_ |= 0x00000004;
       }
       /**
+       * <pre>
+       * Optional default graph URIs overriding the dataset default graph.
+       * </pre>
+       *
        * <code>repeated string default_graph_uris = 3;</code>
        * @return A list containing the defaultGraphUris.
        */
@@ -7244,6 +8208,10 @@ public final class PB_RDFService {
         return defaultGraphUris_;
       }
       /**
+       * <pre>
+       * Optional default graph URIs overriding the dataset default graph.
+       * </pre>
+       *
        * <code>repeated string default_graph_uris = 3;</code>
        * @return The count of defaultGraphUris.
        */
@@ -7251,6 +8219,10 @@ public final class PB_RDFService {
         return defaultGraphUris_.size();
       }
       /**
+       * <pre>
+       * Optional default graph URIs overriding the dataset default graph.
+       * </pre>
+       *
        * <code>repeated string default_graph_uris = 3;</code>
        * @param index The index of the element to return.
        * @return The defaultGraphUris at the given index.
@@ -7259,6 +8231,10 @@ public final class PB_RDFService {
         return defaultGraphUris_.get(index);
       }
       /**
+       * <pre>
+       * Optional default graph URIs overriding the dataset default graph.
+       * </pre>
+       *
        * <code>repeated string default_graph_uris = 3;</code>
        * @param index The index of the value to return.
        * @return The bytes of the defaultGraphUris at the given index.
@@ -7268,6 +8244,10 @@ public final class PB_RDFService {
         return defaultGraphUris_.getByteString(index);
       }
       /**
+       * <pre>
+       * Optional default graph URIs overriding the dataset default graph.
+       * </pre>
+       *
        * <code>repeated string default_graph_uris = 3;</code>
        * @param index The index to set the value at.
        * @param value The defaultGraphUris to set.
@@ -7283,6 +8263,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional default graph URIs overriding the dataset default graph.
+       * </pre>
+       *
        * <code>repeated string default_graph_uris = 3;</code>
        * @param value The defaultGraphUris to add.
        * @return This builder for chaining.
@@ -7297,6 +8281,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional default graph URIs overriding the dataset default graph.
+       * </pre>
+       *
        * <code>repeated string default_graph_uris = 3;</code>
        * @param values The defaultGraphUris to add.
        * @return This builder for chaining.
@@ -7311,6 +8299,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional default graph URIs overriding the dataset default graph.
+       * </pre>
+       *
        * <code>repeated string default_graph_uris = 3;</code>
        * @return This builder for chaining.
        */
@@ -7322,6 +8314,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional default graph URIs overriding the dataset default graph.
+       * </pre>
+       *
        * <code>repeated string default_graph_uris = 3;</code>
        * @param value The bytes of the defaultGraphUris to add.
        * @return This builder for chaining.
@@ -7346,6 +8342,10 @@ public final class PB_RDFService {
         bitField0_ |= 0x00000008;
       }
       /**
+       * <pre>
+       * Optional named graph URIs restricting the query dataset.
+       * </pre>
+       *
        * <code>repeated string named_graph_uris = 4;</code>
        * @return A list containing the namedGraphUris.
        */
@@ -7355,6 +8355,10 @@ public final class PB_RDFService {
         return namedGraphUris_;
       }
       /**
+       * <pre>
+       * Optional named graph URIs restricting the query dataset.
+       * </pre>
+       *
        * <code>repeated string named_graph_uris = 4;</code>
        * @return The count of namedGraphUris.
        */
@@ -7362,6 +8366,10 @@ public final class PB_RDFService {
         return namedGraphUris_.size();
       }
       /**
+       * <pre>
+       * Optional named graph URIs restricting the query dataset.
+       * </pre>
+       *
        * <code>repeated string named_graph_uris = 4;</code>
        * @param index The index of the element to return.
        * @return The namedGraphUris at the given index.
@@ -7370,6 +8378,10 @@ public final class PB_RDFService {
         return namedGraphUris_.get(index);
       }
       /**
+       * <pre>
+       * Optional named graph URIs restricting the query dataset.
+       * </pre>
+       *
        * <code>repeated string named_graph_uris = 4;</code>
        * @param index The index of the value to return.
        * @return The bytes of the namedGraphUris at the given index.
@@ -7379,6 +8391,10 @@ public final class PB_RDFService {
         return namedGraphUris_.getByteString(index);
       }
       /**
+       * <pre>
+       * Optional named graph URIs restricting the query dataset.
+       * </pre>
+       *
        * <code>repeated string named_graph_uris = 4;</code>
        * @param index The index to set the value at.
        * @param value The namedGraphUris to set.
@@ -7394,6 +8410,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional named graph URIs restricting the query dataset.
+       * </pre>
+       *
        * <code>repeated string named_graph_uris = 4;</code>
        * @param value The namedGraphUris to add.
        * @return This builder for chaining.
@@ -7408,6 +8428,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional named graph URIs restricting the query dataset.
+       * </pre>
+       *
        * <code>repeated string named_graph_uris = 4;</code>
        * @param values The namedGraphUris to add.
        * @return This builder for chaining.
@@ -7422,6 +8446,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional named graph URIs restricting the query dataset.
+       * </pre>
+       *
        * <code>repeated string named_graph_uris = 4;</code>
        * @return This builder for chaining.
        */
@@ -7433,6 +8461,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional named graph URIs restricting the query dataset.
+       * </pre>
+       *
        * <code>repeated string named_graph_uris = 4;</code>
        * @param value The bytes of the namedGraphUris to add.
        * @return This builder for chaining.
@@ -7450,6 +8482,10 @@ public final class PB_RDFService {
 
       private int resultForm_ = 0;
       /**
+       * <pre>
+       * Optional expected query result form.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.QueryResultForm result_form = 5;</code>
        * @return The enum numeric value on the wire for resultForm.
        */
@@ -7457,6 +8493,10 @@ public final class PB_RDFService {
         return resultForm_;
       }
       /**
+       * <pre>
+       * Optional expected query result form.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.QueryResultForm result_form = 5;</code>
        * @param value The enum numeric value on the wire for resultForm to set.
        * @return This builder for chaining.
@@ -7468,6 +8508,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional expected query result form.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.QueryResultForm result_form = 5;</code>
        * @return The resultForm.
        */
@@ -7477,6 +8521,10 @@ public final class PB_RDFService {
         return result == null ? org.apache.jena.grpc.wire.PB_RDFService.QueryResultForm.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * Optional expected query result form.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.QueryResultForm result_form = 5;</code>
        * @param value The resultForm to set.
        * @return This builder for chaining.
@@ -7491,6 +8539,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional expected query result form.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.QueryResultForm result_form = 5;</code>
        * @return This builder for chaining.
        */
@@ -7503,6 +8555,10 @@ public final class PB_RDFService {
 
       private java.lang.Object txnId_ = "";
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the query within.
+       * </pre>
+       *
        * <code>string txn_id = 6;</code>
        * @return The txnId.
        */
@@ -7519,6 +8575,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the query within.
+       * </pre>
+       *
        * <code>string txn_id = 6;</code>
        * @return The bytes for txnId.
        */
@@ -7536,6 +8596,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the query within.
+       * </pre>
+       *
        * <code>string txn_id = 6;</code>
        * @param value The txnId to set.
        * @return This builder for chaining.
@@ -7549,6 +8613,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the query within.
+       * </pre>
+       *
        * <code>string txn_id = 6;</code>
        * @return This builder for chaining.
        */
@@ -7559,6 +8627,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the query within.
+       * </pre>
+       *
        * <code>string txn_id = 6;</code>
        * @param value The bytes for txnId to set.
        * @return This builder for chaining.
@@ -7629,24 +8701,44 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Ordered binding rows aligned with the preceding select_header variable list.
+     * </pre>
+     *
      * <code>repeated .RDF_DataTuple rows = 1;</code>
      */
     java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple> 
         getRowsList();
     /**
+     * <pre>
+     * Ordered binding rows aligned with the preceding select_header variable list.
+     * </pre>
+     *
      * <code>repeated .RDF_DataTuple rows = 1;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple getRows(int index);
     /**
+     * <pre>
+     * Ordered binding rows aligned with the preceding select_header variable list.
+     * </pre>
+     *
      * <code>repeated .RDF_DataTuple rows = 1;</code>
      */
     int getRowsCount();
     /**
+     * <pre>
+     * Ordered binding rows aligned with the preceding select_header variable list.
+     * </pre>
+     *
      * <code>repeated .RDF_DataTuple rows = 1;</code>
      */
     java.util.List<? extends org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTupleOrBuilder> 
         getRowsOrBuilderList();
     /**
+     * <pre>
+     * Ordered binding rows aligned with the preceding select_header variable list.
+     * </pre>
+     *
      * <code>repeated .RDF_DataTuple rows = 1;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTupleOrBuilder getRowsOrBuilder(
@@ -7698,6 +8790,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple> rows_;
     /**
+     * <pre>
+     * Ordered binding rows aligned with the preceding select_header variable list.
+     * </pre>
+     *
      * <code>repeated .RDF_DataTuple rows = 1;</code>
      */
     @java.lang.Override
@@ -7705,6 +8801,10 @@ public final class PB_RDFService {
       return rows_;
     }
     /**
+     * <pre>
+     * Ordered binding rows aligned with the preceding select_header variable list.
+     * </pre>
+     *
      * <code>repeated .RDF_DataTuple rows = 1;</code>
      */
     @java.lang.Override
@@ -7713,6 +8813,10 @@ public final class PB_RDFService {
       return rows_;
     }
     /**
+     * <pre>
+     * Ordered binding rows aligned with the preceding select_header variable list.
+     * </pre>
+     *
      * <code>repeated .RDF_DataTuple rows = 1;</code>
      */
     @java.lang.Override
@@ -7720,6 +8824,10 @@ public final class PB_RDFService {
       return rows_.size();
     }
     /**
+     * <pre>
+     * Ordered binding rows aligned with the preceding select_header variable list.
+     * </pre>
+     *
      * <code>repeated .RDF_DataTuple rows = 1;</code>
      */
     @java.lang.Override
@@ -7727,6 +8835,10 @@ public final class PB_RDFService {
       return rows_.get(index);
     }
     /**
+     * <pre>
+     * Ordered binding rows aligned with the preceding select_header variable list.
+     * </pre>
+     *
      * <code>repeated .RDF_DataTuple rows = 1;</code>
      */
     @java.lang.Override
@@ -8094,6 +9206,10 @@ public final class PB_RDFService {
           org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTupleOrBuilder> rowsBuilder_;
 
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple> getRowsList() {
@@ -8104,6 +9220,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public int getRowsCount() {
@@ -8114,6 +9234,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple getRows(int index) {
@@ -8124,6 +9248,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public Builder setRows(
@@ -8141,6 +9269,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public Builder setRows(
@@ -8155,6 +9287,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public Builder addRows(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple value) {
@@ -8171,6 +9307,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public Builder addRows(
@@ -8188,6 +9328,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public Builder addRows(
@@ -8202,6 +9346,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public Builder addRows(
@@ -8216,6 +9364,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public Builder addAllRows(
@@ -8231,6 +9383,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public Builder clearRows() {
@@ -8244,6 +9400,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public Builder removeRows(int index) {
@@ -8257,6 +9417,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple.Builder getRowsBuilder(
@@ -8264,6 +9428,10 @@ public final class PB_RDFService {
         return getRowsFieldBuilder().getBuilder(index);
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTupleOrBuilder getRowsOrBuilder(
@@ -8274,6 +9442,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public java.util.List<? extends org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTupleOrBuilder> 
@@ -8285,6 +9457,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple.Builder addRowsBuilder() {
@@ -8292,6 +9468,10 @@ public final class PB_RDFService {
             org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple.getDefaultInstance());
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple.Builder addRowsBuilder(
@@ -8300,6 +9480,10 @@ public final class PB_RDFService {
             index, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple.getDefaultInstance());
       }
       /**
+       * <pre>
+       * Ordered binding rows aligned with the preceding select_header variable list.
+       * </pre>
+       *
        * <code>repeated .RDF_DataTuple rows = 1;</code>
        */
       public java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple.Builder> 
@@ -10046,11 +11230,19 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * SPARQL Update request string.
+     * </pre>
+     *
      * <code>string update = 1;</code>
      * @return The update.
      */
     java.lang.String getUpdate();
     /**
+     * <pre>
+     * SPARQL Update request string.
+     * </pre>
+     *
      * <code>string update = 1;</code>
      * @return The bytes for update.
      */
@@ -10058,11 +11250,19 @@ public final class PB_RDFService {
         getUpdateBytes();
 
     /**
+     * <pre>
+     * Optional base URI for resolving relative IRIs in the update request.
+     * </pre>
+     *
      * <code>string base_uri = 2;</code>
      * @return The baseUri.
      */
     java.lang.String getBaseUri();
     /**
+     * <pre>
+     * Optional base URI for resolving relative IRIs in the update request.
+     * </pre>
+     *
      * <code>string base_uri = 2;</code>
      * @return The bytes for baseUri.
      */
@@ -10070,23 +11270,39 @@ public final class PB_RDFService {
         getBaseUriBytes();
 
     /**
+     * <pre>
+     * Optional USING graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_graph_uris = 3;</code>
      * @return A list containing the usingGraphUris.
      */
     java.util.List<java.lang.String>
         getUsingGraphUrisList();
     /**
+     * <pre>
+     * Optional USING graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_graph_uris = 3;</code>
      * @return The count of usingGraphUris.
      */
     int getUsingGraphUrisCount();
     /**
+     * <pre>
+     * Optional USING graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_graph_uris = 3;</code>
      * @param index The index of the element to return.
      * @return The usingGraphUris at the given index.
      */
     java.lang.String getUsingGraphUris(int index);
     /**
+     * <pre>
+     * Optional USING graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_graph_uris = 3;</code>
      * @param index The index of the value to return.
      * @return The bytes of the usingGraphUris at the given index.
@@ -10095,23 +11311,39 @@ public final class PB_RDFService {
         getUsingGraphUrisBytes(int index);
 
     /**
+     * <pre>
+     * Optional USING NAMED graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_named_graph_uris = 4;</code>
      * @return A list containing the usingNamedGraphUris.
      */
     java.util.List<java.lang.String>
         getUsingNamedGraphUrisList();
     /**
+     * <pre>
+     * Optional USING NAMED graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_named_graph_uris = 4;</code>
      * @return The count of usingNamedGraphUris.
      */
     int getUsingNamedGraphUrisCount();
     /**
+     * <pre>
+     * Optional USING NAMED graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_named_graph_uris = 4;</code>
      * @param index The index of the element to return.
      * @return The usingNamedGraphUris at the given index.
      */
     java.lang.String getUsingNamedGraphUris(int index);
     /**
+     * <pre>
+     * Optional USING NAMED graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_named_graph_uris = 4;</code>
      * @param index The index of the value to return.
      * @return The bytes of the usingNamedGraphUris at the given index.
@@ -10120,11 +11352,19 @@ public final class PB_RDFService {
         getUsingNamedGraphUrisBytes(int index);
 
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the update within.
+     * </pre>
+     *
      * <code>string txn_id = 5;</code>
      * @return The txnId.
      */
     java.lang.String getTxnId();
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the update within.
+     * </pre>
+     *
      * <code>string txn_id = 5;</code>
      * @return The bytes for txnId.
      */
@@ -10183,6 +11423,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private volatile java.lang.Object update_ = "";
     /**
+     * <pre>
+     * SPARQL Update request string.
+     * </pre>
+     *
      * <code>string update = 1;</code>
      * @return The update.
      */
@@ -10200,6 +11444,10 @@ public final class PB_RDFService {
       }
     }
     /**
+     * <pre>
+     * SPARQL Update request string.
+     * </pre>
+     *
      * <code>string update = 1;</code>
      * @return The bytes for update.
      */
@@ -10222,6 +11470,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private volatile java.lang.Object baseUri_ = "";
     /**
+     * <pre>
+     * Optional base URI for resolving relative IRIs in the update request.
+     * </pre>
+     *
      * <code>string base_uri = 2;</code>
      * @return The baseUri.
      */
@@ -10239,6 +11491,10 @@ public final class PB_RDFService {
       }
     }
     /**
+     * <pre>
+     * Optional base URI for resolving relative IRIs in the update request.
+     * </pre>
+     *
      * <code>string base_uri = 2;</code>
      * @return The bytes for baseUri.
      */
@@ -10262,6 +11518,10 @@ public final class PB_RDFService {
     private com.google.protobuf.LazyStringArrayList usingGraphUris_ =
         com.google.protobuf.LazyStringArrayList.emptyList();
     /**
+     * <pre>
+     * Optional USING graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_graph_uris = 3;</code>
      * @return A list containing the usingGraphUris.
      */
@@ -10270,6 +11530,10 @@ public final class PB_RDFService {
       return usingGraphUris_;
     }
     /**
+     * <pre>
+     * Optional USING graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_graph_uris = 3;</code>
      * @return The count of usingGraphUris.
      */
@@ -10277,6 +11541,10 @@ public final class PB_RDFService {
       return usingGraphUris_.size();
     }
     /**
+     * <pre>
+     * Optional USING graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_graph_uris = 3;</code>
      * @param index The index of the element to return.
      * @return The usingGraphUris at the given index.
@@ -10285,6 +11553,10 @@ public final class PB_RDFService {
       return usingGraphUris_.get(index);
     }
     /**
+     * <pre>
+     * Optional USING graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_graph_uris = 3;</code>
      * @param index The index of the value to return.
      * @return The bytes of the usingGraphUris at the given index.
@@ -10299,6 +11571,10 @@ public final class PB_RDFService {
     private com.google.protobuf.LazyStringArrayList usingNamedGraphUris_ =
         com.google.protobuf.LazyStringArrayList.emptyList();
     /**
+     * <pre>
+     * Optional USING NAMED graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_named_graph_uris = 4;</code>
      * @return A list containing the usingNamedGraphUris.
      */
@@ -10307,6 +11583,10 @@ public final class PB_RDFService {
       return usingNamedGraphUris_;
     }
     /**
+     * <pre>
+     * Optional USING NAMED graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_named_graph_uris = 4;</code>
      * @return The count of usingNamedGraphUris.
      */
@@ -10314,6 +11594,10 @@ public final class PB_RDFService {
       return usingNamedGraphUris_.size();
     }
     /**
+     * <pre>
+     * Optional USING NAMED graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_named_graph_uris = 4;</code>
      * @param index The index of the element to return.
      * @return The usingNamedGraphUris at the given index.
@@ -10322,6 +11606,10 @@ public final class PB_RDFService {
       return usingNamedGraphUris_.get(index);
     }
     /**
+     * <pre>
+     * Optional USING NAMED graph URIs for modify operations.
+     * </pre>
+     *
      * <code>repeated string using_named_graph_uris = 4;</code>
      * @param index The index of the value to return.
      * @return The bytes of the usingNamedGraphUris at the given index.
@@ -10335,6 +11623,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private volatile java.lang.Object txnId_ = "";
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the update within.
+     * </pre>
+     *
      * <code>string txn_id = 5;</code>
      * @return The txnId.
      */
@@ -10352,6 +11644,10 @@ public final class PB_RDFService {
       }
     }
     /**
+     * <pre>
+     * Optional remote transaction identifier to execute the update within.
+     * </pre>
+     *
      * <code>string txn_id = 5;</code>
      * @return The bytes for txnId.
      */
@@ -10796,6 +12092,10 @@ public final class PB_RDFService {
 
       private java.lang.Object update_ = "";
       /**
+       * <pre>
+       * SPARQL Update request string.
+       * </pre>
+       *
        * <code>string update = 1;</code>
        * @return The update.
        */
@@ -10812,6 +12112,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * SPARQL Update request string.
+       * </pre>
+       *
        * <code>string update = 1;</code>
        * @return The bytes for update.
        */
@@ -10829,6 +12133,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * SPARQL Update request string.
+       * </pre>
+       *
        * <code>string update = 1;</code>
        * @param value The update to set.
        * @return This builder for chaining.
@@ -10842,6 +12150,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * SPARQL Update request string.
+       * </pre>
+       *
        * <code>string update = 1;</code>
        * @return This builder for chaining.
        */
@@ -10852,6 +12164,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * SPARQL Update request string.
+       * </pre>
+       *
        * <code>string update = 1;</code>
        * @param value The bytes for update to set.
        * @return This builder for chaining.
@@ -10868,6 +12184,10 @@ public final class PB_RDFService {
 
       private java.lang.Object baseUri_ = "";
       /**
+       * <pre>
+       * Optional base URI for resolving relative IRIs in the update request.
+       * </pre>
+       *
        * <code>string base_uri = 2;</code>
        * @return The baseUri.
        */
@@ -10884,6 +12204,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional base URI for resolving relative IRIs in the update request.
+       * </pre>
+       *
        * <code>string base_uri = 2;</code>
        * @return The bytes for baseUri.
        */
@@ -10901,6 +12225,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional base URI for resolving relative IRIs in the update request.
+       * </pre>
+       *
        * <code>string base_uri = 2;</code>
        * @param value The baseUri to set.
        * @return This builder for chaining.
@@ -10914,6 +12242,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional base URI for resolving relative IRIs in the update request.
+       * </pre>
+       *
        * <code>string base_uri = 2;</code>
        * @return This builder for chaining.
        */
@@ -10924,6 +12256,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional base URI for resolving relative IRIs in the update request.
+       * </pre>
+       *
        * <code>string base_uri = 2;</code>
        * @param value The bytes for baseUri to set.
        * @return This builder for chaining.
@@ -10947,6 +12283,10 @@ public final class PB_RDFService {
         bitField0_ |= 0x00000004;
       }
       /**
+       * <pre>
+       * Optional USING graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_graph_uris = 3;</code>
        * @return A list containing the usingGraphUris.
        */
@@ -10956,6 +12296,10 @@ public final class PB_RDFService {
         return usingGraphUris_;
       }
       /**
+       * <pre>
+       * Optional USING graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_graph_uris = 3;</code>
        * @return The count of usingGraphUris.
        */
@@ -10963,6 +12307,10 @@ public final class PB_RDFService {
         return usingGraphUris_.size();
       }
       /**
+       * <pre>
+       * Optional USING graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_graph_uris = 3;</code>
        * @param index The index of the element to return.
        * @return The usingGraphUris at the given index.
@@ -10971,6 +12319,10 @@ public final class PB_RDFService {
         return usingGraphUris_.get(index);
       }
       /**
+       * <pre>
+       * Optional USING graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_graph_uris = 3;</code>
        * @param index The index of the value to return.
        * @return The bytes of the usingGraphUris at the given index.
@@ -10980,6 +12332,10 @@ public final class PB_RDFService {
         return usingGraphUris_.getByteString(index);
       }
       /**
+       * <pre>
+       * Optional USING graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_graph_uris = 3;</code>
        * @param index The index to set the value at.
        * @param value The usingGraphUris to set.
@@ -10995,6 +12351,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional USING graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_graph_uris = 3;</code>
        * @param value The usingGraphUris to add.
        * @return This builder for chaining.
@@ -11009,6 +12369,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional USING graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_graph_uris = 3;</code>
        * @param values The usingGraphUris to add.
        * @return This builder for chaining.
@@ -11023,6 +12387,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional USING graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_graph_uris = 3;</code>
        * @return This builder for chaining.
        */
@@ -11034,6 +12402,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional USING graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_graph_uris = 3;</code>
        * @param value The bytes of the usingGraphUris to add.
        * @return This builder for chaining.
@@ -11058,6 +12430,10 @@ public final class PB_RDFService {
         bitField0_ |= 0x00000008;
       }
       /**
+       * <pre>
+       * Optional USING NAMED graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_named_graph_uris = 4;</code>
        * @return A list containing the usingNamedGraphUris.
        */
@@ -11067,6 +12443,10 @@ public final class PB_RDFService {
         return usingNamedGraphUris_;
       }
       /**
+       * <pre>
+       * Optional USING NAMED graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_named_graph_uris = 4;</code>
        * @return The count of usingNamedGraphUris.
        */
@@ -11074,6 +12454,10 @@ public final class PB_RDFService {
         return usingNamedGraphUris_.size();
       }
       /**
+       * <pre>
+       * Optional USING NAMED graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_named_graph_uris = 4;</code>
        * @param index The index of the element to return.
        * @return The usingNamedGraphUris at the given index.
@@ -11082,6 +12466,10 @@ public final class PB_RDFService {
         return usingNamedGraphUris_.get(index);
       }
       /**
+       * <pre>
+       * Optional USING NAMED graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_named_graph_uris = 4;</code>
        * @param index The index of the value to return.
        * @return The bytes of the usingNamedGraphUris at the given index.
@@ -11091,6 +12479,10 @@ public final class PB_RDFService {
         return usingNamedGraphUris_.getByteString(index);
       }
       /**
+       * <pre>
+       * Optional USING NAMED graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_named_graph_uris = 4;</code>
        * @param index The index to set the value at.
        * @param value The usingNamedGraphUris to set.
@@ -11106,6 +12498,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional USING NAMED graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_named_graph_uris = 4;</code>
        * @param value The usingNamedGraphUris to add.
        * @return This builder for chaining.
@@ -11120,6 +12516,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional USING NAMED graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_named_graph_uris = 4;</code>
        * @param values The usingNamedGraphUris to add.
        * @return This builder for chaining.
@@ -11134,6 +12534,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional USING NAMED graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_named_graph_uris = 4;</code>
        * @return This builder for chaining.
        */
@@ -11145,6 +12549,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional USING NAMED graph URIs for modify operations.
+       * </pre>
+       *
        * <code>repeated string using_named_graph_uris = 4;</code>
        * @param value The bytes of the usingNamedGraphUris to add.
        * @return This builder for chaining.
@@ -11162,6 +12570,10 @@ public final class PB_RDFService {
 
       private java.lang.Object txnId_ = "";
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the update within.
+       * </pre>
+       *
        * <code>string txn_id = 5;</code>
        * @return The txnId.
        */
@@ -11178,6 +12590,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the update within.
+       * </pre>
+       *
        * <code>string txn_id = 5;</code>
        * @return The bytes for txnId.
        */
@@ -11195,6 +12611,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the update within.
+       * </pre>
+       *
        * <code>string txn_id = 5;</code>
        * @param value The txnId to set.
        * @return This builder for chaining.
@@ -11208,6 +12628,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the update within.
+       * </pre>
+       *
        * <code>string txn_id = 5;</code>
        * @return This builder for chaining.
        */
@@ -11218,6 +12642,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to execute the update within.
+       * </pre>
+       *
        * <code>string txn_id = 5;</code>
        * @param value The bytes for txnId to set.
        * @return This builder for chaining.
@@ -11288,6 +12716,10 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Number of update frames executed during the stream.
+     * </pre>
+     *
      * <code>int64 update_count = 1;</code>
      * @return The updateCount.
      */
@@ -11337,6 +12769,10 @@ public final class PB_RDFService {
     public static final int UPDATE_COUNT_FIELD_NUMBER = 1;
     private long updateCount_ = 0L;
     /**
+     * <pre>
+     * Number of update frames executed during the stream.
+     * </pre>
+     *
      * <code>int64 update_count = 1;</code>
      * @return The updateCount.
      */
@@ -11645,6 +13081,10 @@ public final class PB_RDFService {
 
       private long updateCount_ ;
       /**
+       * <pre>
+       * Number of update frames executed during the stream.
+       * </pre>
+       *
        * <code>int64 update_count = 1;</code>
        * @return The updateCount.
        */
@@ -11653,6 +13093,10 @@ public final class PB_RDFService {
         return updateCount_;
       }
       /**
+       * <pre>
+       * Number of update frames executed during the stream.
+       * </pre>
+       *
        * <code>int64 update_count = 1;</code>
        * @param value The updateCount to set.
        * @return This builder for chaining.
@@ -11665,6 +13109,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Number of update frames executed during the stream.
+       * </pre>
+       *
        * <code>int64 update_count = 1;</code>
        * @return This builder for chaining.
        */
@@ -11731,11 +13179,19 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Optional remote transaction identifier to apply the patch rows within.
+     * </pre>
+     *
      * <code>string txn_id = 1;</code>
      * @return The txnId.
      */
     java.lang.String getTxnId();
     /**
+     * <pre>
+     * Optional remote transaction identifier to apply the patch rows within.
+     * </pre>
+     *
      * <code>string txn_id = 1;</code>
      * @return The bytes for txnId.
      */
@@ -11743,24 +13199,44 @@ public final class PB_RDFService {
         getTxnIdBytes();
 
     /**
+     * <pre>
+     * Ordered RDF Patch rows to apply in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_Patch_Row rows = 2;</code>
      */
     java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row> 
         getRowsList();
     /**
+     * <pre>
+     * Ordered RDF Patch rows to apply in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_Patch_Row rows = 2;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row getRows(int index);
     /**
+     * <pre>
+     * Ordered RDF Patch rows to apply in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_Patch_Row rows = 2;</code>
      */
     int getRowsCount();
     /**
+     * <pre>
+     * Ordered RDF Patch rows to apply in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_Patch_Row rows = 2;</code>
      */
     java.util.List<? extends org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder> 
         getRowsOrBuilderList();
     /**
+     * <pre>
+     * Ordered RDF Patch rows to apply in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_Patch_Row rows = 2;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder getRowsOrBuilder(
@@ -11813,6 +13289,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private volatile java.lang.Object txnId_ = "";
     /**
+     * <pre>
+     * Optional remote transaction identifier to apply the patch rows within.
+     * </pre>
+     *
      * <code>string txn_id = 1;</code>
      * @return The txnId.
      */
@@ -11830,6 +13310,10 @@ public final class PB_RDFService {
       }
     }
     /**
+     * <pre>
+     * Optional remote transaction identifier to apply the patch rows within.
+     * </pre>
+     *
      * <code>string txn_id = 1;</code>
      * @return The bytes for txnId.
      */
@@ -11852,6 +13336,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row> rows_;
     /**
+     * <pre>
+     * Ordered RDF Patch rows to apply in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_Patch_Row rows = 2;</code>
      */
     @java.lang.Override
@@ -11859,6 +13347,10 @@ public final class PB_RDFService {
       return rows_;
     }
     /**
+     * <pre>
+     * Ordered RDF Patch rows to apply in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_Patch_Row rows = 2;</code>
      */
     @java.lang.Override
@@ -11867,6 +13359,10 @@ public final class PB_RDFService {
       return rows_;
     }
     /**
+     * <pre>
+     * Ordered RDF Patch rows to apply in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_Patch_Row rows = 2;</code>
      */
     @java.lang.Override
@@ -11874,6 +13370,10 @@ public final class PB_RDFService {
       return rows_.size();
     }
     /**
+     * <pre>
+     * Ordered RDF Patch rows to apply in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_Patch_Row rows = 2;</code>
      */
     @java.lang.Override
@@ -11881,6 +13381,10 @@ public final class PB_RDFService {
       return rows_.get(index);
     }
     /**
+     * <pre>
+     * Ordered RDF Patch rows to apply in this chunk.
+     * </pre>
+     *
      * <code>repeated .RDF_Patch_Row rows = 2;</code>
      */
     @java.lang.Override
@@ -12261,6 +13765,10 @@ public final class PB_RDFService {
 
       private java.lang.Object txnId_ = "";
       /**
+       * <pre>
+       * Optional remote transaction identifier to apply the patch rows within.
+       * </pre>
+       *
        * <code>string txn_id = 1;</code>
        * @return The txnId.
        */
@@ -12277,6 +13785,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to apply the patch rows within.
+       * </pre>
+       *
        * <code>string txn_id = 1;</code>
        * @return The bytes for txnId.
        */
@@ -12294,6 +13806,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to apply the patch rows within.
+       * </pre>
+       *
        * <code>string txn_id = 1;</code>
        * @param value The txnId to set.
        * @return This builder for chaining.
@@ -12307,6 +13823,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to apply the patch rows within.
+       * </pre>
+       *
        * <code>string txn_id = 1;</code>
        * @return This builder for chaining.
        */
@@ -12317,6 +13837,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional remote transaction identifier to apply the patch rows within.
+       * </pre>
+       *
        * <code>string txn_id = 1;</code>
        * @param value The bytes for txnId to set.
        * @return This builder for chaining.
@@ -12344,6 +13868,10 @@ public final class PB_RDFService {
           org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder> rowsBuilder_;
 
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row> getRowsList() {
@@ -12354,6 +13882,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public int getRowsCount() {
@@ -12364,6 +13896,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row getRows(int index) {
@@ -12374,6 +13910,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public Builder setRows(
@@ -12391,6 +13931,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public Builder setRows(
@@ -12405,6 +13949,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public Builder addRows(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row value) {
@@ -12421,6 +13969,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public Builder addRows(
@@ -12438,6 +13990,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public Builder addRows(
@@ -12452,6 +14008,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public Builder addRows(
@@ -12466,6 +14026,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public Builder addAllRows(
@@ -12481,6 +14045,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public Builder clearRows() {
@@ -12494,6 +14062,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public Builder removeRows(int index) {
@@ -12507,6 +14079,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder getRowsBuilder(
@@ -12514,6 +14090,10 @@ public final class PB_RDFService {
         return getRowsFieldBuilder().getBuilder(index);
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder getRowsOrBuilder(
@@ -12524,6 +14104,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public java.util.List<? extends org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder> 
@@ -12535,6 +14119,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder addRowsBuilder() {
@@ -12542,6 +14130,10 @@ public final class PB_RDFService {
             org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.getDefaultInstance());
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder addRowsBuilder(
@@ -12550,6 +14142,10 @@ public final class PB_RDFService {
             index, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.getDefaultInstance());
       }
       /**
+       * <pre>
+       * Ordered RDF Patch rows to apply in this chunk.
+       * </pre>
+       *
        * <code>repeated .RDF_Patch_Row rows = 2;</code>
        */
       public java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder> 
@@ -12627,6 +14223,10 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Total number of RDF Patch rows applied during the stream.
+     * </pre>
+     *
      * <code>int64 row_count = 1;</code>
      * @return The rowCount.
      */
@@ -12676,6 +14276,10 @@ public final class PB_RDFService {
     public static final int ROW_COUNT_FIELD_NUMBER = 1;
     private long rowCount_ = 0L;
     /**
+     * <pre>
+     * Total number of RDF Patch rows applied during the stream.
+     * </pre>
+     *
      * <code>int64 row_count = 1;</code>
      * @return The rowCount.
      */
@@ -12984,6 +14588,10 @@ public final class PB_RDFService {
 
       private long rowCount_ ;
       /**
+       * <pre>
+       * Total number of RDF Patch rows applied during the stream.
+       * </pre>
+       *
        * <code>int64 row_count = 1;</code>
        * @return The rowCount.
        */
@@ -12992,6 +14600,10 @@ public final class PB_RDFService {
         return rowCount_;
       }
       /**
+       * <pre>
+       * Total number of RDF Patch rows applied during the stream.
+       * </pre>
+       *
        * <code>int64 row_count = 1;</code>
        * @param value The rowCount to set.
        * @return This builder for chaining.
@@ -13004,6 +14616,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Total number of RDF Patch rows applied during the stream.
+       * </pre>
+       *
        * <code>int64 row_count = 1;</code>
        * @return This builder for chaining.
        */
@@ -13070,16 +14686,28 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Optional graph filter restricting which committed patches are delivered.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
      * @return Whether the graphFilter field is set.
      */
     boolean hasGraphFilter();
     /**
+     * <pre>
+     * Optional graph filter restricting which committed patches are delivered.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
      * @return The graphFilter.
      */
     org.apache.jena.grpc.wire.PB_RDFService.GraphTarget getGraphFilter();
     /**
+     * <pre>
+     * Optional graph filter restricting which committed patches are delivered.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
      */
     org.apache.jena.grpc.wire.PB_RDFService.GraphTargetOrBuilder getGraphFilterOrBuilder();
@@ -13129,6 +14757,10 @@ public final class PB_RDFService {
     public static final int GRAPH_FILTER_FIELD_NUMBER = 1;
     private org.apache.jena.grpc.wire.PB_RDFService.GraphTarget graphFilter_;
     /**
+     * <pre>
+     * Optional graph filter restricting which committed patches are delivered.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
      * @return Whether the graphFilter field is set.
      */
@@ -13137,6 +14769,10 @@ public final class PB_RDFService {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
+     * <pre>
+     * Optional graph filter restricting which committed patches are delivered.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
      * @return The graphFilter.
      */
@@ -13145,6 +14781,10 @@ public final class PB_RDFService {
       return graphFilter_ == null ? org.apache.jena.grpc.wire.PB_RDFService.GraphTarget.getDefaultInstance() : graphFilter_;
     }
     /**
+     * <pre>
+     * Optional graph filter restricting which committed patches are delivered.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
      */
     @java.lang.Override
@@ -13475,6 +15115,10 @@ public final class PB_RDFService {
       private com.google.protobuf.SingleFieldBuilder<
           org.apache.jena.grpc.wire.PB_RDFService.GraphTarget, org.apache.jena.grpc.wire.PB_RDFService.GraphTarget.Builder, org.apache.jena.grpc.wire.PB_RDFService.GraphTargetOrBuilder> graphFilterBuilder_;
       /**
+       * <pre>
+       * Optional graph filter restricting which committed patches are delivered.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
        * @return Whether the graphFilter field is set.
        */
@@ -13482,6 +15126,10 @@ public final class PB_RDFService {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
+       * <pre>
+       * Optional graph filter restricting which committed patches are delivered.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
        * @return The graphFilter.
        */
@@ -13493,6 +15141,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional graph filter restricting which committed patches are delivered.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
        */
       public Builder setGraphFilter(org.apache.jena.grpc.wire.PB_RDFService.GraphTarget value) {
@@ -13509,6 +15161,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional graph filter restricting which committed patches are delivered.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
        */
       public Builder setGraphFilter(
@@ -13523,6 +15179,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional graph filter restricting which committed patches are delivered.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
        */
       public Builder mergeGraphFilter(org.apache.jena.grpc.wire.PB_RDFService.GraphTarget value) {
@@ -13544,6 +15204,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional graph filter restricting which committed patches are delivered.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
        */
       public Builder clearGraphFilter() {
@@ -13557,6 +15221,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Optional graph filter restricting which committed patches are delivered.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
        */
       public org.apache.jena.grpc.wire.PB_RDFService.GraphTarget.Builder getGraphFilterBuilder() {
@@ -13565,6 +15233,10 @@ public final class PB_RDFService {
         return getGraphFilterFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Optional graph filter restricting which committed patches are delivered.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
        */
       public org.apache.jena.grpc.wire.PB_RDFService.GraphTargetOrBuilder getGraphFilterOrBuilder() {
@@ -13576,6 +15248,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Optional graph filter restricting which committed patches are delivered.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.GraphTarget graph_filter = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
@@ -14513,33 +16189,57 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Lifecycle command to execute on the stream-bound transaction.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
      * @return The enum numeric value on the wire for command.
      */
     int getCommandValue();
     /**
+     * <pre>
+     * Lifecycle command to execute on the stream-bound transaction.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
      * @return The command.
      */
     org.apache.jena.grpc.wire.PB_RDFService.TransactionCommand getCommand();
 
     /**
+     * <pre>
+     * Requested transaction type when command is TRANSACTION_COMMAND_BEGIN.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionType txn_type = 2;</code>
      * @return The enum numeric value on the wire for txnType.
      */
     int getTxnTypeValue();
     /**
+     * <pre>
+     * Requested transaction type when command is TRANSACTION_COMMAND_BEGIN.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionType txn_type = 2;</code>
      * @return The txnType.
      */
     org.apache.jena.grpc.wire.PB_RDFService.TransactionType getTxnType();
 
     /**
+     * <pre>
+     * Requested promotion mode when command is TRANSACTION_COMMAND_PROMOTE.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.PromoteMode promote_mode = 3;</code>
      * @return The enum numeric value on the wire for promoteMode.
      */
     int getPromoteModeValue();
     /**
+     * <pre>
+     * Requested promotion mode when command is TRANSACTION_COMMAND_PROMOTE.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.PromoteMode promote_mode = 3;</code>
      * @return The promoteMode.
      */
@@ -14592,6 +16292,10 @@ public final class PB_RDFService {
     public static final int COMMAND_FIELD_NUMBER = 1;
     private int command_ = 0;
     /**
+     * <pre>
+     * Lifecycle command to execute on the stream-bound transaction.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
      * @return The enum numeric value on the wire for command.
      */
@@ -14599,6 +16303,10 @@ public final class PB_RDFService {
       return command_;
     }
     /**
+     * <pre>
+     * Lifecycle command to execute on the stream-bound transaction.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
      * @return The command.
      */
@@ -14610,6 +16318,10 @@ public final class PB_RDFService {
     public static final int TXN_TYPE_FIELD_NUMBER = 2;
     private int txnType_ = 0;
     /**
+     * <pre>
+     * Requested transaction type when command is TRANSACTION_COMMAND_BEGIN.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionType txn_type = 2;</code>
      * @return The enum numeric value on the wire for txnType.
      */
@@ -14617,6 +16329,10 @@ public final class PB_RDFService {
       return txnType_;
     }
     /**
+     * <pre>
+     * Requested transaction type when command is TRANSACTION_COMMAND_BEGIN.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionType txn_type = 2;</code>
      * @return The txnType.
      */
@@ -14628,6 +16344,10 @@ public final class PB_RDFService {
     public static final int PROMOTE_MODE_FIELD_NUMBER = 3;
     private int promoteMode_ = 0;
     /**
+     * <pre>
+     * Requested promotion mode when command is TRANSACTION_COMMAND_PROMOTE.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.PromoteMode promote_mode = 3;</code>
      * @return The enum numeric value on the wire for promoteMode.
      */
@@ -14635,6 +16355,10 @@ public final class PB_RDFService {
       return promoteMode_;
     }
     /**
+     * <pre>
+     * Requested promotion mode when command is TRANSACTION_COMMAND_PROMOTE.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.PromoteMode promote_mode = 3;</code>
      * @return The promoteMode.
      */
@@ -14985,6 +16709,10 @@ public final class PB_RDFService {
 
       private int command_ = 0;
       /**
+       * <pre>
+       * Lifecycle command to execute on the stream-bound transaction.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
        * @return The enum numeric value on the wire for command.
        */
@@ -14992,6 +16720,10 @@ public final class PB_RDFService {
         return command_;
       }
       /**
+       * <pre>
+       * Lifecycle command to execute on the stream-bound transaction.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
        * @param value The enum numeric value on the wire for command to set.
        * @return This builder for chaining.
@@ -15003,6 +16735,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Lifecycle command to execute on the stream-bound transaction.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
        * @return The command.
        */
@@ -15012,6 +16748,10 @@ public final class PB_RDFService {
         return result == null ? org.apache.jena.grpc.wire.PB_RDFService.TransactionCommand.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * Lifecycle command to execute on the stream-bound transaction.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
        * @param value The command to set.
        * @return This builder for chaining.
@@ -15026,6 +16766,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Lifecycle command to execute on the stream-bound transaction.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
        * @return This builder for chaining.
        */
@@ -15038,6 +16782,10 @@ public final class PB_RDFService {
 
       private int txnType_ = 0;
       /**
+       * <pre>
+       * Requested transaction type when command is TRANSACTION_COMMAND_BEGIN.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionType txn_type = 2;</code>
        * @return The enum numeric value on the wire for txnType.
        */
@@ -15045,6 +16793,10 @@ public final class PB_RDFService {
         return txnType_;
       }
       /**
+       * <pre>
+       * Requested transaction type when command is TRANSACTION_COMMAND_BEGIN.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionType txn_type = 2;</code>
        * @param value The enum numeric value on the wire for txnType to set.
        * @return This builder for chaining.
@@ -15056,6 +16808,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Requested transaction type when command is TRANSACTION_COMMAND_BEGIN.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionType txn_type = 2;</code>
        * @return The txnType.
        */
@@ -15065,6 +16821,10 @@ public final class PB_RDFService {
         return result == null ? org.apache.jena.grpc.wire.PB_RDFService.TransactionType.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * Requested transaction type when command is TRANSACTION_COMMAND_BEGIN.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionType txn_type = 2;</code>
        * @param value The txnType to set.
        * @return This builder for chaining.
@@ -15079,6 +16839,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Requested transaction type when command is TRANSACTION_COMMAND_BEGIN.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionType txn_type = 2;</code>
        * @return This builder for chaining.
        */
@@ -15091,6 +16855,10 @@ public final class PB_RDFService {
 
       private int promoteMode_ = 0;
       /**
+       * <pre>
+       * Requested promotion mode when command is TRANSACTION_COMMAND_PROMOTE.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.PromoteMode promote_mode = 3;</code>
        * @return The enum numeric value on the wire for promoteMode.
        */
@@ -15098,6 +16866,10 @@ public final class PB_RDFService {
         return promoteMode_;
       }
       /**
+       * <pre>
+       * Requested promotion mode when command is TRANSACTION_COMMAND_PROMOTE.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.PromoteMode promote_mode = 3;</code>
        * @param value The enum numeric value on the wire for promoteMode to set.
        * @return This builder for chaining.
@@ -15109,6 +16881,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Requested promotion mode when command is TRANSACTION_COMMAND_PROMOTE.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.PromoteMode promote_mode = 3;</code>
        * @return The promoteMode.
        */
@@ -15118,6 +16894,10 @@ public final class PB_RDFService {
         return result == null ? org.apache.jena.grpc.wire.PB_RDFService.PromoteMode.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * Requested promotion mode when command is TRANSACTION_COMMAND_PROMOTE.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.PromoteMode promote_mode = 3;</code>
        * @param value The promoteMode to set.
        * @return This builder for chaining.
@@ -15132,6 +16912,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Requested promotion mode when command is TRANSACTION_COMMAND_PROMOTE.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.PromoteMode promote_mode = 3;</code>
        * @return This builder for chaining.
        */
@@ -15198,22 +16982,38 @@ public final class PB_RDFService {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Command acknowledged by this response frame.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
      * @return The enum numeric value on the wire for command.
      */
     int getCommandValue();
     /**
+     * <pre>
+     * Command acknowledged by this response frame.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
      * @return The command.
      */
     org.apache.jena.grpc.wire.PB_RDFService.TransactionCommand getCommand();
 
     /**
+     * <pre>
+     * Server-assigned transaction identifier for passing in x-jena-txn-id metadata or request fields.
+     * </pre>
+     *
      * <code>string txn_id = 2;</code>
      * @return The txnId.
      */
     java.lang.String getTxnId();
     /**
+     * <pre>
+     * Server-assigned transaction identifier for passing in x-jena-txn-id metadata or request fields.
+     * </pre>
+     *
      * <code>string txn_id = 2;</code>
      * @return The bytes for txnId.
      */
@@ -15221,6 +17021,10 @@ public final class PB_RDFService {
         getTxnIdBytes();
 
     /**
+     * <pre>
+     * True if a TRANSACTION_COMMAND_PROMOTE request succeeded in promoting the transaction to write.
+     * </pre>
+     *
      * <code>bool promoted = 3;</code>
      * @return The promoted.
      */
@@ -15272,6 +17076,10 @@ public final class PB_RDFService {
     public static final int COMMAND_FIELD_NUMBER = 1;
     private int command_ = 0;
     /**
+     * <pre>
+     * Command acknowledged by this response frame.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
      * @return The enum numeric value on the wire for command.
      */
@@ -15279,6 +17087,10 @@ public final class PB_RDFService {
       return command_;
     }
     /**
+     * <pre>
+     * Command acknowledged by this response frame.
+     * </pre>
+     *
      * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
      * @return The command.
      */
@@ -15291,6 +17103,10 @@ public final class PB_RDFService {
     @SuppressWarnings("serial")
     private volatile java.lang.Object txnId_ = "";
     /**
+     * <pre>
+     * Server-assigned transaction identifier for passing in x-jena-txn-id metadata or request fields.
+     * </pre>
+     *
      * <code>string txn_id = 2;</code>
      * @return The txnId.
      */
@@ -15308,6 +17124,10 @@ public final class PB_RDFService {
       }
     }
     /**
+     * <pre>
+     * Server-assigned transaction identifier for passing in x-jena-txn-id metadata or request fields.
+     * </pre>
+     *
      * <code>string txn_id = 2;</code>
      * @return The bytes for txnId.
      */
@@ -15329,6 +17149,10 @@ public final class PB_RDFService {
     public static final int PROMOTED_FIELD_NUMBER = 3;
     private boolean promoted_ = false;
     /**
+     * <pre>
+     * True if a TRANSACTION_COMMAND_PROMOTE request succeeded in promoting the transaction to write.
+     * </pre>
+     *
      * <code>bool promoted = 3;</code>
      * @return The promoted.
      */
@@ -15683,6 +17507,10 @@ public final class PB_RDFService {
 
       private int command_ = 0;
       /**
+       * <pre>
+       * Command acknowledged by this response frame.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
        * @return The enum numeric value on the wire for command.
        */
@@ -15690,6 +17518,10 @@ public final class PB_RDFService {
         return command_;
       }
       /**
+       * <pre>
+       * Command acknowledged by this response frame.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
        * @param value The enum numeric value on the wire for command to set.
        * @return This builder for chaining.
@@ -15701,6 +17533,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Command acknowledged by this response frame.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
        * @return The command.
        */
@@ -15710,6 +17546,10 @@ public final class PB_RDFService {
         return result == null ? org.apache.jena.grpc.wire.PB_RDFService.TransactionCommand.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * Command acknowledged by this response frame.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
        * @param value The command to set.
        * @return This builder for chaining.
@@ -15724,6 +17564,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Command acknowledged by this response frame.
+       * </pre>
+       *
        * <code>.org.apache.jena.grpc.v1.TransactionCommand command = 1;</code>
        * @return This builder for chaining.
        */
@@ -15736,6 +17580,10 @@ public final class PB_RDFService {
 
       private java.lang.Object txnId_ = "";
       /**
+       * <pre>
+       * Server-assigned transaction identifier for passing in x-jena-txn-id metadata or request fields.
+       * </pre>
+       *
        * <code>string txn_id = 2;</code>
        * @return The txnId.
        */
@@ -15752,6 +17600,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Server-assigned transaction identifier for passing in x-jena-txn-id metadata or request fields.
+       * </pre>
+       *
        * <code>string txn_id = 2;</code>
        * @return The bytes for txnId.
        */
@@ -15769,6 +17621,10 @@ public final class PB_RDFService {
         }
       }
       /**
+       * <pre>
+       * Server-assigned transaction identifier for passing in x-jena-txn-id metadata or request fields.
+       * </pre>
+       *
        * <code>string txn_id = 2;</code>
        * @param value The txnId to set.
        * @return This builder for chaining.
@@ -15782,6 +17638,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Server-assigned transaction identifier for passing in x-jena-txn-id metadata or request fields.
+       * </pre>
+       *
        * <code>string txn_id = 2;</code>
        * @return This builder for chaining.
        */
@@ -15792,6 +17652,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * Server-assigned transaction identifier for passing in x-jena-txn-id metadata or request fields.
+       * </pre>
+       *
        * <code>string txn_id = 2;</code>
        * @param value The bytes for txnId to set.
        * @return This builder for chaining.
@@ -15808,6 +17672,10 @@ public final class PB_RDFService {
 
       private boolean promoted_ ;
       /**
+       * <pre>
+       * True if a TRANSACTION_COMMAND_PROMOTE request succeeded in promoting the transaction to write.
+       * </pre>
+       *
        * <code>bool promoted = 3;</code>
        * @return The promoted.
        */
@@ -15816,6 +17684,10 @@ public final class PB_RDFService {
         return promoted_;
       }
       /**
+       * <pre>
+       * True if a TRANSACTION_COMMAND_PROMOTE request succeeded in promoting the transaction to write.
+       * </pre>
+       *
        * <code>bool promoted = 3;</code>
        * @param value The promoted to set.
        * @return This builder for chaining.
@@ -15828,6 +17700,10 @@ public final class PB_RDFService {
         return this;
       }
       /**
+       * <pre>
+       * True if a TRANSACTION_COMMAND_PROMOTE request succeeded in promoting the transaction to write.
+       * </pre>
+       *
        * <code>bool promoted = 3;</code>
        * @return This builder for chaining.
        */
