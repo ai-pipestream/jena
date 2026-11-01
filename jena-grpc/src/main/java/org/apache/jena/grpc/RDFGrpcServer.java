@@ -213,7 +213,8 @@ public class RDFGrpcServer implements AutoCloseable {
         }
 
         /**
-         * Set how long a remote transaction may stay idle before the server aborts and ends it
+         * Set how long a remote transaction, or a non-transactional streaming write call waiting
+         * for its next client frame, may stay idle before the server aborts and ends it
          * (defaults to {@link RDFDatasetGrpcService#DEFAULT_TXN_IDLE_TIMEOUT}).
          *
          * @param txnIdleTimeout the idle timeout

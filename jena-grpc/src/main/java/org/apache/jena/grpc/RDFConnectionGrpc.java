@@ -171,4 +171,15 @@ public class RDFConnectionGrpc extends RDFConnectionAdapter {
     public RDFLinkGrpc.PatchSubscription subscribePatches(RDFChanges target) {
         return linkGrpc.subscribePatches(target);
     }
+
+    /**
+     * Subscribe to the committed changes of one graph published by the remote server.
+     *
+     * @param graphName the graph name, or {@code null} for the default graph
+     * @param target the destination {@link RDFChanges} sink
+     * @return a {@link RDFLinkGrpc.PatchSubscription} handle that cancels the subscription when closed
+     */
+    public RDFLinkGrpc.PatchSubscription subscribePatchesForGraph(Node graphName, RDFChanges target) {
+        return linkGrpc.subscribePatchesForGraph(graphName, target);
+    }
 }

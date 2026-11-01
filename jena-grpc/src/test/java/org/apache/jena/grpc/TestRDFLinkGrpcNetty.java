@@ -22,8 +22,14 @@
 package org.apache.jena.grpc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import java.util.function.IntSupplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterAll;
@@ -32,9 +38,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.sparql.JenaTransactionException;
 import org.apache.jena.rdflink.AbstractTestRDFLink;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.sparql.core.DatasetGraphWrapper;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.sse.SSE;
 import org.apache.jena.sparql.util.IsoMatcher;
@@ -98,4 +108,78 @@ public class TestRDFLinkGrpcNetty extends AbstractTestRDFLink {
             assertTrue(IsoMatcher.isomorphic(sample, fetched));
         }
     }
+
+    private static void awaitCount(IntSupplier counter, int expected, long millis) throws InterruptedException {
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(millis);
+        while ( counter.getAsInt() != expected && System.nanoTime() < deadline )
+            Thread.sleep(10);
+        assertEquals(expected, counter.getAsInt());
+    }
+
+    // The in-process server runs handlers on the caller's thread, so a client call blocks for
+    // as long as the server does. The transaction command timeout can only be exercised over
+    // a transport that dispatches on its own executor, such as Netty.
+
+    @Test
+    public void txnCommandTimeout_beginWriteTimesOutWhileLockIsHeld() {
+        try ( RDFLinkGrpc holder = RDFLinkGrpc.connect("127.0.0.1", port);
+              RDFLinkGrpc waiter = RDFLinkGrpc.newBuilder()
+                  .host("127.0.0.1")
+                  .port(port)
+                  .txnCommandTimeout(Duration.ofMillis(300))
+                  .build() ) {
+            holder.begin(ReadWrite.WRITE);
+            JenaTransactionException ex = assertThrows(JenaTransactionException.class,
+                () -> waiter.begin(ReadWrite.WRITE));
+            assertTrue(ex.getMessage().contains("Timed out"), ex.getMessage());
+            assertTrue(ex.getMessage().contains("BEGIN"), ex.getMessage());
+            assertFalse(waiter.isInTransaction());
+
+            holder.update("INSERT DATA { <http://example/s> <http://example/p> 'held' }");
+            holder.commit();
+            holder.end();
+
+            // The cancelled BEGIN did not leak a transaction: the waiter can now begin.
+            assertTimeout(Duration.ofSeconds(10), () -> waiter.begin(ReadWrite.WRITE));
+            waiter.abort();
+            waiter.end();
+            assertEquals(1, waiter.get().size());
+        }
+    }
+
+    @Test
+    public void txnCommandTimeout_slowCommitReportsUnknownOutcome() throws Exception {
+                DatasetGraph slowCommit = new DatasetGraphWrapper(DatasetGraphFactory.createTxnMem()) {
+            @Override
+            public void commit() {
+                try {
+                    Thread.sleep(600);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                super.commit();
+            }
+        };
+        try ( RDFGrpcServer slowServer = RDFGrpcServer.newBuilder()
+                  .port(0)
+                  .dataset(slowCommit)
+                  .build()
+                  .start();
+              RDFLinkGrpc link = RDFLinkGrpc.newBuilder()
+                  .host("127.0.0.1")
+                  .port(slowServer.getPort())
+                  .txnCommandTimeout(Duration.ofMillis(200))
+                  .build();
+              RDFLinkGrpc other = RDFLinkGrpc.connect("127.0.0.1", slowServer.getPort()) ) {
+            link.begin(ReadWrite.WRITE);
+            link.update("INSERT DATA { <http://example/s> <http://example/p> 'slow' }");
+            JenaTransactionException ex = assertThrows(JenaTransactionException.class, link::commit);
+            assertTrue(ex.getMessage().contains("outcome of the commit is unknown"), ex.getMessage());
+            assertFalse(link.isInTransaction());
+
+            // The server finished the commit after the client gave up.
+            awaitCount(() -> other.get().size(), 1, 5_000);
+        }
+    }
+
 }

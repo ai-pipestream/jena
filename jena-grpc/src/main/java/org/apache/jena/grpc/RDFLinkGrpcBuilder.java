@@ -21,6 +21,8 @@
 
 package org.apache.jena.grpc;
 
+import java.time.Duration;
+
 import io.grpc.Channel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
@@ -46,6 +48,7 @@ public class RDFLinkGrpcBuilder {
     private boolean parseCheckUpdates = true;
     private boolean encodeValues = true;
     private int batchSize = ProtobufRDF.DEFAULT_BATCH_SIZE;
+    private Duration txnCommandTimeout;
 
     /**
      * Create a new {@link RDFLinkGrpcBuilder}.
@@ -180,6 +183,25 @@ public class RDFLinkGrpcBuilder {
     }
 
     /**
+     * Set the maximum time to wait for the server's response to a transaction command
+     * ({@code BEGIN}, {@code PROMOTE}, {@code COMMIT}, {@code ABORT}, {@code END}).
+     * By default there is no limit, so {@code begin(WRITE)} blocks until the server grants
+     * the write lock, as a local Jena {@code begin} does. When the timeout elapses the
+     * transaction stream is cancelled and a {@code JenaTransactionException} is thrown; for a
+     * {@code COMMIT} the exception states that the outcome is unknown.
+     *
+     * @param txnCommandTimeout the timeout, or {@code null} to wait without limit
+     * @return this builder
+     * @throws IllegalArgumentException Thrown if {@code txnCommandTimeout} is zero or negative
+     */
+    public RDFLinkGrpcBuilder txnCommandTimeout(Duration txnCommandTimeout) {
+        if ( txnCommandTimeout != null && (txnCommandTimeout.isNegative() || txnCommandTimeout.isZero()) )
+            throw new IllegalArgumentException("txnCommandTimeout must be positive: " + txnCommandTimeout);
+        this.txnCommandTimeout = txnCommandTimeout;
+        return this;
+    }
+
+    /**
      * Build the configured {@link RDFLinkGrpc}.
      *
      * @return the constructed {@link RDFLinkGrpc}
@@ -210,6 +232,7 @@ public class RDFLinkGrpcBuilder {
             parseCheckQueries,
             parseCheckUpdates,
             encodeValues,
-            batchSize);
+            batchSize,
+            txnCommandTimeout);
     }
 }

@@ -21,6 +21,7 @@
 
 package org.apache.jena.grpc;
 
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -123,6 +124,7 @@ public class RDFLinkGrpc implements RDFLink {
     private final boolean parseCheckUpdates;
     private final boolean encodeValues;
     private final int batchSize;
+    private final Duration txnCommandTimeout;
     private final ThreadLocal<ClientTxnSession> currentTxn = new ThreadLocal<>();
     private volatile boolean open = true;
 
@@ -132,13 +134,15 @@ public class RDFLinkGrpc implements RDFLink {
             boolean parseCheckQueries,
             boolean parseCheckUpdates,
             boolean encodeValues,
-            int batchSize) {
+            int batchSize,
+            Duration txnCommandTimeout) {
         this.rawChannel = Objects.requireNonNull(channel);
         this.ownChannel = ownChannel;
         this.parseCheckQueries = parseCheckQueries;
         this.parseCheckUpdates = parseCheckUpdates;
         this.encodeValues = encodeValues;
         this.batchSize = batchSize;
+        this.txnCommandTimeout = txnCommandTimeout;
         this.interceptedChannel = ClientInterceptors.intercept(rawChannel, txnHeaderInterceptor());
     }
 
@@ -430,6 +434,44 @@ public class RDFLinkGrpc implements RDFLink {
      * @throws IllegalArgumentException Thrown if {@code target} is {@code null}
      */
     public PatchSubscription subscribePatches(RDFChanges target, Consumer<Throwable> errorHandler) {
+        return subscribePatches(SubscribePatchesRequest.getDefaultInstance(), target, errorHandler);
+    }
+
+    /**
+     * Subscribe to the committed changes of one graph. Only the rows of {@code graphName}
+     * are delivered, inside their {@code TX}/{@code TC} framing; a commit that did not touch
+     * the graph is not delivered at all.
+     *
+     * @param graphName the graph name, or {@code null} for the default graph
+     * @param target the destination {@link RDFChanges} sink
+     * @return a {@link PatchSubscription} handle that cancels the subscription when closed
+     * @throws IllegalArgumentException Thrown if {@code target} is {@code null}
+     */
+    public PatchSubscription subscribePatchesForGraph(Node graphName, RDFChanges target) {
+        return subscribePatchesForGraph(graphName, target,
+            t -> Log.warn(RDFLinkGrpc.class, "Patch subscription terminated with error", t));
+    }
+
+    /**
+     * Subscribe to the committed changes of one graph, notifying {@code errorHandler} if the
+     * stream fails. Only the rows of {@code graphName} are delivered, inside their
+     * {@code TX}/{@code TC} framing; a commit that did not touch the graph is not delivered at all.
+     *
+     * @param graphName the graph name, or {@code null} for the default graph
+     * @param target the destination {@link RDFChanges} sink
+     * @param errorHandler callback invoked on unexpected stream termination errors (may be {@code null})
+     * @return a {@link PatchSubscription} handle that cancels the subscription when closed
+     * @throws IllegalArgumentException Thrown if {@code target} is {@code null}
+     */
+    public PatchSubscription subscribePatchesForGraph(Node graphName, RDFChanges target, Consumer<Throwable> errorHandler) {
+        SubscribePatchesRequest request = SubscribePatchesRequest.newBuilder()
+            .setGraphFilter(RDFGrpcProtocol.encodeGraphTarget(graphName))
+            .build();
+        return subscribePatches(request, target, errorHandler);
+    }
+
+    private PatchSubscription subscribePatches(
+            SubscribePatchesRequest request, RDFChanges target, Consumer<Throwable> errorHandler) {
         if ( target == null )
             throw new IllegalArgumentException(ERR_TARGET_NULL);
         checkOpen();
@@ -440,7 +482,7 @@ public class RDFLinkGrpc implements RDFLink {
         AtomicReference<Throwable> errorRef = new AtomicReference<>();
         ClientCalls.asyncServerStreamingCall(
             call,
-            SubscribePatchesRequest.getDefaultInstance(),
+            request,
             new StreamObserver<>() {
                 @Override
                 public void onNext(SubscribePatchesResponse value) {
@@ -774,7 +816,7 @@ public class RDFLinkGrpc implements RDFLink {
         if ( isInTransaction() ) {
             throw new JenaTransactionException("Already in a transaction");
         }
-        ClientTxnSession session = new ClientTxnSession(rawChannel, txnType);
+        ClientTxnSession session = new ClientTxnSession(rawChannel, txnType, txnCommandTimeout);
         session.begin();
         currentTxn.set(session);
     }
@@ -1033,13 +1075,15 @@ public class RDFLinkGrpc implements RDFLink {
         private final StreamObserver<TransactionRequest> requestObserver;
         private final BlockingQueue<Object> responses = new LinkedBlockingQueue<>();
         private final TxnType txnType;
+        private final Duration commandTimeout;
         private ReadWrite txnMode;
         private String txnId;
         private volatile boolean streamTerminated;
         private boolean closed;
 
-        ClientTxnSession(Channel channel, TxnType txnType) {
+        ClientTxnSession(Channel channel, TxnType txnType, Duration commandTimeout) {
             this.txnType = txnType;
+            this.commandTimeout = commandTimeout;
             this.txnMode = TxnType.initial(txnType);
             this.call = channel.newCall(RDFGrpcProtocol.TRANSACTION_METHOD, CallOptions.DEFAULT);
             this.requestObserver = ClientCalls.asyncBidiStreamingCall(call, new StreamObserver<>() {
@@ -1075,13 +1119,21 @@ public class RDFLinkGrpc implements RDFLink {
             }
         }
 
+        /**
+         * Send one command and wait for its response. The wait is unbounded unless a command
+         * timeout was configured on the link. On timeout the stream is cancelled, which makes
+         * the server abort the transaction unless the command was a {@code COMMIT} that it had
+         * already carried out; the exception says so.
+         */
         TransactionResponse sendCommand(TransactionRequest request) {
             if ( streamTerminated ) {
                 throw new JenaTransactionException("Transaction stream is already closed");
             }
             requestObserver.onNext(request);
             try {
-                Object event = responses.poll(30, TimeUnit.SECONDS);
+                Object event = (commandTimeout == null)
+                    ? responses.take()
+                    : responses.poll(commandTimeout.toNanos(), TimeUnit.NANOSECONDS);
                 if ( event instanceof TransactionResponse resp ) {
                     return resp;
                 }
@@ -1091,12 +1143,25 @@ public class RDFLinkGrpc implements RDFLink {
                 if ( event instanceof Throwable t ) {
                     throw new JenaTransactionException(t.getMessage(), t);
                 }
-                throw new JenaTransactionException("Transaction stream closed before response arrived");
+                if ( event == null ) {
+                    cancelAbruptly();
+                    throw new JenaTransactionException(timeoutMessage(request.getCommand()));
+                }
+                throw new JenaTransactionException(
+                    "Transaction stream closed before the " + request.getCommand() + " response arrived");
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
                 cancelAbruptly();
                 throw new JenaTransactionException("Interrupted waiting for transaction response", ie);
             }
+        }
+
+        private String timeoutMessage(TransactionCommand command) {
+            String base = "Timed out after " + commandTimeout + " waiting for the " + command + " response";
+            if ( command == TransactionCommand.TRANSACTION_COMMAND_COMMIT ) {
+                return base + "; the outcome of the commit is unknown";
+            }
+            return base + "; the transaction was cancelled";
         }
 
         void completeClientStream() {

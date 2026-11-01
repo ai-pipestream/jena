@@ -23,6 +23,8 @@ package org.apache.jena.grpc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,30 +40,52 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.grpc.CallOptions;
+import io.grpc.ManagedChannel;
+import io.grpc.MethodDescriptor;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.stub.ClientCalls;
+import io.grpc.stub.StreamObserver;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.grpc.wire.PB_RDFService.ApplyPatchRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.ExecuteUpdateRequest;
+import org.apache.jena.grpc.wire.PB_RDFService.WriteDisposition;
+import org.apache.jena.grpc.wire.PB_RDFService.WriteRdfHeader;
+import org.apache.jena.grpc.wire.PB_RDFService.WriteRdfRequest;
 import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.rdflink.AbstractTestRDFLink;
 import org.apache.jena.rdflink.RDFLink;
+import org.apache.jena.rdfpatch.RDFChanges;
 import org.apache.jena.rdfpatch.RDFPatch;
+import org.apache.jena.rdfpatch.binary.RDFChangesWriterProtobuf;
 import org.apache.jena.rdfpatch.changes.RDFChangesApply;
 import org.apache.jena.rdfpatch.changes.RDFChangesBase;
 import org.apache.jena.rdfpatch.changes.RDFChangesCollector;
+import org.apache.jena.riot.protobuf.ProtobufConvert;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.sparql.JenaTransactionException;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.sparql.core.DatasetGraphWrapper;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Transactional.Promote;
 import org.apache.jena.sparql.exec.QueryExec;
@@ -535,5 +559,271 @@ public class TestRDFLinkGrpcInProcess extends AbstractTestRDFLink {
             assertThrows(IllegalArgumentException.class, () -> link.applyPatchBatch(null));
             assertThrows(IllegalArgumentException.class, () -> link.subscribePatches(null));
         }
+    }
+
+    // ---- Round 2 review fixes
+
+    private static final Node EX_S = NodeFactory.createURI("http://example/s");
+    private static final Node EX_P = NodeFactory.createURI("http://example/p");
+    private static final Node EX_G1 = NodeFactory.createURI("http://example/g1");
+    private static final Node EX_G2 = NodeFactory.createURI("http://example/g2");
+
+    private static Node lit(String value) {
+        return NodeFactory.createLiteralString(value);
+    }
+
+    private static List<RDF_Patch_Row> patchRows(Consumer<RDFChanges> action) {
+        List<RDF_Patch_Row> rows = new ArrayList<>();
+        RDFChanges writer = RDFChangesWriterProtobuf.create(rows::add);
+        writer.start();
+        action.accept(writer);
+        writer.finish();
+        return rows;
+    }
+
+    private static RDFPatch patch(Consumer<RDFChanges> action) {
+        RDFChangesCollector collector = new RDFChangesCollector();
+        collector.start();
+        collector.txnBegin();
+        action.accept(collector);
+        collector.txnCommit();
+        collector.finish();
+        return collector.getRDFPatch();
+    }
+
+    /** Records patch events as strings: "TX", "TC", "A g o", "D g o", "P g prefix". */
+    private static final class EventRecorder extends RDFChangesBase {
+        final List<String> events = Collections.synchronizedList(new ArrayList<>());
+        private final CountDownLatch commits;
+
+        EventRecorder(int expectedCommits) {
+            this.commits = new CountDownLatch(expectedCommits);
+        }
+
+        private static String g(Node g) {
+            return (g == null) ? "default" : g.getURI();
+        }
+
+        @Override public void txnBegin() { events.add("TX"); }
+        @Override public void add(Node g, Node s, Node p, Node o) { events.add("A " + g(g) + " " + o.getLiteralLexicalForm()); }
+        @Override public void delete(Node g, Node s, Node p, Node o) { events.add("D " + g(g) + " " + o.getLiteralLexicalForm()); }
+        @Override public void addPrefix(Node g, String prefix, String uri) { events.add("P " + g(g) + " " + prefix); }
+        @Override public void deletePrefix(Node g, String prefix) { events.add("PD " + g(g) + " " + prefix); }
+        @Override public void txnCommit() { events.add("TC"); commits.countDown(); }
+
+        boolean await() throws InterruptedException {
+            return commits.await(5, TimeUnit.SECONDS);
+        }
+    }
+
+    private static void awaitCount(java.util.function.IntSupplier counter, int expected, long millis) throws InterruptedException {
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(millis);
+        while ( counter.getAsInt() != expected && System.nanoTime() < deadline )
+            Thread.sleep(10);
+        assertEquals(expected, counter.getAsInt());
+    }
+
+    /** Client-streaming write that sends {@code frames} and then stalls without half-closing. */
+    private static final class StalledCall<Req, Resp> implements AutoCloseable {
+        final ManagedChannel channel;
+        final StreamObserver<Req> requests;
+        final CountDownLatch terminated = new CountDownLatch(1);
+        final AtomicReference<Throwable> error = new AtomicReference<>();
+        final AtomicReference<Resp> response = new AtomicReference<>();
+
+        StalledCall(String serverName, MethodDescriptor<Req, Resp> method, List<Req> frames) {
+            channel = InProcessChannelBuilder.forName(serverName).usePlaintext().build();
+            requests = ClientCalls.asyncClientStreamingCall(channel.newCall(method, CallOptions.DEFAULT),
+                new StreamObserver<>() {
+                    @Override public void onNext(Resp value) { response.set(value); }
+                    @Override public void onError(Throwable t) { error.set(t); terminated.countDown(); }
+                    @Override public void onCompleted() { terminated.countDown(); }
+                });
+            frames.forEach(requests::onNext);
+        }
+
+        @Override
+        public void close() {
+            channel.shutdownNow();
+        }
+    }
+
+    private <Req, Resp> void assertStalledWriteIsReaped(MethodDescriptor<Req, Resp> method, List<Req> frames) throws Exception {
+        String name = "jena-grpc-stall-" + SERVER_SEQ.incrementAndGet();
+        DatasetGraph dsg = DatasetGraphFactory.createTxnMem();
+        try ( RDFGrpcServer stallServer = RDFGrpcServer.newBuilder()
+                  .inProcessName(name)
+                  .dataset(dsg)
+                  .txnIdleTimeout(Duration.ofMillis(200))
+                  .build()
+                  .start();
+              StalledCall<Req, Resp> stalled = new StalledCall<>(name, method, frames) ) {
+            RDFDatasetGrpcService service = stallServer.getService();
+            awaitCount(service::ownedWriteCount, 1, 5_000);
+            assertEquals(0, service.activeTxnCount());
+
+            // The reaper aborts the stalled session and fails the call.
+            awaitCount(service::ownedWriteCount, 0, 10_000);
+            assertTrue(stalled.terminated.await(5, TimeUnit.SECONDS));
+            StatusRuntimeException sre = assertInstanceOf(StatusRuntimeException.class, stalled.error.get());
+            assertEquals(Status.Code.ABORTED, sre.getStatus().getCode());
+
+            // The writer lock is free again and the partial write was rolled back.
+            assertTimeoutPreemptively(Duration.ofSeconds(5),
+                () -> Txn.executeWrite(dsg, () -> dsg.add(Quad.defaultGraphIRI, EX_S, EX_P, lit("other"))));
+            Txn.executeRead(dsg, () -> {
+                assertEquals(1, Iter.count(dsg.find()));
+                assertFalse(dsg.contains(Node.ANY, EX_S, EX_P, lit("stalled")));
+            });
+        }
+    }
+
+    @Test
+    public void stalledWriteRdf_isReapedAndReleasesWriteLock() throws Exception {
+        Quad quad = Quad.create(Quad.defaultGraphIRI, EX_S, EX_P, lit("stalled"));
+        assertStalledWriteIsReaped(RDFGrpcProtocol.WRITE_RDF_METHOD, List.of(
+            WriteRdfRequest.newBuilder()
+                .setHeader(WriteRdfHeader.newBuilder().setDisposition(WriteDisposition.WRITE_DISPOSITION_APPEND))
+                .build(),
+            WriteRdfRequest.newBuilder()
+                .setRow(RDF_StreamRow.newBuilder().setQuad(ProtobufConvert.convert(quad, false)))
+                .build()));
+    }
+
+    @Test
+    public void stalledExecuteUpdate_isReapedAndReleasesWriteLock() throws Exception {
+        assertStalledWriteIsReaped(RDFGrpcProtocol.EXECUTE_UPDATE_METHOD, List.of(
+            ExecuteUpdateRequest.newBuilder()
+                .setUpdate("INSERT DATA { <http://example/s> <http://example/p> 'stalled' }")
+                .build()));
+    }
+
+    @Test
+    public void stalledApplyPatch_isReapedAndReleasesWriteLock() throws Exception {
+        List<RDF_Patch_Row> rows = patchRows(c -> {
+            c.txnBegin();
+            c.add(null, EX_S, EX_P, lit("stalled"));
+        });
+        assertStalledWriteIsReaped(RDFGrpcProtocol.APPLY_PATCH_METHOD, List.of(
+            ApplyPatchRequest.newBuilder().addAllRows(rows).build()));
+    }
+
+    @Test
+    public void applyPatch_subscriberJoiningMidStreamGetsNoPartialPatch() throws Exception {
+        List<RDF_Patch_Row> chunk1 = patchRows(c -> {
+            c.txnBegin();
+            c.add(null, EX_S, EX_P, lit("o1"));
+        });
+        List<RDF_Patch_Row> chunk2 = patchRows(c -> {
+            c.add(null, EX_S, EX_P, lit("o2"));
+            c.txnCommit();
+        });
+        EventRecorder recorder = new EventRecorder(1);
+        try ( StalledCall<ApplyPatchRequest, ?> inFlight = new StalledCall<>(serverName,
+                  RDFGrpcProtocol.APPLY_PATCH_METHOD,
+                  List.of(ApplyPatchRequest.newBuilder().addAllRows(chunk1).build()));
+              RDFLinkGrpc link = RDFLinkGrpc.connectInProcess(serverName) ) {
+            awaitCount(server.getService()::ownedWriteCount, 1, 5_000);
+            try ( RDFLinkGrpc.PatchSubscription sub = link.subscribePatches(recorder) ) {
+                inFlight.requests.onNext(ApplyPatchRequest.newBuilder().addAllRows(chunk2).build());
+                inFlight.requests.onCompleted();
+                assertTrue(inFlight.terminated.await(5, TimeUnit.SECONDS));
+                assertEquals(null, inFlight.error.get());
+
+                // The next whole patch is the first thing the subscriber sees.
+                link.applyPatch(addPatch(EX_S, EX_P, lit("o3")));
+                assertTrue(recorder.await());
+                assertEquals(List.of("TX", "A default o3", "TC"), List.copyOf(recorder.events));
+                assertEquals(3, link.get().size());
+            }
+        }
+    }
+
+    @Test
+    public void subscribePatches_graphFilterDeliversOnlyMatchingRows() throws Exception {
+        EventRecorder all = new EventRecorder(2);
+        EventRecorder g1Only = new EventRecorder(1);
+        EventRecorder defaultOnly = new EventRecorder(2);
+        try ( RDFLinkGrpc link = RDFLinkGrpc.connectInProcess(serverName);
+              RDFLinkGrpc.PatchSubscription subAll = link.subscribePatches(all);
+              RDFLinkGrpc.PatchSubscription subG1 = link.subscribePatchesForGraph(EX_G1, g1Only);
+              RDFLinkGrpc.PatchSubscription subDefault = link.subscribePatchesForGraph(null, defaultOnly) ) {
+
+            // Touches only the default graph: not delivered to the g1 subscriber at all.
+            link.applyPatch(patch(c -> c.add(null, EX_S, EX_P, lit("o1"))));
+            // Touches the default graph and two named graphs.
+            link.applyPatch(patch(c -> {
+                c.add(null, EX_S, EX_P, lit("o2"));
+                c.add(EX_G1, EX_S, EX_P, lit("o3"));
+                c.addPrefix(EX_G1, "ex", "http://example/");
+                c.add(EX_G2, EX_S, EX_P, lit("o4"));
+            }));
+
+            assertTrue(all.await());
+            assertTrue(g1Only.await());
+            assertTrue(defaultOnly.await());
+            assertEquals(List.of(
+                    "TX", "A default o1", "TC",
+                    "TX", "A default o2", "A http://example/g1 o3", "P http://example/g1 ex", "A http://example/g2 o4", "TC"),
+                List.copyOf(all.events));
+            assertEquals(List.of("TX", "A http://example/g1 o3", "P http://example/g1 ex", "TC"),
+                List.copyOf(g1Only.events));
+            assertEquals(List.of("TX", "A default o1", "TC", "TX", "A default o2", "TC"),
+                List.copyOf(defaultOnly.events));
+        }
+    }
+
+    @Test
+    public void subscribePatches_receivesWriteRdfAndUpdateCommits() throws Exception {
+        DatasetGraph source = SSE.parseDatasetGraph("(dataset (graph (:s :p 'o1')) (graph :g1 (:s :p 'o2')))");
+        source.prefixes().add("ex", "http://example/");
+        EventRecorder recorder = new EventRecorder(4);
+        DatasetGraph replica = DatasetGraphFactory.createTxnMem();
+        RDFChangesCollector received = new RDFChangesCollector();
+        try ( RDFLinkGrpc link = RDFLinkGrpc.connectInProcess(serverName);
+              RDFLinkGrpc.PatchSubscription sub = link.subscribePatches(new RDFChangesBase() {
+                  @Override public void txnBegin() { received.txnBegin(); recorder.txnBegin(); }
+                  @Override public void txnCommit() { received.txnCommit(); recorder.txnCommit(); }
+                  @Override public void add(Node g, Node s, Node p, Node o) { received.add(g, s, p, o); recorder.add(g, s, p, o); }
+                  @Override public void delete(Node g, Node s, Node p, Node o) { received.delete(g, s, p, o); recorder.delete(g, s, p, o); }
+                  @Override public void addPrefix(Node g, String prefix, String uri) { received.addPrefix(g, prefix, uri); recorder.addPrefix(g, prefix, uri); }
+              }) ) {
+            link.putDataset(source);                                                        // WriteRdf, dataset
+            link.put(EX_G2, SSE.parseGraph("(graph (:s :p 'o3'))"));          // WriteRdf, graph
+            link.update("INSERT DATA { <http://example/s> <http://example/p> 'o4' }");      // ExecuteUpdate
+            link.update("DELETE DATA { <http://example/s> <http://example/p> 'o1' }");      // ExecuteUpdate
+            assertTrue(recorder.await());
+
+            assertTrue(recorder.events.contains("P default ex"));
+            assertEquals(List.of("TX", "A default o4", "TC", "TX", "D default o1", "TC"),
+                recorder.events.subList(recorder.events.size() - 6, recorder.events.size()));
+
+            received.getRDFPatch().apply(new RDFChangesApply(replica));
+            assertTrue(IsoMatcher.isomorphic(link.getDataset(), replica));
+        }
+    }
+
+    @Test
+    public void subscribePatches_subscriberJoiningDuringRemoteTxnGetsNextCommitOnly() throws Exception {
+        EventRecorder recorder = new EventRecorder(1);
+        try ( RDFLinkGrpc writer = RDFLinkGrpc.connectInProcess(serverName);
+              RDFLinkGrpc reader = RDFLinkGrpc.connectInProcess(serverName) ) {
+            writer.begin(ReadWrite.WRITE);
+            writer.update("INSERT DATA { <http://example/s> <http://example/p> 'o1' }");
+            try ( RDFLinkGrpc.PatchSubscription sub = reader.subscribePatches(recorder) ) {
+                writer.update("INSERT DATA { <http://example/s> <http://example/p> 'o2' }");
+                writer.commit();
+                writer.end();
+                writer.update("INSERT DATA { <http://example/s> <http://example/p> 'o3' }");
+                assertTrue(recorder.await());
+                assertEquals(List.of("TX", "A default o3", "TC"), List.copyOf(recorder.events));
+            }
+        }
+    }
+
+    @Test
+    public void txnCommandTimeout_rejectsNonPositive() {
+        assertThrows(IllegalArgumentException.class, () -> RDFLinkGrpc.newBuilder().txnCommandTimeout(Duration.ZERO));
+        assertThrows(IllegalArgumentException.class, () -> RDFLinkGrpc.newBuilder().txnCommandTimeout(Duration.ofSeconds(-1)));
     }
 }
