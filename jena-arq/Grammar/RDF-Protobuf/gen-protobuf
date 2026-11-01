@@ -41,7 +41,9 @@ then
 	 's/^public final class/\@SuppressWarnings("all")\npublic final class/' \
 	 "$OUTPUT"
     (
-	cat "$ROOT/build-files/license-header"
+	echo "/*"
+	sed -e 's/^/ * /' -e 's/ *$//' "$ROOT/build-files/license-header"
+	echo " */"
 	echo
 	cat "$OUTPUT"
     ) > F

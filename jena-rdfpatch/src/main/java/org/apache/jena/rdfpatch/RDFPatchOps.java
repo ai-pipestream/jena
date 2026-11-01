@@ -24,6 +24,7 @@ package org.apache.jena.rdfpatch;
 import java.io.*;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -32,7 +33,9 @@ import org.apache.jena.atlas.io.IO;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdfpatch.binary.RDFChangesWriterBinary;
+import org.apache.jena.rdfpatch.binary.RDFChangesWriterProtobuf;
 import org.apache.jena.rdfpatch.binary.RDFPatchReaderBinary;
+import org.apache.jena.rdfpatch.binary.RDFPatchReaderProtobuf;
 import org.apache.jena.rdfpatch.changes.*;
 import org.apache.jena.rdfpatch.system.DatasetGraphChanges;
 import org.apache.jena.rdfpatch.system.GraphChanges;
@@ -43,12 +46,15 @@ import org.apache.jena.rdfpatch.text.RDFPatchReaderText;
 import org.apache.jena.rdfpatch.text.TokenWriter;
 import org.apache.jena.rdfpatch.text.TokenWriterText;
 import org.apache.jena.riot.RDFParser;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row;
 import org.apache.jena.riot.system.ErrorHandler;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.sparql.core.DatasetGraph;
 
 public class RDFPatchOps {
     public static String namespace = "http://jena.apache.org/rdf-patch/";
+    private static final String ERR_DSG_NULL = "dsg must not be null";
 
     /** Read an {@link RDFPatch} from a file. */
     public static RDFPatch fileToPatch(String filename) {
@@ -218,9 +224,68 @@ public class RDFPatchOps {
         } catch (IOException ex) { IO.exception(ex); return null; }
     }
 
+    /**
+     * Read an {@link RDFPatch} from an input stream in Protobuf binary format.
+     *
+     * @param input source input stream
+     * @return the decoded {@link RDFPatch}
+     * @throws IllegalArgumentException Thrown if {@code input} is {@code null}
+     */
+    public static RDFPatch readProtobuf(InputStream input) {
+        return RDFPatchReaderProtobuf.read(input);
+    }
+
+    /**
+     * Read an {@link RDFPatch} from a file in Protobuf binary format.
+     *
+     * @param filename source file path
+     * @return the decoded {@link RDFPatch}
+     * @throws IllegalArgumentException Thrown if {@code filename} is {@code null}
+     */
+    public static RDFPatch readProtobuf(String filename) {
+        if ( filename == null )
+            throw new IllegalArgumentException("filename must not be null");
+        try ( InputStream input = IO.openFile(filename) ) {
+            return readProtobuf(input);
+        } catch (IOException ex) { IO.exception(ex); return null; }
+    }
+
+    /**
+     * Read an {@link RDFPatch} from an iterator of {@link RDF_Patch_Row} messages.
+     *
+     * @param rows iterator of {@link RDF_Patch_Row} messages
+     * @return the decoded {@link RDFPatch}
+     * @throws IllegalArgumentException Thrown if {@code rows} is {@code null}
+     */
+    public static RDFPatch readProtobuf(Iterator<RDF_Patch_Row> rows) {
+        return RDFPatchReaderProtobuf.read(rows);
+    }
+
+    /**
+     * Convert an in-memory {@link RDF_Patch} message into an {@link RDFPatch}.
+     *
+     * @param patch the Protobuf patch message
+     * @return the decoded {@link RDFPatch}
+     * @throws IllegalArgumentException Thrown if {@code patch} is {@code null}
+     */
+    public static RDFPatch readProtobuf(RDF_Patch patch) {
+        return RDFPatchReaderProtobuf.read(patch);
+    }
+
     /** Read an {@link RDFPatch} header. */
     public static PatchHeader readHeader(InputStream input) {
         return RDFPatchReaderText.readerHeader(input);
+    }
+
+    /**
+     * Read an {@link RDFPatch} header from a Protobuf binary input stream.
+     *
+     * @param input source input stream
+     * @return the decoded {@link PatchHeader}
+     * @throws IllegalArgumentException Thrown if {@code input} is {@code null}
+     */
+    public static PatchHeader readHeaderProtobuf(InputStream input) {
+        return RDFPatchReaderProtobuf.readHeader(input);
     }
 
     /** Apply changes from a {@link RDFPatch} to a {@link DatasetGraph} */
@@ -236,6 +301,36 @@ public class RDFPatchOps {
         pr.apply(changes);
     }
 
+    /**
+     * Apply changes from a Protobuf binary input stream to a {@link DatasetGraph}.
+     *
+     * @param dsg target dataset graph
+     * @param input source input stream
+     * @throws IllegalArgumentException Thrown if {@code dsg} or {@code input} is {@code null}
+     */
+    public static void applyChangeProtobuf(DatasetGraph dsg, InputStream input) {
+        if ( dsg == null )
+            throw new IllegalArgumentException(ERR_DSG_NULL);
+        PatchProcessor pr = RDFPatchReaderProtobuf.create(input);
+        RDFChanges changes = new RDFChangesApply(dsg);
+        pr.apply(changes);
+    }
+
+    /**
+     * Apply changes from an iterator of {@link RDF_Patch_Row} messages to a {@link DatasetGraph}.
+     *
+     * @param dsg target dataset graph
+     * @param rows iterator of {@link RDF_Patch_Row} messages
+     * @throws IllegalArgumentException Thrown if {@code dsg} or {@code rows} is {@code null}
+     */
+    public static void applyChangeProtobuf(DatasetGraph dsg, Iterator<RDF_Patch_Row> rows) {
+        if ( dsg == null )
+            throw new IllegalArgumentException(ERR_DSG_NULL);
+        PatchProcessor pr = RDFPatchReaderProtobuf.create(rows);
+        RDFChanges changes = new RDFChangesApply(dsg);
+        pr.apply(changes);
+    }
+
     /** Apply changes from a {@link RDFPatch} to a {@link Graph} */
     public static void applyChange(Graph graph, RDFPatch patch) {
         RDFChanges changes = new RDFChangesApplyGraph(graph);
@@ -245,6 +340,21 @@ public class RDFPatchOps {
     /** Apply changes from a text format input stream to a {@link Graph} */
     public static void applyChange(Graph graph, InputStream input) {
         RDFPatchReaderText pr = new RDFPatchReaderText(input);
+        RDFChanges changes = new RDFChangesApplyGraph(graph);
+        pr.apply(changes);
+    }
+
+    /**
+     * Apply changes from a Protobuf binary input stream to a {@link Graph}.
+     *
+     * @param graph target graph
+     * @param input source input stream
+     * @throws IllegalArgumentException Thrown if {@code graph} or {@code input} is {@code null}
+     */
+    public static void applyChangeProtobuf(Graph graph, InputStream input) {
+        if ( graph == null )
+            throw new IllegalArgumentException("graph must not be null");
+        PatchProcessor pr = RDFPatchReaderProtobuf.create(input);
         RDFChanges changes = new RDFChangesApplyGraph(graph);
         pr.apply(changes);
     }
@@ -307,6 +417,71 @@ public class RDFPatchOps {
         RDFChangesWriterBinary.write(patch, out);
     }
 
+    /**
+     * Write an {@link RDFPatch} in Protobuf binary format to {@code out}.
+     *
+     * @param out destination output stream
+     * @param patch the patch to write
+     * @throws IllegalArgumentException Thrown if {@code out} or {@code patch} is {@code null}
+     */
+    public static void writeProtobuf(OutputStream out, RDFPatch patch) {
+        RDFChangesWriterProtobuf.write(patch, out);
+    }
+
+    /**
+     * Emit an {@link RDFPatch} as a sequence of in-memory {@link RDF_Patch_Row} messages to {@code rowConsumer}.
+     *
+     * @param patch the patch to emit
+     * @param rowConsumer consumer receiving each encoded {@link RDF_Patch_Row}
+     * @throws IllegalArgumentException Thrown if {@code patch} or {@code rowConsumer} is {@code null}
+     */
+    public static void writeProtobuf(RDFPatch patch, Consumer<RDF_Patch_Row> rowConsumer) {
+        if ( patch == null )
+            throw new IllegalArgumentException("patch must not be null");
+        RDFChanges writer = RDFChangesWriterProtobuf.create(rowConsumer);
+        writer.start();
+        try {
+            patch.apply(writer);
+        } finally {
+            writer.finish();
+        }
+    }
+
+    /**
+     * Return an {@link RDFChanges} that writes length-delimited {@link RDF_Patch_Row} messages to {@code output}.
+     * Callers must invoke {@link RDFChanges#start()} and {@link RDFChanges#finish()}.
+     *
+     * @param output destination output stream
+     * @return an {@link RDFChanges} writer
+     * @throws IllegalArgumentException Thrown if {@code output} is {@code null}
+     */
+    public static RDFChanges protobufWriter(OutputStream output) {
+        return RDFChangesWriterProtobuf.create(output);
+    }
+
+    /**
+     * Return an {@link RDFChanges} that emits each event as an in-memory {@link RDF_Patch_Row} message
+     * to {@code rowConsumer}.
+     *
+     * @param rowConsumer consumer receiving each encoded {@link RDF_Patch_Row}
+     * @return an {@link RDFChanges} adapter
+     * @throws IllegalArgumentException Thrown if {@code rowConsumer} is {@code null}
+     */
+    public static RDFChanges protobufWriter(Consumer<RDF_Patch_Row> rowConsumer) {
+        return RDFChangesWriterProtobuf.create(rowConsumer);
+    }
+
+    /**
+     * Return a {@link Consumer} of {@link RDF_Patch_Row} messages that dispatches each row to {@code changes}.
+     *
+     * @param changes destination {@link RDFChanges}
+     * @return a consumer of {@link RDF_Patch_Row} messages
+     * @throws IllegalArgumentException Thrown if {@code changes} is {@code null}
+     */
+    public static Consumer<RDF_Patch_Row> protobufChangesReceiver(RDFChanges changes) {
+        return RDFPatchReaderProtobuf.changesToRowConsumer(changes);
+    }
+
     /** Write an {@link StreamRDF} out in {@link RDFPatch} text format.
      *  {@link StreamRDF#start} and {@link StreamRDF#finish}
      *  must be called; these bracket the patch in transaction markers
@@ -324,6 +499,24 @@ public class RDFPatchOps {
      */
     public static void writeBinary(OutputStream out, Consumer<StreamRDF> action) {
         RDFChangesWriterBinary.writeBinary(out, c->{
+            StreamRDF stream = new StreamPatch(c);
+            action.accept(stream);
+        });
+    }
+
+    /**
+     * Provide a {@link StreamRDF} that outputs in RDFPatch Protobuf binary format.
+     * {@link StreamRDF#start()} and {@link StreamRDF#finish()} must be called;
+     * these bracket the patch in transaction markers {@code TX} and {@code TC}.
+     *
+     * @param out destination output stream
+     * @param action callback receiving the {@link StreamRDF}
+     * @throws IllegalArgumentException Thrown if {@code out} or {@code action} is {@code null}
+     */
+    public static void writeProtobuf(OutputStream out, Consumer<StreamRDF> action) {
+        if ( action == null )
+            throw new IllegalArgumentException("action must not be null");
+        RDFChangesWriterProtobuf.writeProtobuf(out, c -> {
             StreamRDF stream = new StreamPatch(c);
             action.accept(stream);
         });
