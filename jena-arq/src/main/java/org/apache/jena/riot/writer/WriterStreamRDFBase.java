@@ -81,7 +81,7 @@ public abstract class WriterStreamRDFBase implements StreamRDF
         this(output,
              NodeToLabel.createScopeByDocument(),
              WriterLib.directiveStyle(context),
-             context.isFalseOrUndef(RIOT.symTurtleOmitBase));
+             context == null || context.isFalseOrUndef(RIOT.symTurtleOmitBase));
     }
 
     protected WriterStreamRDFBase(IndentedWriter output,

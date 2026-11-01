@@ -72,6 +72,7 @@ public abstract class TurtleShell {
         this.context = context;
         this.directiveStyle = WriterLib.directiveStyle(context);
         this.indentStyle = WriterLib.indentStyle(context);
+        WriterLib.indentWidth(context, INDENT_PREDICATE);
     }
 
     protected TurtleShell(IndentedWriter out, PrefixMap pmap, String baseURI, Context context) {
@@ -119,8 +120,13 @@ public abstract class TurtleShell {
 
     private final class ShellGraphWide extends ShellGraph {
 
+        private final int indentPredicate;
+        private final int indentObject;
+
         private ShellGraphWide(Graph graph, Node graphName, DatasetGraph dsg, Set<Node> graphNames) {
             super(graph, graphName, dsg, graphNames);
+            this.indentPredicate = WriterLib.indentWidth(context, INDENT_PREDICATE);
+            this.indentObject = WriterLib.indentWidth(context, INDENT_OBJECT);
         }
 
         @Override
@@ -149,7 +155,7 @@ public abstract class TurtleShell {
                 x = x.subList(1, x.size());
                 writeList(x);
                 print(" .");
-                out.decIndent(INDENT_PREDICATE);
+                out.decIndent(indentPredicate);
                 println();
             }
             return somethingWritten;
@@ -160,7 +166,7 @@ public abstract class TurtleShell {
             if ( cluster.isEmpty() )
                 return;
             writeNode(subject);
-            writeClusterPredicateObjectList(INDENT_PREDICATE, cluster);
+            writeClusterPredicateObjectList(indentPredicate, cluster);
         }
 
         @Override
@@ -220,7 +226,7 @@ public abstract class TurtleShell {
 
         private void writePredicateObjectList(Node p, List<Node> objects, int predicateMaxWidth, boolean first) {
             writePredicate(p, predicateMaxWidth, first);
-            out.incIndent(INDENT_OBJECT);
+            out.incIndent(indentObject);
 
             boolean lastObjectMultiLine = false;
             boolean firstObject = true;
@@ -240,14 +246,14 @@ public abstract class TurtleShell {
                 int row2 = out.getRow();
                 lastObjectMultiLine = (row2 > row1);
             }
-            out.decIndent(INDENT_OBJECT);
+            out.decIndent(indentObject);
         }
 
         private void writePredicateObject(Node p, Node obj, int predicateMaxWidth, boolean first) {
             writePredicate(p, predicateMaxWidth, first);
-            out.incIndent(INDENT_OBJECT);
+            out.incIndent(indentObject);
             writeNodePretty(obj);
-            out.decIndent(INDENT_OBJECT);
+            out.decIndent(indentObject);
         }
 
         private void writePredicate(Node p, int predicateMaxWidth, boolean first) {
@@ -404,10 +410,11 @@ public abstract class TurtleShell {
 
     private final class ShellGraphLong extends ShellGraph {
 
-        private static final int INDENT = 2;
+        private final int indentWidth;
 
         private ShellGraphLong(Graph graph, Node graphName, DatasetGraph dsg, Set<Node> graphNames) {
             super(graph, graphName, dsg, graphNames);
+            this.indentWidth = WriterLib.indentWidth(context, INDENT_LONG);
         }
 
 
@@ -437,7 +444,7 @@ public abstract class TurtleShell {
                 x = x.subList(1, x.size());
                 writeList(x);
                 print(" .");
-                out.decIndent(INDENT);
+                out.decIndent(indentWidth);
                 println();
             }
             return somethingWritten;
@@ -448,7 +455,7 @@ public abstract class TurtleShell {
             if ( cluster.isEmpty() )
                 return;
             writeNode(subject);
-            writeClusterPredicateObjectList(INDENT, cluster);
+            writeClusterPredicateObjectList(indentWidth, cluster);
         }
         // Writing predicate-object lists.
         // We group the cluster by predicate and within each group
@@ -514,7 +521,7 @@ public abstract class TurtleShell {
 
         private void writePredicateObjectList(Node p, List<Node> objects, boolean first) {
             writePredicate(p, first);
-            out.incIndent(INDENT);
+            out.incIndent(indentWidth);
 
             boolean firstObject = true;
             for ( Node o : objects ) {
@@ -530,7 +537,7 @@ public abstract class TurtleShell {
                     firstObject = false;
                 writeNode(o);
             }
-            out.decIndent(INDENT);
+            out.decIndent(indentWidth);
         }
 
         /** Write a predicate - jump to next line if deemed long */
@@ -573,18 +580,18 @@ public abstract class TurtleShell {
 
             if ( isCompact(x) ) {
                 print("[ ");
-                out.incIndent(2);
+                out.incIndent(indentWidth);
                 writePredicateObjectList(x);
-                out.decIndent(2);
+                out.decIndent(indentWidth);
                 print(" ]");
                 return;
             }
 
             print("[");
             out.println();
-            out.incIndent(2);
+            out.incIndent(indentWidth);
             writePredicateObjectList(x);
-            out.decIndent(2);
+            out.decIndent(indentWidth);
             println();
             print("]");
         }
@@ -597,13 +604,13 @@ public abstract class TurtleShell {
             }
 
             out.print("(");
-            out.incIndent(2);
+            out.incIndent(indentWidth);
             for ( Node n : elts ) {
                 out.println();
                 writeNodePretty(n);
             }
             out.println();
-            out.decIndent(2);
+            out.decIndent(indentWidth);
             out.print(")");
         }
 
