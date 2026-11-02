@@ -678,6 +678,65 @@ public class TestRDFLinkGrpcInProcess extends AbstractTestRDFLink {
         }
     }
 
+    private Throwable executeUpdateRaw(ExecuteUpdateRequest request) throws Exception {
+        try ( StalledCall<ExecuteUpdateRequest, ?> call = new StalledCall<>(serverName,
+                  RDFGrpcProtocol.EXECUTE_UPDATE_METHOD, List.of(request)) ) {
+            call.requests.onCompleted();
+            assertTrue(call.terminated.await(5, TimeUnit.SECONDS));
+            return call.error.get();
+        }
+    }
+
+    @Test
+    public void executeUpdate_usingGraphUrisSelectWhereBindings() throws Exception {
+        Txn.executeWrite(serverDsg, () -> {
+            serverDsg.add(Quad.defaultGraphIRI, EX_S, EX_P, lit("from-default"));
+            serverDsg.add(EX_G1, EX_S, EX_P, lit("from-g1"));
+        });
+        Node copy = NodeFactory.createURI("http://example/copy");
+        Throwable error = executeUpdateRaw(ExecuteUpdateRequest.newBuilder()
+            .setUpdate("INSERT { <http://example/copy> <http://example/p> ?o } "
+                + "WHERE { ?s <http://example/p> ?o }")
+            .addUsingGraphUris("http://example/g1")
+            .build());
+        assertEquals(null, error);
+        Txn.executeRead(serverDsg, () -> {
+            assertTrue(serverDsg.contains(Quad.defaultGraphIRI, copy, EX_P, lit("from-g1")));
+            assertFalse(serverDsg.contains(Quad.defaultGraphIRI, copy, EX_P, lit("from-default")));
+        });
+    }
+
+    @Test
+    public void executeUpdate_usingNamedGraphUrisRestrictNamedWhereBindings() throws Exception {
+        Txn.executeWrite(serverDsg, () -> {
+            serverDsg.add(EX_G1, EX_S, EX_P, lit("from-g1"));
+            serverDsg.add(EX_G2, EX_S, EX_P, lit("from-g2"));
+        });
+        Node copy = NodeFactory.createURI("http://example/copy");
+        Throwable error = executeUpdateRaw(ExecuteUpdateRequest.newBuilder()
+            .setUpdate("INSERT { <http://example/copy> <http://example/p> ?o } "
+                + "WHERE { GRAPH ?g { ?s <http://example/p> ?o } }")
+            .addUsingNamedGraphUris("http://example/g1")
+            .build());
+        assertEquals(null, error);
+        Txn.executeRead(serverDsg, () -> {
+            assertTrue(serverDsg.contains(Quad.defaultGraphIRI, copy, EX_P, lit("from-g1")));
+            assertFalse(serverDsg.contains(Quad.defaultGraphIRI, copy, EX_P, lit("from-g2")));
+        });
+    }
+
+    @Test
+    public void executeUpdate_usingFieldsRejectInlineWith() throws Exception {
+        Throwable error = executeUpdateRaw(ExecuteUpdateRequest.newBuilder()
+            .setUpdate("WITH <http://example/g2> "
+                + "INSERT { <http://example/copy> <http://example/p> 'x' } WHERE {}")
+            .addUsingGraphUris("http://example/g1")
+            .build());
+        StatusRuntimeException sre = assertInstanceOf(StatusRuntimeException.class, error);
+        assertEquals(Status.Code.INVALID_ARGUMENT, sre.getStatus().getCode());
+        assertFalse(serverDsg.contains(Node.ANY, Node.ANY, Node.ANY, Node.ANY));
+    }
+
     @Test
     public void stalledWriteRdf_isReapedAndReleasesWriteLock() throws Exception {
         Quad quad = Quad.create(Quad.defaultGraphIRI, EX_S, EX_P, lit("stalled"));

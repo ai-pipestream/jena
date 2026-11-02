@@ -289,7 +289,8 @@ service RdfDatasetService {
   // Stream one or more SPARQL Update requests to the dataset.
   rpc ExecuteUpdate(stream ExecuteUpdateRequest) returns (ExecuteUpdateResponse);
 
-  // Stream RDF Patch rows to apply to the dataset in O(1) server memory.
+  // Stream RDF Patch rows to apply to the dataset without buffering the request on the server.
+  // A patch subscriber may require buffering committed changes for atomic delivery.
   rpc ApplyPatch(stream ApplyPatchRequest) returns (ApplyPatchResponse);
 
   // Subscribe to a live server stream of committed RDF Patches.

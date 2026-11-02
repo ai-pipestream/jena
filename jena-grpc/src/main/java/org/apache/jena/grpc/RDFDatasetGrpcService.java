@@ -60,6 +60,7 @@ import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.grpc.wire.PB_RDFService.ApplyPatchRequest;
 import org.apache.jena.grpc.wire.PB_RDFService.ApplyPatchResponse;
@@ -117,6 +118,7 @@ import org.apache.jena.sparql.core.Transactional.Promote;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.exec.UpdateExec;
+import org.apache.jena.sparql.modify.UsingList;
 import org.apache.jena.system.Txn;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
@@ -365,9 +367,9 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     }
 
     /**
-     * True O(1)-memory streaming RDF write handler. Opens or attaches to a single-thread write
-     * session on the first frame and streams every incoming batch or row directly into the target
-     * {@link Graph} or {@link DatasetGraph} as it arrives.
+     * Streaming RDF write handler. Opens or attaches to a single-thread write session on the first
+     * frame and streams every incoming batch or row directly into the target {@link Graph} or
+     * {@link DatasetGraph} as it arrives. Patch subscriber recording buffers committed changes.
      */
     private StreamObserver<WriteRdfRequest> writeRdf(StreamObserver<WriteRdfResponse> responseObserver) {
         return new WriteCall<>(responseObserver) {
@@ -584,8 +586,16 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
             protected void handle(ExecuteUpdateRequest request) throws Exception {
                 String baseUri = request.getBaseUri().isEmpty() ? null : request.getBaseUri();
                 UpdateRequest updateReq = UpdateFactory.create(request.getUpdate(), baseUri, Syntax.syntaxARQ);
+                UsingList usingList = new UsingList();
+                for ( String uri : request.getUsingGraphUrisList() ) {
+                    usingList.addUsing(NodeFactory.createURI(uri));
+                }
+                for ( String uri : request.getUsingNamedGraphUrisList() ) {
+                    usingList.addUsingNamed(NodeFactory.createURI(uri));
+                }
+                UpdateRequest update = UsingList.modifyUpdateForUsingList(updateReq, usingList);
                 ensureSession(request.getTxnId());
-                session.run(() -> UpdateExec.dataset(session.dataset()).update(updateReq).execute());
+                session.run(() -> UpdateExec.dataset(session.dataset()).update(update).execute());
                 updateCount++;
             }
 
@@ -599,11 +609,10 @@ public class RDFDatasetGrpcService implements BindableService, AutoCloseable {
     }
 
     /**
-     * True O(1)-memory streaming RDF Patch handler. Applies incoming {@link RDF_Patch_Row}
-     * messages directly on the write transaction thread as each {@link ApplyPatchRequest}
-     * arrives instead of buffering the entire stream in memory. The changes reach subscribers
-     * through the write session's change recorder, so a subscriber either receives the whole
-     * patch or nothing.
+     * Streaming RDF Patch handler. Applies incoming {@link RDF_Patch_Row} messages directly on
+     * the write transaction thread as each {@link ApplyPatchRequest} arrives instead of buffering
+     * the request. When a subscriber requires change recording, committed changes are buffered so
+     * each subscriber receives the whole patch or nothing.
      */
     private StreamObserver<ApplyPatchRequest> applyPatch(StreamObserver<ApplyPatchResponse> responseObserver) {
         return new WriteCall<>(responseObserver) {

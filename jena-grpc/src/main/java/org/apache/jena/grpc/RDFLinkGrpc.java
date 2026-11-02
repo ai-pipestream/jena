@@ -104,7 +104,7 @@ import org.apache.jena.update.UpdateRequest;
 /**
  * Jetty-free, stream-first gRPC implementation of {@link RDFLink} communicating over
  * {@code PB_RDF} and {@code PB_RDFService} Protobuf messages, supporting lazy streaming
- * quad pattern matching ({@link #findStream}), O(1)-memory streaming dataset/graph ingest,
+ * quad pattern matching ({@link #findStream}), streaming dataset/graph ingest,
  * connection-bound bidirectional transactions, transactional {@link RDFPatch} application
  * and subscription, and SPARQL Query/Update.
  */
