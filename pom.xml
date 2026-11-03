@@ -81,6 +81,7 @@
     <ver.shiro>2.2.1</ver.shiro>
 
     <ver.protobuf>4.36.2</ver.protobuf>
+    <ver.grpc>1.85.1</ver.grpc>
     <ver.libthrift>0.25.0</ver.libthrift>
 
     <ver.caffeine>3.3.1</ver.caffeine>
@@ -202,6 +203,7 @@
         <module>jena-shex</module>
         <module>jena-rdfpatch</module>
         <module>jena-rdfconnection</module>
+        <module>jena-grpc</module>
         <module>jena-db</module>
         <module>jena-tdb1</module>
         <module>jena-tdb2</module>
@@ -260,6 +262,7 @@
         <module>jena-shex</module>
         <module>jena-rdfpatch</module>
         <module>jena-rdfconnection</module>
+        <module>jena-grpc</module>
         <module>jena-db</module>
         <module>jena-tdb1</module>
         <module>jena-tdb2</module>
@@ -355,6 +358,91 @@
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-java</artifactId>
         <version>${ver.protobuf}</version>
+      </dependency>
+
+      <!-- gRPC (used by jena-grpc) -->
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-api</artifactId>
+        <version>${ver.grpc}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_annotations</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-context</artifactId>
+        <version>${ver.grpc}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-core</artifactId>
+        <version>${ver.grpc}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_annotations</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-stub</artifactId>
+        <version>${ver.grpc}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_annotations</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-protobuf</artifactId>
+        <version>${ver.grpc}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-protobuf-lite</artifactId>
+        <version>${ver.grpc}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-javalite</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-inprocess</artifactId>
+        <version>${ver.grpc}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-netty-shaded</artifactId>
+        <version>${ver.grpc}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_annotations</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-util</artifactId>
+        <version>${ver.grpc}</version>
       </dependency>
 
       <dependency>
