@@ -41,28 +41,44 @@ import org.apache.jena.sparql.core.Quad;
  */
 public class StreamRDF2Protobuf implements StreamRDF, AutoCloseable
 {
-    // No REPEAT support.
 
    // OutputStream + delimited.
     private PrefixMap pmap = PrefixMapFactory.create();
     private final boolean encodeValues;
+    // Version 2 encoding, or null for version 1 where every term is written in full.
+    private final ProtobufEncoderV2 encoder;
+    private boolean headerSent = false;
     private final Consumer<RDF_StreamRow> rowHandler;
     private final Runnable andFinally;
 
     public static StreamRDF createDelimited(OutputStream outputStream, boolean withValues) {
-        CodedOutputStream codedOutput = PBufRDF.delimitedOutput(outputStream);
-        Consumer<RDF_StreamRow> output = sr->PBufRDF.writeDelimited(sr, codedOutput);
-        Runnable atEnd = () -> {
-            PBufRDF.flush(codedOutput);
-            IO.flush(outputStream);
-        };
-        return new StreamRDF2Protobuf(output, withValues, atEnd);
+        return createDelimited(outputStream, withValues, false);
+    }
+
+    /**
+     * Create a {@link StreamRDF} that writes length-delimited {@link RDF_StreamRow}s.
+     * With {@code version2}, the stream starts with a header and uses the term
+     * table encoding (see {@code binary-rdf.proto}).
+     */
+    public static StreamRDF createDelimited(OutputStream outputStream, boolean withValues, boolean version2) {
+        ProtobufEncoderV2 encoder = version2 ? new ProtobufEncoderV2(withValues) : null;
+        return createDelimited(outputStream, encoder, withValues);
+    }
+
+    /** Version 2 with the given table sizes. */
+    static StreamRDF createDelimited(OutputStream outputStream, boolean withValues, int termTableSize, int datatypeTableSize) {
+        return createDelimited(outputStream, new ProtobufEncoderV2(withValues, termTableSize, datatypeTableSize), withValues);
+    }
+
+    private static StreamRDF createDelimited(OutputStream outputStream, ProtobufEncoderV2 encoder, boolean withValues) {
+        // Writes the wire format directly; see ProtobufStreamWriter.
+        return new ProtobufStreamWriter(outputStream, withValues, encoder);
     }
 
     public static void writeBlk(OutputStream outputStream, Consumer<StreamRDF> stream, boolean withValues) {
         RDF_Stream.Builder builder = RDF_Stream.newBuilder();
         Consumer<RDF_StreamRow> output = sr->builder.addRow(sr);
-        StreamRDF2Protobuf processor = new StreamRDF2Protobuf(output, withValues, ()->IO.flush(outputStream));
+        StreamRDF2Protobuf processor = new StreamRDF2Protobuf(output, withValues, null, ()->IO.flush(outputStream));
         stream.accept(processor);
         RDF_Stream pbStream = builder.build();
         try {
@@ -71,9 +87,10 @@ public class StreamRDF2Protobuf implements StreamRDF, AutoCloseable
     }
 
 
-    private StreamRDF2Protobuf(Consumer<RDF_StreamRow> rowHandler, boolean encodeValues, Runnable atEnd) {
+    private StreamRDF2Protobuf(Consumer<RDF_StreamRow> rowHandler, boolean encodeValues, ProtobufEncoderV2 encoder, Runnable atEnd) {
         this.pmap = PrefixMapFactory.create();
         this.encodeValues = encodeValues;
+        this.encoder = encoder;
         this.rowHandler = rowHandler;
         this.andFinally = atEnd;
     }
@@ -86,7 +103,21 @@ public class StreamRDF2Protobuf implements StreamRDF, AutoCloseable
     private RDF_Term.Builder termBuilder = RDF_Term.newBuilder();
 
     @Override
-    public void start() {}
+    public void start() {
+        header();
+    }
+
+    // A version 2 stream starts with a header row. It is written before the
+    // first row, not only in start(), so the stream is right even if start()
+    // is not called.
+    private void header() {
+        if ( encoder == null || headerSent )
+            return;
+        headerSent = true;
+        streamRowBuilder.clear();
+        streamRowBuilder.setHeader(encoder.header());
+        rowHandler.accept(streamRowBuilder.build());
+    }
 
     @Override
     public void finish() {
@@ -101,6 +132,7 @@ public class StreamRDF2Protobuf implements StreamRDF, AutoCloseable
 
     @Override
     public void base(String base) {
+        header();
         streamRowBuilder.clear();
         baseBuilder.clear();
         baseBuilder.setIri(base);
@@ -110,6 +142,7 @@ public class StreamRDF2Protobuf implements StreamRDF, AutoCloseable
 
     @Override
     public void prefix(String prefix, String iri) {
+        header();
         streamRowBuilder.clear();
         prefixBuilder.clear();
         prefixBuilder.setPrefix(prefix);
@@ -123,16 +156,22 @@ public class StreamRDF2Protobuf implements StreamRDF, AutoCloseable
 
     @Override
     public void triple(Triple triple) {
+        header();
         streamRowBuilder.clear();
-        RDF_Triple triplePB = PBufRDF.rdfTriple(triple, tripleBuilder, termBuilder);
+        RDF_Triple triplePB = ( encoder != null )
+                ? encoder.triple(triple, tripleBuilder)
+                : PBufRDF.rdfTriple(triple, tripleBuilder, termBuilder, encodeValues);
         streamRowBuilder.setTriple(triplePB);
         rowHandler.accept(streamRowBuilder.build());
     }
 
     @Override
     public void quad(Quad quad) {
+        header();
         streamRowBuilder.clear();
-        RDF_Quad quadPB = PBufRDF.rdfQuad(quad, quadBuilder, termBuilder);
+        RDF_Quad quadPB = ( encoder != null )
+                ? encoder.quad(quad, quadBuilder)
+                : PBufRDF.rdfQuad(quad, quadBuilder, termBuilder, encodeValues);
         streamRowBuilder.setQuad(quadPB);
         rowHandler.accept(streamRowBuilder.build());
     }

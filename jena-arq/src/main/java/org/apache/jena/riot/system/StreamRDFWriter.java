@@ -88,8 +88,9 @@ public class StreamRDFWriter {
     private static StreamRDFWriterFactory streamWriterFactoryProtobuf = new StreamRDFWriterFactory() {
         @Override
         public StreamRDF create(OutputStream output, RDFFormat format, Context context) {
-            boolean withValues = RDFFormat.RDF_PROTO_VALUES.equals(format) ;
-            return ProtobufRDF.streamToOutputStream(output, withValues) ;
+            boolean withValues = RDFFormat.RDF_PROTO_VALUES.equals(format) || RDFFormat.RDF_PROTO_V2_VALUES.equals(format) ;
+            boolean version2 = RDFFormat.RDF_PROTO_V2.equals(format) || RDFFormat.RDF_PROTO_V2_VALUES.equals(format) ;
+            return ProtobufRDF.streamToOutputStream(output, withValues, version2) ;
         }
     } ;
 
@@ -168,6 +169,8 @@ public class StreamRDFWriter {
 
         register(RDFFormat.RDF_PROTO,           streamWriterFactoryProtobuf) ;
         register(RDFFormat.RDF_PROTO_VALUES,    streamWriterFactoryProtobuf) ;
+        register(RDFFormat.RDF_PROTO_V2,        streamWriterFactoryProtobuf) ;
+        register(RDFFormat.RDF_PROTO_V2_VALUES, streamWriterFactoryProtobuf) ;
 
         register(RDFFormat.RDF_THRIFT,          streamWriterFactoryThrift) ;
         register(RDFFormat.RDF_THRIFT_VALUES,   streamWriterFactoryThrift) ;

@@ -221,6 +221,8 @@ public class RDFWriterRegistry
 
         register(RDFFormat.RDF_PROTO,           wgProtoFactory);
         register(RDFFormat.RDF_PROTO_VALUES,    wgProtoFactory);
+        register(RDFFormat.RDF_PROTO_V2,        wgProtoFactory);
+        register(RDFFormat.RDF_PROTO_V2_VALUES, wgProtoFactory);
         register(RDFFormat.RDF_THRIFT,          wgThriftFactory);
         register(RDFFormat.RDF_THRIFT_VALUES,   wgThriftFactory);
 
@@ -239,6 +241,8 @@ public class RDFWriterRegistry
 
         register(RDFFormat.RDF_PROTO,           wdsProtoFactory);
         register(RDFFormat.RDF_PROTO_VALUES,    wdsProtoFactory);
+        register(RDFFormat.RDF_PROTO_V2,        wdsProtoFactory);
+        register(RDFFormat.RDF_PROTO_V2_VALUES, wdsProtoFactory);
         register(RDFFormat.RDF_THRIFT,          wdsThriftFactory);
         register(RDFFormat.RDF_THRIFT_VALUES,   wdsThriftFactory);
 

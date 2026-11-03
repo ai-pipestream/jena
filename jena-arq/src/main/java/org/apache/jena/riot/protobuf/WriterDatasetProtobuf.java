@@ -22,6 +22,8 @@
 package org.apache.jena.riot.protobuf;
 
 import static org.apache.jena.riot.Lang.RDFPROTO;
+import static org.apache.jena.riot.RDFFormat.RDF_PROTO_V2;
+import static org.apache.jena.riot.RDFFormat.RDF_PROTO_V2_VALUES;
 import static org.apache.jena.riot.RDFFormat.RDF_PROTO_VALUES;
 
 import java.io.OutputStream;
@@ -40,8 +42,10 @@ import org.apache.jena.sparql.util.Context;
 public class WriterDatasetProtobuf implements WriterDatasetRIOT
 {
     private final boolean withValues;
+    private final boolean version2;
     public WriterDatasetProtobuf(RDFFormat fmt) {
-        this.withValues = RDF_PROTO_VALUES.equals(fmt);
+        this.withValues = RDF_PROTO_VALUES.equals(fmt) || RDF_PROTO_V2_VALUES.equals(fmt);
+        this.version2 = RDF_PROTO_V2.equals(fmt) || RDF_PROTO_V2_VALUES.equals(fmt);
     }
     @Override
     public Lang getLang() {
@@ -53,7 +57,7 @@ public class WriterDatasetProtobuf implements WriterDatasetRIOT
     }
     @Override
     public void write(OutputStream out, DatasetGraph dsg, PrefixMap prefixMap, String baseURI, Context context) {
-        StreamRDF stream = ProtobufRDF.streamToOutputStream(out, withValues);
+        StreamRDF stream = ProtobufRDF.streamToOutputStream(out, withValues, version2);
         stream.start();
         StreamRDFOps.sendDatasetToStream(dsg, stream, baseURI, prefixMap);
         stream.finish();

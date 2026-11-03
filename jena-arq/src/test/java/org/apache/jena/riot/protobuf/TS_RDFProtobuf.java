@@ -29,6 +29,7 @@ import org.junit.platform.suite.api.Suite;
     TestProtobufTerm.class
     , TestProtobufSetup.class
     , TestProtobufStreamRDF.class
+    , TestProtobufV2.class
     , TestProtobufResultSet.class
 //    , TestProtobufPatch.class
 } )

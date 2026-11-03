@@ -25,6 +25,7 @@ import org.apache.jena.atlas.lib.Cache;
 import org.apache.jena.atlas.lib.CacheFactory;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_IRI;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_PrefixDecl;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Quad;
@@ -45,6 +46,8 @@ public class Protobuf2StreamRDF implements VisitorStreamRowProtoRDF {
     private final PrefixMap pmap;
     private final Cache<String, Node> uriCache =
             CacheFactory.createSimpleCache(FactoryRDFCaching.DftNodeCacheSize);
+    // Set once a version 2 header has been seen.
+    private ProtobufDecoderV2 decoder = null;
 
     public Protobuf2StreamRDF(PrefixMap pmap, StreamRDF stream) {
         this.pmap = pmap;
@@ -53,13 +56,13 @@ public class Protobuf2StreamRDF implements VisitorStreamRowProtoRDF {
 
     @Override
     public void visit(RDF_Triple rt) {
-        Triple t = ProtobufConvert.convert(uriCache, rt, pmap);
+        Triple t = ( decoder != null ) ? decoder.triple(rt) : ProtobufConvert.convert(uriCache, rt, pmap);
         dest.triple(t);
     }
 
     @Override
     public void visit(RDF_Quad rq) {
-        Quad q = ProtobufConvert.convert(uriCache, rq, pmap);
+        Quad q = ( decoder != null ) ? decoder.quad(rq) : ProtobufConvert.convert(uriCache, rq, pmap);
         dest.quad(q);
     }
 
@@ -69,6 +72,13 @@ public class Protobuf2StreamRDF implements VisitorStreamRowProtoRDF {
         String iriStr = prefixDecl.getUri();
         pmap.add(prefix, iriStr);
         dest.prefix(prefix, iriStr);
+    }
+
+    @Override
+    public void visit(RDF_Header header) {
+        if ( decoder == null )
+            decoder = new ProtobufDecoderV2(pmap);
+        decoder.start(header);
     }
 
     @Override

@@ -59,6 +59,8 @@ message RDF_Literal {
     string langdir = 5 ;    // Language tag and base direction separated by "--"
     string datatype = 3 ;
     RDF_PrefixName dtPrefix = 4 ;
+    // Version 2: index into the datatype table (see RDF_Header).
+    uint32 datatypeRef = 6 ;
   }
 }
 
@@ -75,6 +77,8 @@ message RDF_ANY { }
 
 message RDF_UNDEF { }
 
+// Version 2: the term is the same as the term in the same position
+// (subject, predicate, object or graph) of the previous triple or quad.
 message RDF_REPEAT { }
 
 message RDF_Term {
@@ -88,7 +92,10 @@ message RDF_Term {
     RDF_ANY        any        = 7 ;
     RDF_UNDEF      undefined  = 8 ;
     RDF_REPEAT     repeat     = 9 ;
-    
+
+    // Version 2: index into the term table (see RDF_Header).
+    uint32         termRef    = 10 ;
+
     // Value forms of literals.
     sint64         valInteger = 20 ;
     double         valDouble  = 21 ;
@@ -117,6 +124,32 @@ message RDF_PrefixDecl {
   string uri    = 2 ;
 }
 
+// Stream header (version 2).
+//
+// A version 1 stream has no header: every term is written in full.
+//
+// A version 2 stream starts with a header row and may then use RDF_REPEAT,
+// RDF_Term.termRef and RDF_Literal.datatypeRef. The reader and writer each
+// keep two tables that are filled in the same, fixed way as the stream is
+// processed, so no table entries are sent explicitly:
+//
+//   Term table: every IRI, prefix name and blank node written in full
+//   (including those inside triple terms, in subject, predicate, object
+//   order) is placed in the next slot of the table, wrapping round to slot 0
+//   when the table is full. A termRef is the slot of a term written earlier.
+//
+//   Datatype table: every datatype IRI written in full (RDF_Literal.datatype)
+//   is placed in the next slot of the datatype table in the same way.
+//   A datatypeRef is the slot of a datatype written earlier.
+//
+// A header part way through a stream starts both tables again, so
+// version 2 streams can be concatenated.
+message RDF_Header {
+  uint32 version = 1 ;            // Currently 2.
+  uint32 termTableSize = 2 ;      // Number of slots in the term table.
+  uint32 datatypeTableSize = 3 ;  // Number of slots in the datatype table.
+}
+
 // StreamRDF
 message RDF_StreamRow {
   oneof row {
@@ -124,6 +157,7 @@ message RDF_StreamRow {
     RDF_Triple       triple      = 2 ;
     RDF_Quad         quad        = 3 ;
     RDF_IRI          base        = 4 ;
+    RDF_Header       header      = 5 ;
   }
 }
 

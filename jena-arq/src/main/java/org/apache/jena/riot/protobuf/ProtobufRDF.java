@@ -68,9 +68,17 @@ public class ProtobufRDF {
      * @return StreamRDF A stream to send to.
      */
     public static StreamRDF streamToFile(String filename, boolean withValues) {
+        return streamToFile(filename, withValues, false);
+    }
+
+    /**
+     * Create a {@link StreamRDF} that writes to a file.
+     * See {@link #streamToOutputStream(OutputStream, boolean, boolean)} for {@code version2}.
+     */
+    public static StreamRDF streamToFile(String filename, boolean withValues, boolean version2) {
         OutputStream out = IO.openOutputFile(filename);
         out = IO.ensureBuffered(out);
-        return streamToOutputStream(out, withValues);
+        return streamToOutputStream(out, withValues, version2);
     }
 
     /**
@@ -86,9 +94,21 @@ public class ProtobufRDF {
      * The output stream is written with "writeDelimitedTo".
      */
     public static StreamRDF streamToOutputStream(OutputStream output, boolean withValues) {
+        return streamToOutputStream(output, withValues, false);
+    }
+
+    /**
+     * Create a {@link StreamRDF} that writes to an output stream.
+     * <p>
+     * With {@code version2}, the stream starts with a header and a term is written
+     * in full once, then referred to by a small number: the version 2 encoding
+     * described in {@code binary-rdf.proto}. It is smaller and faster to read than
+     * version 1 but needs a reader that understands version 2. Readers accept both.
+     */
+    public static StreamRDF streamToOutputStream(OutputStream output, boolean withValues, boolean version2) {
         output = IO.ensureBuffered(output);
         try {
-            return StreamRDF2Protobuf.createDelimited(output, withValues);
+            return StreamRDF2Protobuf.createDelimited(output, withValues, version2);
         } finally { IO.flush(output); }
     }
 
@@ -111,10 +131,12 @@ public class ProtobufRDF {
      * @param stream StreamRDF
      */
     public static void inputStreamToStreamRDF(InputStream input, StreamRDF stream) {
-        Protobuf2StreamRDF visitor = new Protobuf2StreamRDF(PrefixMapFactory.create(), stream);
+        // Reads the wire format directly; see ProtobufStreamReader.
+        CodedInputStream codedInput = PBufRDF.delimitedInput(input);
+        ProtobufStreamReader reader = new ProtobufStreamReader(codedInput, PrefixMapFactory.create(), stream);
         stream.start();
         try {
-            apply(input, visitor);
+            reader.read();
         }
         finally { stream.finish(); }
     }

@@ -118,20 +118,28 @@ class PBufRDF {
     }
 
     public static RDF_Triple rdfTriple(Triple triple, RDF_Triple.Builder tripleBuilder, RDF_Term.Builder termBuilder) {
+        return rdfTriple(triple, tripleBuilder, termBuilder, false);
+    }
+
+    static RDF_Triple rdfTriple(Triple triple, RDF_Triple.Builder tripleBuilder, RDF_Term.Builder termBuilder, boolean encodeValues) {
         tripleBuilder.clear();
-        tripleBuilder.setS(rdfTerm(triple.getSubject(), termBuilder));
-        tripleBuilder.setP(rdfTerm(triple.getPredicate(), termBuilder));
-        tripleBuilder.setO(rdfTerm(triple.getObject(), termBuilder));
+        tripleBuilder.setS(rdfTerm(triple.getSubject(), termBuilder, encodeValues));
+        tripleBuilder.setP(rdfTerm(triple.getPredicate(), termBuilder, encodeValues));
+        tripleBuilder.setO(rdfTerm(triple.getObject(), termBuilder, encodeValues));
         return tripleBuilder.build();
     }
 
     public static RDF_Quad rdfQuad(Quad quad, RDF_Quad.Builder quadBuilder, RDF_Term.Builder termBuilder) {
+        return rdfQuad(quad, quadBuilder, termBuilder, false);
+    }
+
+    static RDF_Quad rdfQuad(Quad quad, RDF_Quad.Builder quadBuilder, RDF_Term.Builder termBuilder, boolean encodeValues) {
         quadBuilder.clear();
         if ( quad.getGraph() != null )
-            quadBuilder.setG(rdfTerm(quad.getGraph(), termBuilder));
-        quadBuilder.setS(rdfTerm(quad.getSubject(), termBuilder));
-        quadBuilder.setP(rdfTerm(quad.getPredicate(), termBuilder));
-        quadBuilder.setO(rdfTerm(quad.getObject(), termBuilder));
+            quadBuilder.setG(rdfTerm(quad.getGraph(), termBuilder, encodeValues));
+        quadBuilder.setS(rdfTerm(quad.getSubject(), termBuilder, encodeValues));
+        quadBuilder.setP(rdfTerm(quad.getPredicate(), termBuilder, encodeValues));
+        quadBuilder.setO(rdfTerm(quad.getObject(), termBuilder, encodeValues));
         return quadBuilder.build();
     }
 
@@ -153,6 +161,9 @@ class PBufRDF {
         switch(x.getRowCase()) {
             case BASE :
                 visitor.visit(x.getBase());
+                return true;
+            case HEADER :
+                visitor.visit(x.getHeader());
                 return true;
             case PREFIXDECL :
                 visitor.visit(x.getPrefixDecl());

@@ -21,6 +21,7 @@
 
 package org.apache.jena.riot.protobuf;
 
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_IRI;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_PrefixDecl;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Quad;
@@ -35,4 +36,6 @@ public interface VisitorStreamRowProtoRDF {
     public void visit(RDF_IRI base);
 
     public void visit(RDF_PrefixDecl prefix);
+    /** A version 2 stream header. A visitor that converts terms must act on it. */
+    public default void visit(RDF_Header header) {}
 }

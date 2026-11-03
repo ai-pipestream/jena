@@ -65,7 +65,7 @@ public class ProtobufConvert
      * @param term
      * @return RDF_Term or null if not a value.
      */
-    private static RDF_Term toProtobufValue(Node node, RDF_Term.Builder term) {
+    static RDF_Term toProtobufValue(Node node, RDF_Term.Builder term) {
         if ( ! node.isLiteral() )
             return null;
         term.clear();
@@ -210,6 +210,8 @@ public class ProtobufConvert
                             RDFDatatype dt = NodeFactory.getType(x);
                             return NodeFactory.createLiteralDT(lex, dt);
                         }
+                        case DATATYPEREF :
+                            throw new RiotProtobufException("Datatype reference outside a version 2 stream");
                         case LITERALKIND_NOT_SET :
                             throw new RiotProtobufException("Literal kind not set.");
                     }
@@ -231,7 +233,9 @@ public class ProtobufConvert
             case ANY :
                 return Node.ANY;
             case REPEAT :
-                throw new RiotProtobufException("REPEAT not implemented");
+                throw new RiotProtobufException("RDF_REPEAT outside a version 2 stream");
+            case TERMREF :
+                throw new RiotProtobufException("Term reference outside a version 2 stream");
             case UNDEFINED :
                 return null;
             case VALINTEGER : {
@@ -337,43 +341,7 @@ public class ProtobufConvert
             }
 
             RDF_Literal.Builder literal = RDF_Literal.newBuilder();
-            String lex = node.getLiteralLexicalForm();
-            literal.setLex(lex);
-
-            // Protobuf default string is ""
-
-            String dt = node.getLiteralDatatypeURI();
-            String lang = node.getLiteralLanguage();
-            TextDirection baseDir = node.getLiteralBaseDirection();
-
-            if ( lang.isEmpty() )
-                lang = null;
-
-            // General encoding.
-            if ( node.getLiteralDatatype().equals(XSDDatatype.XSDstring) ||
-                 node.getLiteralDatatype().equals(RDFLangString.rdfLangString) ||
-                 node.getLiteralDatatype().equals(RDFDirLangString.rdfDirLangString) ) {
-                dt = null;
-            }
-
-            if ( dt == null ) {
-                if ( lang == null )
-                    literal.setSimple(true);
-                else if ( baseDir == null )
-                    literal.setLangtag(lang);
-                else {
-                    String langdir = lang+"--"+baseDir.direction();
-                    literal.setLangdir(langdir);
-                }
-            } else {
-                // datatype
-                RDF_PrefixName dtPrefixName = abbrev(dt, pmap);
-                if ( dtPrefixName != null )
-                    literal.setDtPrefix(dtPrefixName);
-                else {
-                    literal.setDatatype(dt);
-                }
-            }
+            literal(node, pmap, literal);
             termBuilder.setLiteral(literal);
             return termBuilder.build();
         }
@@ -404,6 +372,50 @@ public class ProtobufConvert
             return ANY;
 
         throw new RiotProtobufException("Node conversion not supported: "+node);
+    }
+
+    /**
+     * Encode a literal {@link Node} by lexical form into an {@link RDF_Literal} builder.
+     * The value encodings (integer, double and decimal) are handled by {@link #toProtobufValue}.
+     */
+    static void literal(Node node, PrefixMap pmap, RDF_Literal.Builder literal) {
+        String lex = node.getLiteralLexicalForm();
+        literal.setLex(lex);
+
+        // Protobuf default string is ""
+
+        String dt = node.getLiteralDatatypeURI();
+        String lang = node.getLiteralLanguage();
+        TextDirection baseDir = node.getLiteralBaseDirection();
+
+        if ( lang.isEmpty() )
+            lang = null;
+
+        // General encoding.
+        if ( node.getLiteralDatatype().equals(XSDDatatype.XSDstring) ||
+             node.getLiteralDatatype().equals(RDFLangString.rdfLangString) ||
+             node.getLiteralDatatype().equals(RDFDirLangString.rdfDirLangString) ) {
+            dt = null;
+        }
+
+        if ( dt == null ) {
+            if ( lang == null )
+                literal.setSimple(true);
+            else if ( baseDir == null )
+                literal.setLangtag(lang);
+            else {
+                String langdir = lang+"--"+baseDir.direction();
+                literal.setLangdir(langdir);
+            }
+        } else {
+            // datatype
+            RDF_PrefixName dtPrefixName = abbrev(dt, pmap);
+            if ( dtPrefixName != null )
+                literal.setDtPrefix(dtPrefixName);
+            else {
+                literal.setDatatype(dt);
+            }
+        }
     }
 
     private static String expand(RDF_PrefixName prefixName, PrefixMap pmap) {

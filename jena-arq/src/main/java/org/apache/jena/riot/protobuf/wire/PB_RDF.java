@@ -1886,6 +1886,25 @@ public final class PB_RDF {
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_PrefixNameOrBuilder getDtPrefixOrBuilder();
 
+    /**
+     * <pre>
+     * Version 2: index into the datatype table (see RDF_Header).
+     * </pre>
+     *
+     * <code>uint32 datatypeRef = 6;</code>
+     * @return Whether the datatypeRef field is set.
+     */
+    boolean hasDatatypeRef();
+    /**
+     * <pre>
+     * Version 2: index into the datatype table (see RDF_Header).
+     * </pre>
+     *
+     * <code>uint32 datatypeRef = 6;</code>
+     * @return The datatypeRef.
+     */
+    int getDatatypeRef();
+
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Literal.LiteralKindCase getLiteralKindCase();
   }
   /**
@@ -1937,6 +1956,7 @@ public final class PB_RDF {
       LANGDIR(5),
       DATATYPE(3),
       DTPREFIX(4),
+      DATATYPEREF(6),
       LITERALKIND_NOT_SET(0);
       private final int value;
       private LiteralKindCase(int value) {
@@ -1959,6 +1979,7 @@ public final class PB_RDF {
           case 5: return LANGDIR;
           case 3: return DATATYPE;
           case 4: return DTPREFIX;
+          case 6: return DATATYPEREF;
           case 0: return LITERALKIND_NOT_SET;
           default: return null;
         }
@@ -2245,6 +2266,35 @@ public final class PB_RDF {
       return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_PrefixName.getDefaultInstance();
     }
 
+    public static final int DATATYPEREF_FIELD_NUMBER = 6;
+    /**
+     * <pre>
+     * Version 2: index into the datatype table (see RDF_Header).
+     * </pre>
+     *
+     * <code>uint32 datatypeRef = 6;</code>
+     * @return Whether the datatypeRef field is set.
+     */
+    @java.lang.Override
+    public boolean hasDatatypeRef() {
+      return literalKindCase_ == 6;
+    }
+    /**
+     * <pre>
+     * Version 2: index into the datatype table (see RDF_Header).
+     * </pre>
+     *
+     * <code>uint32 datatypeRef = 6;</code>
+     * @return The datatypeRef.
+     */
+    @java.lang.Override
+    public int getDatatypeRef() {
+      if (literalKindCase_ == 6) {
+        return (java.lang.Integer) literalKind_;
+      }
+      return 0;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2274,6 +2324,10 @@ public final class PB_RDF {
       if (literalKindCase_ == 5) {
         com.google.protobuf.GeneratedMessage.writeString(output, 5, literalKind_);
       }
+      if (literalKindCase_ == 6) {
+        output.writeUInt32(
+            6, (int)((java.lang.Integer) literalKind_));
+      }
       if (literalKindCase_ == 9) {
         output.writeBool(
             9, (boolean)((java.lang.Boolean) literalKind_));
@@ -2302,6 +2356,11 @@ public final class PB_RDF {
       }
       if (literalKindCase_ == 5) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(5, literalKind_);
+      }
+      if (literalKindCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(
+              6, (int)((java.lang.Integer) literalKind_));
       }
       if (literalKindCase_ == 9) {
         size += com.google.protobuf.CodedOutputStream
@@ -2347,6 +2406,10 @@ public final class PB_RDF {
           if (!getDtPrefix()
               .equals(other.getDtPrefix())) return false;
           break;
+        case 6:
+          if (getDatatypeRef()
+              != other.getDatatypeRef()) return false;
+          break;
         case 0:
         default:
       }
@@ -2384,6 +2447,10 @@ public final class PB_RDF {
         case 4:
           hash = (37 * hash) + DTPREFIX_FIELD_NUMBER;
           hash = (53 * hash) + getDtPrefix().hashCode();
+          break;
+        case 6:
+          hash = (37 * hash) + DATATYPEREF_FIELD_NUMBER;
+          hash = (53 * hash) + getDatatypeRef();
           break;
         case 0:
         default:
@@ -2617,6 +2684,10 @@ public final class PB_RDF {
             mergeDtPrefix(other.getDtPrefix());
             break;
           }
+          case DATATYPEREF: {
+            setDatatypeRef(other.getDatatypeRef());
+            break;
+          }
           case LITERALKIND_NOT_SET: {
             break;
           }
@@ -2677,6 +2748,11 @@ public final class PB_RDF {
                 literalKind_ = s;
                 break;
               } // case 42
+              case 48: {
+                literalKind_ = input.readUInt32();
+                literalKindCase_ = 6;
+                break;
+              } // case 48
               case 72: {
                 literalKind_ = input.readBool();
                 literalKindCase_ = 9;
@@ -3295,6 +3371,64 @@ public final class PB_RDF {
         literalKindCase_ = 4;
         onChanged();
         return dtPrefixBuilder_;
+      }
+
+      /**
+       * <pre>
+       * Version 2: index into the datatype table (see RDF_Header).
+       * </pre>
+       *
+       * <code>uint32 datatypeRef = 6;</code>
+       * @return Whether the datatypeRef field is set.
+       */
+      public boolean hasDatatypeRef() {
+        return literalKindCase_ == 6;
+      }
+      /**
+       * <pre>
+       * Version 2: index into the datatype table (see RDF_Header).
+       * </pre>
+       *
+       * <code>uint32 datatypeRef = 6;</code>
+       * @return The datatypeRef.
+       */
+      public int getDatatypeRef() {
+        if (literalKindCase_ == 6) {
+          return (java.lang.Integer) literalKind_;
+        }
+        return 0;
+      }
+      /**
+       * <pre>
+       * Version 2: index into the datatype table (see RDF_Header).
+       * </pre>
+       *
+       * <code>uint32 datatypeRef = 6;</code>
+       * @param value The datatypeRef to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatatypeRef(int value) {
+
+        literalKindCase_ = 6;
+        literalKind_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version 2: index into the datatype table (see RDF_Header).
+       * </pre>
+       *
+       * <code>uint32 datatypeRef = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatatypeRef() {
+        if (literalKindCase_ == 6) {
+          literalKindCase_ = 0;
+          literalKind_ = null;
+          onChanged();
+        }
+        return this;
       }
 
       // @@protoc_insertion_point(builder_scope:RDF_Literal)
@@ -5080,6 +5214,11 @@ public final class PB_RDF {
       com.google.protobuf.MessageOrBuilder {
   }
   /**
+   * <pre>
+   * Version 2: the term is the same as the term in the same position
+   * (subject, predicate, object or graph) of the previous triple or quad.
+   * </pre>
+   *
    * Protobuf type {@code RDF_REPEAT}
    */
   public static final class RDF_REPEAT extends
@@ -5263,6 +5402,11 @@ public final class PB_RDF {
       return builder;
     }
     /**
+     * <pre>
+     * Version 2: the term is the same as the term in the same position
+     * (subject, predicate, object or graph) of the previous triple or quad.
+     * </pre>
+     *
      * Protobuf type {@code RDF_REPEAT}
      */
     public static final class Builder extends
@@ -5571,6 +5715,25 @@ public final class PB_RDF {
 
     /**
      * <pre>
+     * Version 2: index into the term table (see RDF_Header).
+     * </pre>
+     *
+     * <code>uint32 termRef = 10;</code>
+     * @return Whether the termRef field is set.
+     */
+    boolean hasTermRef();
+    /**
+     * <pre>
+     * Version 2: index into the term table (see RDF_Header).
+     * </pre>
+     *
+     * <code>uint32 termRef = 10;</code>
+     * @return The termRef.
+     */
+    int getTermRef();
+
+    /**
+     * <pre>
      * Value forms of literals.
      * </pre>
      *
@@ -5668,6 +5831,7 @@ public final class PB_RDF {
       ANY(7),
       UNDEFINED(8),
       REPEAT(9),
+      TERMREF(10),
       VALINTEGER(20),
       VALDOUBLE(21),
       VALDECIMAL(22),
@@ -5697,6 +5861,7 @@ public final class PB_RDF {
           case 7: return ANY;
           case 8: return UNDEFINED;
           case 9: return REPEAT;
+          case 10: return TERMREF;
           case 20: return VALINTEGER;
           case 21: return VALDOUBLE;
           case 22: return VALDECIMAL;
@@ -5994,6 +6159,35 @@ public final class PB_RDF {
       return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_REPEAT.getDefaultInstance();
     }
 
+    public static final int TERMREF_FIELD_NUMBER = 10;
+    /**
+     * <pre>
+     * Version 2: index into the term table (see RDF_Header).
+     * </pre>
+     *
+     * <code>uint32 termRef = 10;</code>
+     * @return Whether the termRef field is set.
+     */
+    @java.lang.Override
+    public boolean hasTermRef() {
+      return termCase_ == 10;
+    }
+    /**
+     * <pre>
+     * Version 2: index into the term table (see RDF_Header).
+     * </pre>
+     *
+     * <code>uint32 termRef = 10;</code>
+     * @return The termRef.
+     */
+    @java.lang.Override
+    public int getTermRef() {
+      if (termCase_ == 10) {
+        return (java.lang.Integer) term_;
+      }
+      return 0;
+    }
+
     public static final int VALINTEGER_FIELD_NUMBER = 20;
     /**
      * <pre>
@@ -6116,6 +6310,10 @@ public final class PB_RDF {
       if (termCase_ == 9) {
         output.writeMessage(9, (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_REPEAT) term_);
       }
+      if (termCase_ == 10) {
+        output.writeUInt32(
+            10, (int)((java.lang.Integer) term_));
+      }
       if (termCase_ == 20) {
         output.writeSInt64(
             20, (long)((java.lang.Long) term_));
@@ -6171,6 +6369,11 @@ public final class PB_RDF {
       if (termCase_ == 9) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(9, (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_REPEAT) term_);
+      }
+      if (termCase_ == 10) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(
+              10, (int)((java.lang.Integer) term_));
       }
       if (termCase_ == 20) {
         size += com.google.protobuf.CodedOutputStream
@@ -6239,6 +6442,10 @@ public final class PB_RDF {
           if (!getRepeat()
               .equals(other.getRepeat())) return false;
           break;
+        case 10:
+          if (getTermRef()
+              != other.getTermRef()) return false;
+          break;
         case 20:
           if (getValInteger()
               != other.getValInteger()) return false;
@@ -6302,6 +6509,10 @@ public final class PB_RDF {
         case 9:
           hash = (37 * hash) + REPEAT_FIELD_NUMBER;
           hash = (53 * hash) + getRepeat().hashCode();
+          break;
+        case 10:
+          hash = (37 * hash) + TERMREF_FIELD_NUMBER;
+          hash = (53 * hash) + getTermRef();
           break;
         case 20:
           hash = (37 * hash) + VALINTEGER_FIELD_NUMBER;
@@ -6613,6 +6824,10 @@ public final class PB_RDF {
             mergeRepeat(other.getRepeat());
             break;
           }
+          case TERMREF: {
+            setTermRef(other.getTermRef());
+            break;
+          }
           case VALINTEGER: {
             setValInteger(other.getValInteger());
             break;
@@ -6718,6 +6933,11 @@ public final class PB_RDF {
                 termCase_ = 9;
                 break;
               } // case 74
+              case 80: {
+                term_ = input.readUInt32();
+                termCase_ = 10;
+                break;
+              } // case 80
               case 160: {
                 term_ = input.readSInt64();
                 termCase_ = 20;
@@ -8043,6 +8263,64 @@ public final class PB_RDF {
         termCase_ = 9;
         onChanged();
         return repeatBuilder_;
+      }
+
+      /**
+       * <pre>
+       * Version 2: index into the term table (see RDF_Header).
+       * </pre>
+       *
+       * <code>uint32 termRef = 10;</code>
+       * @return Whether the termRef field is set.
+       */
+      public boolean hasTermRef() {
+        return termCase_ == 10;
+      }
+      /**
+       * <pre>
+       * Version 2: index into the term table (see RDF_Header).
+       * </pre>
+       *
+       * <code>uint32 termRef = 10;</code>
+       * @return The termRef.
+       */
+      public int getTermRef() {
+        if (termCase_ == 10) {
+          return (java.lang.Integer) term_;
+        }
+        return 0;
+      }
+      /**
+       * <pre>
+       * Version 2: index into the term table (see RDF_Header).
+       * </pre>
+       *
+       * <code>uint32 termRef = 10;</code>
+       * @param value The termRef to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTermRef(int value) {
+
+        termCase_ = 10;
+        term_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version 2: index into the term table (see RDF_Header).
+       * </pre>
+       *
+       * <code>uint32 termRef = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTermRef() {
+        if (termCase_ == 10) {
+          termCase_ = 0;
+          term_ = null;
+          onChanged();
+        }
+        return this;
       }
 
       /**
@@ -11144,6 +11422,690 @@ public final class PB_RDF {
 
   }
 
+  public interface RDF_HeaderOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:RDF_Header)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Currently 2.
+     * </pre>
+     *
+     * <code>uint32 version = 1;</code>
+     * @return The version.
+     */
+    int getVersion();
+
+    /**
+     * <pre>
+     * Number of slots in the term table.
+     * </pre>
+     *
+     * <code>uint32 termTableSize = 2;</code>
+     * @return The termTableSize.
+     */
+    int getTermTableSize();
+
+    /**
+     * <pre>
+     * Number of slots in the datatype table.
+     * </pre>
+     *
+     * <code>uint32 datatypeTableSize = 3;</code>
+     * @return The datatypeTableSize.
+     */
+    int getDatatypeTableSize();
+  }
+  /**
+   * <pre>
+   * Stream header (version 2).
+   *
+   * A version 1 stream has no header: every term is written in full.
+   *
+   * A version 2 stream starts with a header row and may then use RDF_REPEAT,
+   * RDF_Term.termRef and RDF_Literal.datatypeRef. The reader and writer each
+   * keep two tables that are filled in the same, fixed way as the stream is
+   * processed, so no table entries are sent explicitly:
+   *
+   * Term table: every IRI, prefix name and blank node written in full
+   * (including those inside triple terms, in subject, predicate, object
+   * order) is placed in the next slot of the table, wrapping round to slot 0
+   * when the table is full. A termRef is the slot of a term written earlier.
+   *
+   * Datatype table: every datatype IRI written in full (RDF_Literal.datatype)
+   * is placed in the next slot of the datatype table in the same way.
+   * A datatypeRef is the slot of a datatype written earlier.
+   *
+   * A header part way through a stream starts both tables again, so
+   * version 2 streams can be concatenated.
+   * </pre>
+   *
+   * Protobuf type {@code RDF_Header}
+   */
+  public static final class RDF_Header extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:RDF_Header)
+      RDF_HeaderOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 28,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        RDF_Header.class.getName());
+    }
+    // Use RDF_Header.newBuilder() to construct.
+    private RDF_Header(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private RDF_Header() {
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Header_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Header_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.class, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.Builder.class);
+    }
+
+    public static final int VERSION_FIELD_NUMBER = 1;
+    private int version_ = 0;
+    /**
+     * <pre>
+     * Currently 2.
+     * </pre>
+     *
+     * <code>uint32 version = 1;</code>
+     * @return The version.
+     */
+    @java.lang.Override
+    public int getVersion() {
+      return version_;
+    }
+
+    public static final int TERMTABLESIZE_FIELD_NUMBER = 2;
+    private int termTableSize_ = 0;
+    /**
+     * <pre>
+     * Number of slots in the term table.
+     * </pre>
+     *
+     * <code>uint32 termTableSize = 2;</code>
+     * @return The termTableSize.
+     */
+    @java.lang.Override
+    public int getTermTableSize() {
+      return termTableSize_;
+    }
+
+    public static final int DATATYPETABLESIZE_FIELD_NUMBER = 3;
+    private int datatypeTableSize_ = 0;
+    /**
+     * <pre>
+     * Number of slots in the datatype table.
+     * </pre>
+     *
+     * <code>uint32 datatypeTableSize = 3;</code>
+     * @return The datatypeTableSize.
+     */
+    @java.lang.Override
+    public int getDatatypeTableSize() {
+      return datatypeTableSize_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (version_ != 0) {
+        output.writeUInt32(1, version_);
+      }
+      if (termTableSize_ != 0) {
+        output.writeUInt32(2, termTableSize_);
+      }
+      if (datatypeTableSize_ != 0) {
+        output.writeUInt32(3, datatypeTableSize_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (version_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, version_);
+      }
+      if (termTableSize_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(2, termTableSize_);
+      }
+      if (datatypeTableSize_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(3, datatypeTableSize_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header)) {
+        return super.equals(obj);
+      }
+      org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header other = (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header) obj;
+
+      if (getVersion()
+          != other.getVersion()) return false;
+      if (getTermTableSize()
+          != other.getTermTableSize()) return false;
+      if (getDatatypeTableSize()
+          != other.getDatatypeTableSize()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + VERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getVersion();
+      hash = (37 * hash) + TERMTABLESIZE_FIELD_NUMBER;
+      hash = (53 * hash) + getTermTableSize();
+      hash = (37 * hash) + DATATYPETABLESIZE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatatypeTableSize();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Stream header (version 2).
+     *
+     * A version 1 stream has no header: every term is written in full.
+     *
+     * A version 2 stream starts with a header row and may then use RDF_REPEAT,
+     * RDF_Term.termRef and RDF_Literal.datatypeRef. The reader and writer each
+     * keep two tables that are filled in the same, fixed way as the stream is
+     * processed, so no table entries are sent explicitly:
+     *
+     * Term table: every IRI, prefix name and blank node written in full
+     * (including those inside triple terms, in subject, predicate, object
+     * order) is placed in the next slot of the table, wrapping round to slot 0
+     * when the table is full. A termRef is the slot of a term written earlier.
+     *
+     * Datatype table: every datatype IRI written in full (RDF_Literal.datatype)
+     * is placed in the next slot of the datatype table in the same way.
+     * A datatypeRef is the slot of a datatype written earlier.
+     *
+     * A header part way through a stream starts both tables again, so
+     * version 2 streams can be concatenated.
+     * </pre>
+     *
+     * Protobuf type {@code RDF_Header}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:RDF_Header)
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_HeaderOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Header_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Header_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.class, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.Builder.class);
+      }
+
+      // Construct using org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        version_ = 0;
+        termTableSize_ = 0;
+        datatypeTableSize_ = 0;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Header_descriptor;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header getDefaultInstanceForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header build() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header buildPartial() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header result = new org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.version_ = version_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.termTableSize_ = termTableSize_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.datatypeTableSize_ = datatypeTableSize_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header) {
+          return mergeFrom((org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header other) {
+        if (other == org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.getDefaultInstance()) return this;
+        if (other.getVersion() != 0) {
+          setVersion(other.getVersion());
+        }
+        if (other.getTermTableSize() != 0) {
+          setTermTableSize(other.getTermTableSize());
+        }
+        if (other.getDatatypeTableSize() != 0) {
+          setDatatypeTableSize(other.getDatatypeTableSize());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                version_ = input.readUInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                termTableSize_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                datatypeTableSize_ = input.readUInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int version_ ;
+      /**
+       * <pre>
+       * Currently 2.
+       * </pre>
+       *
+       * <code>uint32 version = 1;</code>
+       * @return The version.
+       */
+      @java.lang.Override
+      public int getVersion() {
+        return version_;
+      }
+      /**
+       * <pre>
+       * Currently 2.
+       * </pre>
+       *
+       * <code>uint32 version = 1;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersion(int value) {
+
+        version_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Currently 2.
+       * </pre>
+       *
+       * <code>uint32 version = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVersion() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        version_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int termTableSize_ ;
+      /**
+       * <pre>
+       * Number of slots in the term table.
+       * </pre>
+       *
+       * <code>uint32 termTableSize = 2;</code>
+       * @return The termTableSize.
+       */
+      @java.lang.Override
+      public int getTermTableSize() {
+        return termTableSize_;
+      }
+      /**
+       * <pre>
+       * Number of slots in the term table.
+       * </pre>
+       *
+       * <code>uint32 termTableSize = 2;</code>
+       * @param value The termTableSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTermTableSize(int value) {
+
+        termTableSize_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Number of slots in the term table.
+       * </pre>
+       *
+       * <code>uint32 termTableSize = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTermTableSize() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        termTableSize_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int datatypeTableSize_ ;
+      /**
+       * <pre>
+       * Number of slots in the datatype table.
+       * </pre>
+       *
+       * <code>uint32 datatypeTableSize = 3;</code>
+       * @return The datatypeTableSize.
+       */
+      @java.lang.Override
+      public int getDatatypeTableSize() {
+        return datatypeTableSize_;
+      }
+      /**
+       * <pre>
+       * Number of slots in the datatype table.
+       * </pre>
+       *
+       * <code>uint32 datatypeTableSize = 3;</code>
+       * @param value The datatypeTableSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatatypeTableSize(int value) {
+
+        datatypeTableSize_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Number of slots in the datatype table.
+       * </pre>
+       *
+       * <code>uint32 datatypeTableSize = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatatypeTableSize() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        datatypeTableSize_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:RDF_Header)
+    }
+
+    // @@protoc_insertion_point(class_scope:RDF_Header)
+    private static final org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header();
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RDF_Header>
+        PARSER = new com.google.protobuf.AbstractParser<RDF_Header>() {
+      @java.lang.Override
+      public RDF_Header parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<RDF_Header> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RDF_Header> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface RDF_StreamRowOrBuilder extends
       // @@protoc_insertion_point(interface_extends:RDF_StreamRow)
       com.google.protobuf.MessageOrBuilder {
@@ -11208,6 +12170,21 @@ public final class PB_RDF {
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_IRIOrBuilder getBaseOrBuilder();
 
+    /**
+     * <code>.RDF_Header header = 5;</code>
+     * @return Whether the header field is set.
+     */
+    boolean hasHeader();
+    /**
+     * <code>.RDF_Header header = 5;</code>
+     * @return The header.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header getHeader();
+    /**
+     * <code>.RDF_Header header = 5;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_HeaderOrBuilder getHeaderOrBuilder();
+
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow.RowCase getRowCase();
   }
   /**
@@ -11261,6 +12238,7 @@ public final class PB_RDF {
       TRIPLE(2),
       QUAD(3),
       BASE(4),
+      HEADER(5),
       ROW_NOT_SET(0);
       private final int value;
       private RowCase(int value) {
@@ -11282,6 +12260,7 @@ public final class PB_RDF {
           case 2: return TRIPLE;
           case 3: return QUAD;
           case 4: return BASE;
+          case 5: return HEADER;
           case 0: return ROW_NOT_SET;
           default: return null;
         }
@@ -11421,6 +12400,37 @@ public final class PB_RDF {
       return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_IRI.getDefaultInstance();
     }
 
+    public static final int HEADER_FIELD_NUMBER = 5;
+    /**
+     * <code>.RDF_Header header = 5;</code>
+     * @return Whether the header field is set.
+     */
+    @java.lang.Override
+    public boolean hasHeader() {
+      return rowCase_ == 5;
+    }
+    /**
+     * <code>.RDF_Header header = 5;</code>
+     * @return The header.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header getHeader() {
+      if (rowCase_ == 5) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.getDefaultInstance();
+    }
+    /**
+     * <code>.RDF_Header header = 5;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_HeaderOrBuilder getHeaderOrBuilder() {
+      if (rowCase_ == 5) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -11447,6 +12457,9 @@ public final class PB_RDF {
       if (rowCase_ == 4) {
         output.writeMessage(4, (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_IRI) row_);
       }
+      if (rowCase_ == 5) {
+        output.writeMessage(5, (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header) row_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -11471,6 +12484,10 @@ public final class PB_RDF {
       if (rowCase_ == 4) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_IRI) row_);
+      }
+      if (rowCase_ == 5) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header) row_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -11505,6 +12522,10 @@ public final class PB_RDF {
           if (!getBase()
               .equals(other.getBase())) return false;
           break;
+        case 5:
+          if (!getHeader()
+              .equals(other.getHeader())) return false;
+          break;
         case 0:
         default:
       }
@@ -11535,6 +12556,10 @@ public final class PB_RDF {
         case 4:
           hash = (37 * hash) + BASE_FIELD_NUMBER;
           hash = (53 * hash) + getBase().hashCode();
+          break;
+        case 5:
+          hash = (37 * hash) + HEADER_FIELD_NUMBER;
+          hash = (53 * hash) + getHeader().hashCode();
           break;
         case 0:
         default:
@@ -11686,6 +12711,9 @@ public final class PB_RDF {
         if (baseBuilder_ != null) {
           baseBuilder_.clear();
         }
+        if (headerBuilder_ != null) {
+          headerBuilder_.clear();
+        }
         rowCase_ = 0;
         row_ = null;
         return this;
@@ -11743,6 +12771,10 @@ public final class PB_RDF {
             baseBuilder_ != null) {
           result.row_ = baseBuilder_.build();
         }
+        if (rowCase_ == 5 &&
+            headerBuilder_ != null) {
+          result.row_ = headerBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -11772,6 +12804,10 @@ public final class PB_RDF {
           }
           case BASE: {
             mergeBase(other.getBase());
+            break;
+          }
+          case HEADER: {
+            mergeHeader(other.getHeader());
             break;
           }
           case ROW_NOT_SET: {
@@ -11832,6 +12868,13 @@ public final class PB_RDF {
                 rowCase_ = 4;
                 break;
               } // case 34
+              case 42: {
+                input.readMessage(
+                    getHeaderFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                rowCase_ = 5;
+                break;
+              } // case 42
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -12430,6 +13473,148 @@ public final class PB_RDF {
         rowCase_ = 4;
         onChanged();
         return baseBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_HeaderOrBuilder> headerBuilder_;
+      /**
+       * <code>.RDF_Header header = 5;</code>
+       * @return Whether the header field is set.
+       */
+      @java.lang.Override
+      public boolean hasHeader() {
+        return rowCase_ == 5;
+      }
+      /**
+       * <code>.RDF_Header header = 5;</code>
+       * @return The header.
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header getHeader() {
+        if (headerBuilder_ == null) {
+          if (rowCase_ == 5) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.getDefaultInstance();
+        } else {
+          if (rowCase_ == 5) {
+            return headerBuilder_.getMessage();
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.RDF_Header header = 5;</code>
+       */
+      public Builder setHeader(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header value) {
+        if (headerBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          row_ = value;
+          onChanged();
+        } else {
+          headerBuilder_.setMessage(value);
+        }
+        rowCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.RDF_Header header = 5;</code>
+       */
+      public Builder setHeader(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.Builder builderForValue) {
+        if (headerBuilder_ == null) {
+          row_ = builderForValue.build();
+          onChanged();
+        } else {
+          headerBuilder_.setMessage(builderForValue.build());
+        }
+        rowCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.RDF_Header header = 5;</code>
+       */
+      public Builder mergeHeader(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header value) {
+        if (headerBuilder_ == null) {
+          if (rowCase_ == 5 &&
+              row_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.getDefaultInstance()) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.newBuilder((org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header) row_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            row_ = value;
+          }
+          onChanged();
+        } else {
+          if (rowCase_ == 5) {
+            headerBuilder_.mergeFrom(value);
+          } else {
+            headerBuilder_.setMessage(value);
+          }
+        }
+        rowCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.RDF_Header header = 5;</code>
+       */
+      public Builder clearHeader() {
+        if (headerBuilder_ == null) {
+          if (rowCase_ == 5) {
+            rowCase_ = 0;
+            row_ = null;
+            onChanged();
+          }
+        } else {
+          if (rowCase_ == 5) {
+            rowCase_ = 0;
+            row_ = null;
+          }
+          headerBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Header header = 5;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.Builder getHeaderBuilder() {
+        return getHeaderFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Header header = 5;</code>
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_HeaderOrBuilder getHeaderOrBuilder() {
+        if ((rowCase_ == 5) && (headerBuilder_ != null)) {
+          return headerBuilder_.getMessageOrBuilder();
+        } else {
+          if (rowCase_ == 5) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.RDF_Header header = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_HeaderOrBuilder> 
+          getHeaderFieldBuilder() {
+        if (headerBuilder_ == null) {
+          if (!(rowCase_ == 5)) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.getDefaultInstance();
+          }
+          headerBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_HeaderOrBuilder>(
+                  (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header) row_,
+                  getParentForChildren(),
+                  isClean());
+          row_ = null;
+        }
+        rowCase_ = 5;
+        onChanged();
+        return headerBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:RDF_StreamRow)
@@ -15509,6 +16694,11 @@ public final class PB_RDF {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_RDF_PrefixDecl_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_RDF_Header_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_RDF_Header_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_RDF_StreamRow_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -15545,38 +16735,41 @@ public final class PB_RDF {
       "\n\020binary-rdf.proto\"\026\n\007RDF_IRI\022\013\n\003iri\030\001 \001" +
       "(\t\"3\n\016RDF_PrefixName\022\016\n\006prefix\030\001 \001(\t\022\021\n\t" +
       "localName\030\002 \001(\t\"\032\n\tRDF_BNode\022\r\n\005label\030\001 " +
-      "\001(\t\"\232\001\n\013RDF_Literal\022\013\n\003lex\030\001 \001(\t\022\020\n\006simp" +
+      "\001(\t\"\261\001\n\013RDF_Literal\022\013\n\003lex\030\001 \001(\t\022\020\n\006simp" +
       "le\030\t \001(\010H\000\022\021\n\007langtag\030\002 \001(\tH\000\022\021\n\007langdir" +
       "\030\005 \001(\tH\000\022\022\n\010datatype\030\003 \001(\tH\000\022#\n\010dtPrefix" +
-      "\030\004 \001(\0132\017.RDF_PrefixNameH\000B\r\n\013literalKind" +
-      "\"+\n\013RDF_Decimal\022\r\n\005value\030\001 \001(\022\022\r\n\005scale\030" +
-      "\002 \001(\021\"\027\n\007RDF_Var\022\014\n\004name\030\001 \001(\t\"\t\n\007RDF_AN" +
-      "Y\"\013\n\tRDF_UNDEF\"\014\n\nRDF_REPEAT\"\371\002\n\010RDF_Ter" +
-      "m\022\027\n\003iri\030\001 \001(\0132\010.RDF_IRIH\000\022\033\n\005bnode\030\002 \001(" +
-      "\0132\n.RDF_BNodeH\000\022\037\n\007literal\030\003 \001(\0132\014.RDF_L" +
-      "iteralH\000\022%\n\nprefixName\030\004 \001(\0132\017.RDF_Prefi" +
-      "xNameH\000\022\034\n\010variable\030\005 \001(\0132\010.RDF_VarH\000\022!\n" +
-      "\ntripleTerm\030\006 \001(\0132\013.RDF_TripleH\000\022\027\n\003any\030" +
-      "\007 \001(\0132\010.RDF_ANYH\000\022\037\n\tundefined\030\010 \001(\0132\n.R" +
-      "DF_UNDEFH\000\022\035\n\006repeat\030\t \001(\0132\013.RDF_REPEATH" +
-      "\000\022\024\n\nvalInteger\030\024 \001(\022H\000\022\023\n\tvalDouble\030\025 \001" +
-      "(\001H\000\022\"\n\nvalDecimal\030\026 \001(\0132\014.RDF_DecimalH\000" +
-      "B\006\n\004term\"N\n\nRDF_Triple\022\024\n\001S\030\001 \001(\0132\t.RDF_" +
+      "\030\004 \001(\0132\017.RDF_PrefixNameH\000\022\025\n\013datatypeRef" +
+      "\030\006 \001(\rH\000B\r\n\013literalKind\"+\n\013RDF_Decimal\022\r" +
+      "\n\005value\030\001 \001(\022\022\r\n\005scale\030\002 \001(\021\"\027\n\007RDF_Var\022" +
+      "\014\n\004name\030\001 \001(\t\"\t\n\007RDF_ANY\"\013\n\tRDF_UNDEF\"\014\n" +
+      "\nRDF_REPEAT\"\214\003\n\010RDF_Term\022\027\n\003iri\030\001 \001(\0132\010." +
+      "RDF_IRIH\000\022\033\n\005bnode\030\002 \001(\0132\n.RDF_BNodeH\000\022\037" +
+      "\n\007literal\030\003 \001(\0132\014.RDF_LiteralH\000\022%\n\nprefi" +
+      "xName\030\004 \001(\0132\017.RDF_PrefixNameH\000\022\034\n\010variab" +
+      "le\030\005 \001(\0132\010.RDF_VarH\000\022!\n\ntripleTerm\030\006 \001(\013" +
+      "2\013.RDF_TripleH\000\022\027\n\003any\030\007 \001(\0132\010.RDF_ANYH\000" +
+      "\022\037\n\tundefined\030\010 \001(\0132\n.RDF_UNDEFH\000\022\035\n\006rep" +
+      "eat\030\t \001(\0132\013.RDF_REPEATH\000\022\021\n\007termRef\030\n \001(" +
+      "\rH\000\022\024\n\nvalInteger\030\024 \001(\022H\000\022\023\n\tvalDouble\030\025" +
+      " \001(\001H\000\022\"\n\nvalDecimal\030\026 \001(\0132\014.RDF_Decimal" +
+      "H\000B\006\n\004term\"N\n\nRDF_Triple\022\024\n\001S\030\001 \001(\0132\t.RD" +
+      "F_Term\022\024\n\001P\030\002 \001(\0132\t.RDF_Term\022\024\n\001O\030\003 \001(\0132" +
+      "\t.RDF_Term\"b\n\010RDF_Quad\022\024\n\001S\030\001 \001(\0132\t.RDF_" +
       "Term\022\024\n\001P\030\002 \001(\0132\t.RDF_Term\022\024\n\001O\030\003 \001(\0132\t." +
-      "RDF_Term\"b\n\010RDF_Quad\022\024\n\001S\030\001 \001(\0132\t.RDF_Te" +
-      "rm\022\024\n\001P\030\002 \001(\0132\t.RDF_Term\022\024\n\001O\030\003 \001(\0132\t.RD" +
-      "F_Term\022\024\n\001G\030\004 \001(\0132\t.RDF_Term\"-\n\016RDF_Pref" +
-      "ixDecl\022\016\n\006prefix\030\001 \001(\t\022\013\n\003uri\030\002 \001(\t\"\221\001\n\r" +
-      "RDF_StreamRow\022%\n\nprefixDecl\030\001 \001(\0132\017.RDF_" +
-      "PrefixDeclH\000\022\035\n\006triple\030\002 \001(\0132\013.RDF_Tripl" +
-      "eH\000\022\031\n\004quad\030\003 \001(\0132\t.RDF_QuadH\000\022\030\n\004base\030\004" +
-      " \001(\0132\010.RDF_IRIH\000B\005\n\003row\")\n\nRDF_Stream\022\033\n" +
-      "\003row\030\001 \003(\0132\016.RDF_StreamRow\"&\n\014RDF_VarTup" +
-      "le\022\026\n\004vars\030\001 \003(\0132\010.RDF_Var\"\'\n\rRDF_DataTu" +
-      "ple\022\026\n\003row\030\001 \003(\0132\t.RDF_Term\"(\n\tRDF_Graph" +
-      "\022\033\n\006triple\030\001 \003(\0132\013.RDF_TripleB.\n\"org.apa" +
-      "che.jena.riot.protobuf.wireB\006PB_RDFH\001b\006p" +
-      "roto3"
+      "RDF_Term\022\024\n\001G\030\004 \001(\0132\t.RDF_Term\"-\n\016RDF_Pr" +
+      "efixDecl\022\016\n\006prefix\030\001 \001(\t\022\013\n\003uri\030\002 \001(\t\"O\n" +
+      "\nRDF_Header\022\017\n\007version\030\001 \001(\r\022\025\n\rtermTabl" +
+      "eSize\030\002 \001(\r\022\031\n\021datatypeTableSize\030\003 \001(\r\"\260" +
+      "\001\n\rRDF_StreamRow\022%\n\nprefixDecl\030\001 \001(\0132\017.R" +
+      "DF_PrefixDeclH\000\022\035\n\006triple\030\002 \001(\0132\013.RDF_Tr" +
+      "ipleH\000\022\031\n\004quad\030\003 \001(\0132\t.RDF_QuadH\000\022\030\n\004bas" +
+      "e\030\004 \001(\0132\010.RDF_IRIH\000\022\035\n\006header\030\005 \001(\0132\013.RD" +
+      "F_HeaderH\000B\005\n\003row\")\n\nRDF_Stream\022\033\n\003row\030\001" +
+      " \003(\0132\016.RDF_StreamRow\"&\n\014RDF_VarTuple\022\026\n\004" +
+      "vars\030\001 \003(\0132\010.RDF_Var\"\'\n\rRDF_DataTuple\022\026\n" +
+      "\003row\030\001 \003(\0132\t.RDF_Term\"(\n\tRDF_Graph\022\033\n\006tr" +
+      "iple\030\001 \003(\0132\013.RDF_TripleB.\n\"org.apache.je" +
+      "na.riot.protobuf.wireB\006PB_RDFH\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -15605,7 +16798,7 @@ public final class PB_RDF {
     internal_static_RDF_Literal_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Literal_descriptor,
-        new java.lang.String[] { "Lex", "Simple", "Langtag", "Langdir", "Datatype", "DtPrefix", "LiteralKind", });
+        new java.lang.String[] { "Lex", "Simple", "Langtag", "Langdir", "Datatype", "DtPrefix", "DatatypeRef", "LiteralKind", });
     internal_static_RDF_Decimal_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_RDF_Decimal_fieldAccessorTable = new
@@ -15641,7 +16834,7 @@ public final class PB_RDF {
     internal_static_RDF_Term_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Term_descriptor,
-        new java.lang.String[] { "Iri", "Bnode", "Literal", "PrefixName", "Variable", "TripleTerm", "Any", "Undefined", "Repeat", "ValInteger", "ValDouble", "ValDecimal", "Term", });
+        new java.lang.String[] { "Iri", "Bnode", "Literal", "PrefixName", "Variable", "TripleTerm", "Any", "Undefined", "Repeat", "TermRef", "ValInteger", "ValDouble", "ValDecimal", "Term", });
     internal_static_RDF_Triple_descriptor =
       getDescriptor().getMessageTypes().get(10);
     internal_static_RDF_Triple_fieldAccessorTable = new
@@ -15660,32 +16853,38 @@ public final class PB_RDF {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_PrefixDecl_descriptor,
         new java.lang.String[] { "Prefix", "Uri", });
-    internal_static_RDF_StreamRow_descriptor =
+    internal_static_RDF_Header_descriptor =
       getDescriptor().getMessageTypes().get(13);
+    internal_static_RDF_Header_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_RDF_Header_descriptor,
+        new java.lang.String[] { "Version", "TermTableSize", "DatatypeTableSize", });
+    internal_static_RDF_StreamRow_descriptor =
+      getDescriptor().getMessageTypes().get(14);
     internal_static_RDF_StreamRow_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_StreamRow_descriptor,
-        new java.lang.String[] { "PrefixDecl", "Triple", "Quad", "Base", "Row", });
+        new java.lang.String[] { "PrefixDecl", "Triple", "Quad", "Base", "Header", "Row", });
     internal_static_RDF_Stream_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_RDF_Stream_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Stream_descriptor,
         new java.lang.String[] { "Row", });
     internal_static_RDF_VarTuple_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_RDF_VarTuple_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_VarTuple_descriptor,
         new java.lang.String[] { "Vars", });
     internal_static_RDF_DataTuple_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_RDF_DataTuple_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_DataTuple_descriptor,
         new java.lang.String[] { "Row", });
     internal_static_RDF_Graph_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_RDF_Graph_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Graph_descriptor,

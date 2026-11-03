@@ -45,6 +45,10 @@ public class RDFFormat {
     public static final RDFFormatVariant UTF8           = new RDFFormatVariant("utf-8") ;
     /** Variant for RDF Thrift using values */
     public static final RDFFormatVariant ValueEncoding  = new RDFFormatVariant("Value") ;
+    /** Version 2 of the RDF Protobuf encoding. */
+    public static final RDFFormatVariant V2             = new RDFFormatVariant("v2") ;
+    /** Version 2 of the RDF Protobuf encoding, with value encoding. */
+    public static final RDFFormatVariant V2_VALUES      = new RDFFormatVariant("v2-values") ;
 
     /** Variant for RDF Canonicalization output (N-Triples and N-Quads) */
     public static final RDFFormatVariant CANONICAL      = new RDFFormatVariant("canonical");
@@ -201,6 +205,27 @@ public class RDFFormat {
      * @see #RDF_PROTO
      */
     public static final RDFFormat RDF_PROTO_VALUES     = new RDFFormat(Lang.RDFPROTO, RDFFormat.ValueEncoding) ;
+
+    /**
+     * Version 2 of the RDF Protobuf encoding. The stream starts with a header, a
+     * term already written is referred to by a small number instead of being
+     * written again, and a term that is the same as in the previous triple or quad
+     * is marked as a repeat. The output is smaller and much faster to read than
+     * {@link #RDF_PROTO}. Readers accept both versions; earlier Jena versions can
+     * not read version 2.
+     *
+     * @see #RDF_PROTO
+     * @see #RDF_PROTO_V2_VALUES
+     */
+    public static final RDFFormat RDF_PROTO_V2         = new RDFFormat(Lang.RDFPROTO, RDFFormat.V2) ;
+
+    /**
+     * {@link #RDF_PROTO_V2} with value encoding of integers, doubles and decimals,
+     * with the same caveats as {@link #RDF_PROTO_VALUES}.
+     *
+     * @see #RDF_PROTO_V2
+     */
+    public static final RDFFormat RDF_PROTO_V2_VALUES  = new RDFFormat(Lang.RDFPROTO, RDFFormat.V2_VALUES) ;
 
     /**
      * RDF Thrift output. This format is faithful representation of RDF written
