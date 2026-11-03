@@ -24,12 +24,22 @@ package org.apache.jena.riot.protobuf;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 import com.google.protobuf.CodedInputStream;
 
 import org.apache.jena.atlas.io.IO;
+import org.apache.jena.atlas.lib.Cache;
+import org.apache.jena.graph.Node;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_VarTuple;
+import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.thrift.ThriftRDF;
@@ -43,6 +53,13 @@ import org.apache.jena.sparql.exec.RowSetStream;
  * An encoding use Apache Thrift is available in {@link ThriftRDF}.
  */
 public class ProtobufRDF {
+
+    /** Default maximum number of {@link RDF_StreamRow} items per batched {@link RDF_Stream} message. */
+    public static final int DEFAULT_BATCH_SIZE = 1000;
+
+    private static final String ERR_STREAM_NULL = "stream must not be null";
+    private static final String ERR_DEST_NULL = "dest must not be null";
+    private static final String ERR_ROW_SET_NULL = "rowSet must not be null";
 
     /**
      * Create an {@link StreamRDF} for output.  A filename ending {@code .gz} will have
@@ -84,6 +101,9 @@ public class ProtobufRDF {
     /**
      * An {@link StreamRDF} that writes to an output stream.
      * The output stream is written with "writeDelimitedTo".
+     *
+     * @param output the destination output stream
+     * @return a {@link StreamRDF} writing length-delimited rows
      */
     public static StreamRDF streamToOutputStream(OutputStream output) {
         return streamToOutputStream(output, false);
@@ -92,6 +112,10 @@ public class ProtobufRDF {
     /**
      * An {@link StreamRDF} that writes to an output stream.
      * The output stream is written with "writeDelimitedTo".
+     *
+     * @param output the destination output stream
+     * @param withValues {@code true} to encode numeric literals by value
+     * @return a {@link StreamRDF} writing length-delimited rows
      */
     public static StreamRDF streamToOutputStream(OutputStream output, boolean withValues) {
         return streamToOutputStream(output, withValues, false);
@@ -110,6 +134,285 @@ public class ProtobufRDF {
         try {
             return StreamRDF2Protobuf.createDelimited(output, withValues, version2);
         } finally { IO.flush(output); }
+    }
+
+    /**
+     * Create a {@link StreamRDF} that emits each event as an in-memory {@link RDF_StreamRow} message
+     * to {@code rowConsumer} without intermediate byte-stream serialization.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted rows must be decoded in order by one stateful decoder.
+     *
+     * @param rowConsumer consumer receiving each encoded {@link RDF_StreamRow}
+     * @return a {@link StreamRDF} adapter
+     * @throws IllegalArgumentException Thrown if {@code rowConsumer} is {@code null}
+     */
+    public static StreamRDF streamToRowConsumer(Consumer<RDF_StreamRow> rowConsumer) {
+        return StreamRDF2Protobuf.create(rowConsumer);
+    }
+
+    /**
+     * Create a {@link StreamRDF} that emits each event as an in-memory {@link RDF_StreamRow} message
+     * to {@code rowConsumer} without intermediate byte-stream serialization.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted rows must be decoded in order by one stateful decoder.
+     *
+     * @param rowConsumer consumer receiving each encoded {@link RDF_StreamRow}
+     * @param withValues {@code true} to encode numeric literals by value
+     * @return a {@link StreamRDF} adapter
+     * @throws IllegalArgumentException Thrown if {@code rowConsumer} is {@code null}
+     */
+    public static StreamRDF streamToRowConsumer(Consumer<RDF_StreamRow> rowConsumer, boolean withValues) {
+        return StreamRDF2Protobuf.create(rowConsumer, withValues);
+    }
+
+    /**
+     * Create a {@link StreamRDF} that emits each event as an in-memory {@link RDF_StreamRow} message
+     * to {@code rowConsumer} and invokes {@code onFinish} when {@link StreamRDF#finish()} is called.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted rows must be decoded in order by one stateful decoder.
+     *
+     * @param rowConsumer consumer receiving each encoded {@link RDF_StreamRow}
+     * @param withValues {@code true} to encode numeric literals by value
+     * @param onFinish callback invoked when {@link StreamRDF#finish()} is called
+     * @return a {@link StreamRDF} adapter
+     * @throws IllegalArgumentException Thrown if {@code rowConsumer} or {@code onFinish} is {@code null}
+     */
+    public static StreamRDF streamToRowConsumer(Consumer<RDF_StreamRow> rowConsumer, boolean withValues, Runnable onFinish) {
+        return StreamRDF2Protobuf.create(rowConsumer, withValues, onFinish);
+    }
+
+    /**
+     * Create a {@link StreamRDF} that batches encoded {@link RDF_StreamRow} items into {@link RDF_Stream}
+     * messages of at most {@link #DEFAULT_BATCH_SIZE} rows.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted batches must be decoded in order by one stateful decoder.
+     *
+     * @param batchConsumer consumer receiving each non-empty {@link RDF_Stream} batch
+     * @return a batched {@link StreamRDF} adapter
+     * @throws IllegalArgumentException Thrown if {@code batchConsumer} is {@code null}
+     */
+    public static StreamRDF streamToBatchConsumer(Consumer<RDF_Stream> batchConsumer) {
+        return streamToBatchConsumer(batchConsumer, DEFAULT_BATCH_SIZE, false);
+    }
+
+    /**
+     * Create a {@link StreamRDF} that batches encoded {@link RDF_StreamRow} items into {@link RDF_Stream}
+     * messages of at most {@code batchSize} rows.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted batches must be decoded in order by one stateful decoder.
+     *
+     * @param batchConsumer consumer receiving each non-empty {@link RDF_Stream} batch
+     * @param batchSize maximum number of rows per emitted {@link RDF_Stream} message (must be positive)
+     * @return a batched {@link StreamRDF} adapter
+     * @throws IllegalArgumentException Thrown if {@code batchConsumer} is {@code null} or {@code batchSize <= 0}
+     */
+    public static StreamRDF streamToBatchConsumer(Consumer<RDF_Stream> batchConsumer, int batchSize) {
+        return streamToBatchConsumer(batchConsumer, batchSize, false);
+    }
+
+    /**
+     * Create a {@link StreamRDF} that batches encoded {@link RDF_StreamRow} items into {@link RDF_Stream}
+     * messages of at most {@code batchSize} rows.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted batches must be decoded in order by one stateful decoder.
+     *
+     * @param batchConsumer consumer receiving each non-empty {@link RDF_Stream} batch
+     * @param batchSize maximum number of rows per emitted {@link RDF_Stream} message (must be positive)
+     * @param withValues {@code true} to encode numeric literals by value
+     * @return a batched {@link StreamRDF} adapter
+     * @throws IllegalArgumentException Thrown if {@code batchConsumer} is {@code null} or {@code batchSize <= 0}
+     */
+    public static StreamRDF streamToBatchConsumer(Consumer<RDF_Stream> batchConsumer, int batchSize, boolean withValues) {
+        return StreamRDF2Protobuf.createBatched(batchConsumer, batchSize, withValues);
+    }
+
+    /**
+     * Create a {@link StreamRDF} that batches encoded {@link RDF_StreamRow} items into {@link RDF_Stream}
+     * messages of at most {@code batchSize} rows and invokes {@code onFinish} on {@link StreamRDF#finish()}.
+     * <p>
+     * Prefix declarations update the encoder's prefix map so subsequent IRIs may be abbreviated as
+     * {@code RDF_PrefixName} terms; emitted batches must be decoded in order by one stateful decoder.
+     *
+     * @param batchConsumer consumer receiving each non-empty {@link RDF_Stream} batch
+     * @param batchSize maximum number of rows per emitted {@link RDF_Stream} message (must be positive)
+     * @param withValues {@code true} to encode numeric literals by value
+     * @param onFinish callback invoked when {@link StreamRDF#finish()} is called after flushing any pending batch
+     * @return a batched {@link StreamRDF} adapter
+     * @throws IllegalArgumentException Thrown if {@code batchConsumer} or {@code onFinish} is {@code null}, or {@code batchSize <= 0}
+     */
+    public static StreamRDF streamToBatchConsumer(Consumer<RDF_Stream> batchConsumer, int batchSize, boolean withValues, Runnable onFinish) {
+        return StreamRDF2Protobuf.createBatched(batchConsumer, batchSize, withValues, onFinish);
+    }
+
+    /**
+     * As {@link #streamToBatchConsumer(Consumer, int, boolean)}; with {@code version2}
+     * the rows use the version 2 encoding (term tables and repeats, see
+     * {@code binary-rdf.proto}), starting with a header row in the first batch.
+     * The batches must be decoded in order by one decoder, as
+     * {@link #batchConsumerToStreamRDF} does.
+     */
+    public static StreamRDF streamToBatchConsumer(Consumer<RDF_Stream> batchConsumer, int batchSize, boolean withValues, boolean version2) {
+        return StreamRDF2Protobuf.createBatched(batchConsumer, batchSize, withValues, version2, () -> {});
+    }
+
+    /**
+     * As {@link #streamToRowConsumer(Consumer, boolean)}; with {@code version2} the rows use
+     * the version 2 encoding, starting with a header row.
+     */
+    public static StreamRDF streamToRowConsumer(Consumer<RDF_StreamRow> rowConsumer, boolean withValues, boolean version2) {
+        return StreamRDF2Protobuf.create(rowConsumer, withValues, version2, () -> {});
+    }
+
+    /**
+     * Write RDF as frames. A frame is the bytes of one {@link RDF_Stream} message holding up
+     * to {@code batchSize} rows; it can be sent as the payload of a transport message and
+     * parsed with {@code RDF_Stream.parseFrom}, or decoded without building message
+     * objects by {@link #framesToStreamRDF(StreamRDF)}, which is much faster. The frames of
+     * one stream must be decoded in order by one decoder: with {@code version2} the first
+     * frame starts with the header row and later rows refer back to earlier ones.
+     * <p>
+     * The consumer owns each buffer it is given. {@link StreamRDF#finish()} hands over the
+     * last, partial frame if there is one; a stream with no rows at all produces no frame.
+     *
+     * @param frameConsumer receives each frame
+     * @param batchSize rows per frame
+     * @param withValues {@code true} to encode numeric literals by value
+     * @param version2 {@code true} for version 2 of the encoding (term tables and repeats)
+     * @return a {@link StreamRDF} to write to
+     */
+    public static StreamRDF streamToFrames(Consumer<ByteBuffer> frameConsumer, int batchSize, boolean withValues, boolean version2) {
+        Objects.requireNonNull(frameConsumer, "frameConsumer");
+        if ( batchSize <= 0 )
+            throw new IllegalArgumentException("batchSize must be positive: " + batchSize);
+        ProtobufEncoderV2 tables = version2 ? new ProtobufEncoderV2(withValues) : null;
+        return new ProtobufStreamWriter(frameConsumer, batchSize, withValues, tables);
+    }
+
+    /**
+     * Decode frames, as produced by {@link #streamToFrames}, to {@code dest}. Each buffer
+     * is read from its position to its limit. The caller starts and finishes {@code dest}.
+     *
+     * @param dest where the rows go
+     * @return a consumer of frames, to be given the frames of one stream in order
+     */
+    public static Consumer<ByteBuffer> framesToStreamRDF(StreamRDF dest) {
+        return framesToStreamRDF(PrefixMapFactory.create(), dest);
+    }
+
+    /** As {@link #framesToStreamRDF(StreamRDF)}, with the prefix map that prefix declarations in the stream fill. */
+    public static Consumer<ByteBuffer> framesToStreamRDF(PrefixMap pmap, StreamRDF dest) {
+        Objects.requireNonNull(dest, "dest");
+        ProtobufStreamReader reader = new ProtobufStreamReader(pmap, dest);
+        return reader::readFrame;
+    }
+
+    /**
+     * Return a {@link Consumer} of {@link RDF_StreamRow} messages that decodes and forwards each row
+     * to {@code dest} using a fresh {@link PrefixMap} and default URI cache.
+     *
+     * @param dest the destination {@link StreamRDF}
+     * @return a consumer of {@link RDF_StreamRow} messages
+     * @throws IllegalArgumentException Thrown if {@code dest} is {@code null}
+     */
+    public static Consumer<RDF_StreamRow> rowConsumerToStreamRDF(StreamRDF dest) {
+        return new Protobuf2StreamRDF(dest);
+    }
+
+    /**
+     * Return a {@link Consumer} of {@link RDF_StreamRow} messages that decodes and forwards each row
+     * to {@code dest} using the supplied {@link PrefixMap} and default URI cache.
+     *
+     * @param pmap the prefix map to populate and consult
+     * @param dest the destination {@link StreamRDF}
+     * @return a consumer of {@link RDF_StreamRow} messages
+     * @throws IllegalArgumentException Thrown if {@code pmap} or {@code dest} is {@code null}
+     */
+    public static Consumer<RDF_StreamRow> rowConsumerToStreamRDF(PrefixMap pmap, StreamRDF dest) {
+        return new Protobuf2StreamRDF(pmap, dest);
+    }
+
+    /**
+     * Return a {@link Consumer} of {@link RDF_StreamRow} messages that decodes and forwards each row
+     * to {@code dest} using the supplied {@link PrefixMap} and optional URI cache.
+     *
+     * @param pmap the prefix map to populate and consult
+     * @param dest the destination {@link StreamRDF}
+     * @param uriCache optional cache for interning URI nodes, or {@code null} to disable caching
+     * @return a consumer of {@link RDF_StreamRow} messages
+     * @throws IllegalArgumentException Thrown if {@code pmap} or {@code dest} is {@code null}
+     */
+    public static Consumer<RDF_StreamRow> rowConsumerToStreamRDF(PrefixMap pmap, StreamRDF dest, Cache<String, Node> uriCache) {
+        return new Protobuf2StreamRDF(pmap, dest, uriCache);
+    }
+
+    /**
+     * Return a {@link Consumer} of batched {@link RDF_Stream} messages that decodes and forwards each row
+     * to {@code dest} using a fresh {@link PrefixMap} and default URI cache.
+     *
+     * @param dest the destination {@link StreamRDF}
+     * @return a consumer of {@link RDF_Stream} messages
+     * @throws IllegalArgumentException Thrown if {@code dest} is {@code null}
+     */
+    public static Consumer<RDF_Stream> batchConsumerToStreamRDF(StreamRDF dest) {
+        Protobuf2StreamRDF decoder = new Protobuf2StreamRDF(dest);
+        return decoder::accept;
+    }
+
+    /**
+     * Return a {@link Consumer} of batched {@link RDF_Stream} messages that decodes and forwards each row
+     * to {@code dest} using the supplied {@link PrefixMap} and default URI cache.
+     *
+     * @param pmap the prefix map to populate and consult
+     * @param dest the destination {@link StreamRDF}
+     * @return a consumer of {@link RDF_Stream} messages
+     * @throws IllegalArgumentException Thrown if {@code pmap} or {@code dest} is {@code null}
+     */
+    public static Consumer<RDF_Stream> batchConsumerToStreamRDF(PrefixMap pmap, StreamRDF dest) {
+        Protobuf2StreamRDF decoder = new Protobuf2StreamRDF(pmap, dest);
+        return decoder::accept;
+    }
+
+    /**
+     * Return a {@link Consumer} of batched {@link RDF_Stream} messages that decodes and forwards each row
+     * to {@code dest} using the supplied {@link PrefixMap} and optional URI cache.
+     *
+     * @param pmap the prefix map to populate and consult
+     * @param dest the destination {@link StreamRDF}
+     * @param uriCache optional cache for interning URI nodes, or {@code null} to disable caching
+     * @return a consumer of {@link RDF_Stream} messages
+     * @throws IllegalArgumentException Thrown if {@code pmap} or {@code dest} is {@code null}
+     */
+    public static Consumer<RDF_Stream> batchConsumerToStreamRDF(PrefixMap pmap, StreamRDF dest, Cache<String, Node> uriCache) {
+        Protobuf2StreamRDF decoder = new Protobuf2StreamRDF(pmap, dest, uriCache);
+        return decoder::accept;
+    }
+
+    /**
+     * Decode all rows in a single {@link RDF_Stream} message and send them to {@code dest},
+     * bracketed by {@link StreamRDF#start()} and {@link StreamRDF#finish()}.
+     *
+     * @param stream the {@link RDF_Stream} message to decode
+     * @param dest the destination {@link StreamRDF}
+     * @throws IllegalArgumentException Thrown if {@code stream} or {@code dest} is {@code null}
+     */
+    public static void protobufToStreamRDF(RDF_Stream stream, StreamRDF dest) {
+        if ( stream == null )
+            throw new IllegalArgumentException(ERR_STREAM_NULL);
+        if ( dest == null )
+            throw new IllegalArgumentException(ERR_DEST_NULL);
+        Protobuf2StreamRDF decoder = new Protobuf2StreamRDF(PrefixMapFactory.create(), dest);
+        dest.start();
+        try {
+            decoder.accept(stream);
+        } finally {
+            dest.finish();
+        }
     }
 
     /**
@@ -161,6 +464,9 @@ public class ProtobufRDF {
 
     /**
      * Return a streaming {@link RowSet} read from an input stream (with delimiters per row)
+     *
+     * @param input the source input stream
+     * @return a streaming {@link RowSet}
      */
     public static RowSet readRowSet(InputStream input) {
         Protobuf2Binding p2b = new Protobuf2Binding(input);
@@ -168,7 +474,49 @@ public class ProtobufRDF {
     }
 
     /**
+     * Decode an {@link RDF_VarTuple} header message into an ordered list of {@link Var} instances.
+     *
+     * @param varTuple the variable header message
+     * @return an ordered list of {@link Var}
+     * @throws IllegalArgumentException Thrown if {@code varTuple} is {@code null}
+     */
+    public static List<Var> decodeVars(RDF_VarTuple varTuple) {
+        return Protobuf2Binding.decodeVars(varTuple);
+    }
+
+    /**
+     * Return a streaming {@link RowSet} decoded from an {@link RDF_VarTuple} header message
+     * and an iterator of {@link RDF_DataTuple} row messages.
+     *
+     * @param varTuple the variable header message
+     * @param dataTuples iterator supplying {@link RDF_DataTuple} row messages
+     * @return a streaming {@link RowSet}
+     * @throws IllegalArgumentException Thrown if {@code varTuple} or {@code dataTuples} is {@code null}
+     */
+    public static RowSet readRowSet(RDF_VarTuple varTuple, Iterator<RDF_DataTuple> dataTuples) {
+        Protobuf2Binding p2b = new Protobuf2Binding(varTuple, dataTuples);
+        return RowSetStream.create(p2b.getVars(), p2b);
+    }
+
+    /**
+     * Return a streaming {@link RowSet} decoded from an ordered list of result variables
+     * and an iterator of {@link RDF_DataTuple} row messages.
+     *
+     * @param vars the result variables in column order
+     * @param dataTuples iterator supplying {@link RDF_DataTuple} row messages
+     * @return a streaming {@link RowSet}
+     * @throws IllegalArgumentException Thrown if {@code vars} or {@code dataTuples} is {@code null}
+     */
+    public static RowSet readRowSet(List<Var> vars, Iterator<RDF_DataTuple> dataTuples) {
+        Protobuf2Binding p2b = new Protobuf2Binding(vars, dataTuples);
+        return RowSetStream.create(p2b.getVars(), p2b);
+    }
+
+    /**
      * Write a {@link RowSet} to an output stream (with delimiters per row)
+     *
+     * @param out destination output stream
+     * @param rowSet the row set to write
      */
     public static void writeRowSet(OutputStream out, RowSet rowSet) {
         writeRowSet(out, rowSet, false);
@@ -176,15 +524,51 @@ public class ProtobufRDF {
 
     /**
      * Write a {@link RowSet} to an output stream (with delimiters per row)
+     *
+     * @param out destination output stream
+     * @param rowSet the row set to write
+     * @param withValues {@code true} to encode numeric literals by value
      */
     public static void writeRowSet(OutputStream out, RowSet rowSet, boolean withValues) {
         out = IO.ensureBuffered(out);
         try {
             List<Var> vars = rowSet.getResultVars();
-            try ( Binding2Protobuf b2p = new Binding2Protobuf(out, vars, false) ) {
+            try ( Binding2Protobuf b2p = new Binding2Protobuf(out, vars, withValues) ) {
                 rowSet.forEachRemaining(b2p::output);
             }
         } finally { IO.flush(out); }
+    }
+
+    /**
+     * Encode a {@link RowSet} as an {@link RDF_VarTuple} header message followed by a stream
+     * of {@link RDF_DataTuple} row messages without intermediate byte-stream serialization.
+     *
+     * @param rowSet the row set to encode
+     * @param headerConsumer consumer receiving the initial {@link RDF_VarTuple} header
+     * @param rowConsumer consumer receiving each encoded {@link RDF_DataTuple} row
+     * @throws IllegalArgumentException Thrown if {@code rowSet}, {@code headerConsumer}, or {@code rowConsumer} is {@code null}
+     */
+    public static void writeRowSet(RowSet rowSet, Consumer<RDF_VarTuple> headerConsumer, Consumer<RDF_DataTuple> rowConsumer) {
+        writeRowSet(rowSet, headerConsumer, rowConsumer, false);
+    }
+
+    /**
+     * Encode a {@link RowSet} as an {@link RDF_VarTuple} header message followed by a stream
+     * of {@link RDF_DataTuple} row messages without intermediate byte-stream serialization.
+     *
+     * @param rowSet the row set to encode
+     * @param headerConsumer consumer receiving the initial {@link RDF_VarTuple} header
+     * @param rowConsumer consumer receiving each encoded {@link RDF_DataTuple} row
+     * @param withValues {@code true} to encode numeric literals by value
+     * @throws IllegalArgumentException Thrown if {@code rowSet}, {@code headerConsumer}, or {@code rowConsumer} is {@code null}
+     */
+    public static void writeRowSet(RowSet rowSet, Consumer<RDF_VarTuple> headerConsumer, Consumer<RDF_DataTuple> rowConsumer, boolean withValues) {
+        if ( rowSet == null )
+            throw new IllegalArgumentException(ERR_ROW_SET_NULL);
+        List<Var> vars = rowSet.getResultVars();
+        try ( Binding2Protobuf b2p = new Binding2Protobuf(headerConsumer, rowConsumer, vars, withValues) ) {
+            rowSet.forEachRemaining(b2p::output);
+        }
     }
 
 }

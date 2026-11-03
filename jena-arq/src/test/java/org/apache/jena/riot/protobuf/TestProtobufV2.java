@@ -325,6 +325,103 @@ public class TestProtobufV2 {
 
     // ---- Helpers
 
+    @Test public void frames_v2_round_trip() {
+        framesRoundTrip(true, 7);
+    }
+
+    @Test public void frames_v1_round_trip() {
+        framesRoundTrip(false, 7);
+    }
+
+    @Test public void frames_one_row_each() {
+        framesRoundTrip(true, 1);
+    }
+
+    @Test public void frames_parse_as_messages() throws Exception {
+        List<Triple> triples = sampleTriples();
+        List<java.nio.ByteBuffer> frames = new ArrayList<>();
+        StreamRDF writer = ProtobufRDF.streamToFrames(frames::add, 3, false, true);
+        writer.start();
+        writer.prefix("ex", "http://example/");
+        triples.forEach(writer::triple);
+        writer.finish();
+        // Each frame is a well-formed RDF_Stream message with the expected rows.
+        int rows = 0;
+        boolean headerFirst = false;
+        for ( int i = 0; i < frames.size(); i++ ) {
+            org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream msg =
+                org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream.parseFrom(frames.get(i));
+            if ( i == 0 )
+                headerFirst = msg.getRow(0).hasHeader();
+            rows += msg.getRowCount();
+        }
+        assertTrue(headerFirst);
+        assertEquals(1 + 1 + triples.size(), rows);  // header, prefix, triples
+        // The generated-message decoder reads the same frames.
+        List<Triple> back = new ArrayList<>();
+        StreamRDF collector = new org.apache.jena.riot.system.StreamRDFBase() {
+            @Override public void triple(Triple triple) { back.add(triple); }
+        };
+        java.util.function.Consumer<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream> decoder =
+            ProtobufRDF.batchConsumerToStreamRDF(collector);
+        for ( java.nio.ByteBuffer frame : frames )
+            decoder.accept(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream.parseFrom(frame));
+        assertEquals(triples, back);
+    }
+
+    @Test public void frames_empty_stream() {
+        List<java.nio.ByteBuffer> frames = new ArrayList<>();
+        StreamRDF writer = ProtobufRDF.streamToFrames(frames::add, 10, false, true);
+        writer.start();
+        writer.finish();
+        // Version 2: the header row alone. Version 1: nothing at all.
+        assertEquals(1, frames.size());
+        StreamRDF writer1 = ProtobufRDF.streamToFrames(frames::add, 10, false, false);
+        writer1.start();
+        writer1.finish();
+        assertEquals(1, frames.size());
+        List<Triple> back = new ArrayList<>();
+        StreamRDF collector = new org.apache.jena.riot.system.StreamRDFBase() {
+            @Override public void triple(Triple triple) { back.add(triple); }
+        };
+        java.util.function.Consumer<java.nio.ByteBuffer> decoder = ProtobufRDF.framesToStreamRDF(collector);
+        frames.forEach(decoder);
+        assertTrue(back.isEmpty());
+    }
+
+    private static void framesRoundTrip(boolean version2, int batchSize) {
+        List<Triple> triples = sampleTriples();
+        List<java.nio.ByteBuffer> frames = new ArrayList<>();
+        StreamRDF writer = ProtobufRDF.streamToFrames(frames::add, batchSize, false, version2);
+        writer.start();
+        triples.forEach(writer::triple);
+        writer.finish();
+        assertEquals((triples.size() + (version2 ? 1 : 0) + batchSize - 1) / batchSize, frames.size());
+        List<Triple> back = new ArrayList<>();
+        StreamRDF collector = new org.apache.jena.riot.system.StreamRDFBase() {
+            @Override public void triple(Triple triple) { back.add(triple); }
+        };
+        java.util.function.Consumer<java.nio.ByteBuffer> decoder = ProtobufRDF.framesToStreamRDF(collector);
+        frames.forEach(decoder);
+        assertEquals(triples, back);
+    }
+
+    private static List<Triple> sampleTriples() {
+        List<Triple> triples = new ArrayList<>();
+        for ( int i = 0; i < 20; i++ ) {
+            Node s = NodeFactory.createURI("http://example/s" + (i / 4));
+            Node p = NodeFactory.createURI("http://example/p" + (i % 3));
+            Node o = switch ( i % 4 ) {
+                case 0 -> NodeFactory.createURI("http://example/o" + i);
+                case 1 -> NodeFactory.createLiteralString("text " + i);
+                case 2 -> NodeFactory.createLiteralDT(Integer.toString(i), org.apache.jena.datatypes.xsd.XSDDatatype.XSDinteger);
+                default -> NodeFactory.createBlankNode("b" + i);
+            };
+            triples.add(Triple.create(s, p, o));
+        }
+        return triples;
+    }
+
     private static Graph writeRead(Graph g, RDFFormat format) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         RDFDataMgr.write(out, g, format);

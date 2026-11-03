@@ -22,6 +22,7 @@ package org.apache.jena.riot.protobuf;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 
 import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.WireFormat;
@@ -108,7 +109,10 @@ final class ProtobufStreamReader {
 
     private static final int NO_POSITION = -1;
 
-    private final CodedInputStream in;
+    // RDF_Stream
+    private static final int STREAM_ROW = (1 << 3) | LEN;
+
+    private CodedInputStream in;
     private final StreamRDF dest;
     private final PrefixMap pmap;
     // Version 1: IRIs are interned through a cache, as Protobuf2StreamRDF does.
@@ -124,6 +128,11 @@ final class ProtobufStreamReader {
         this.tables = new ProtobufDecoderV2(pmap);
     }
 
+    /** A reader of frames; see {@link #readFrame(ByteBuffer)}. */
+    ProtobufStreamReader(PrefixMap pmap, StreamRDF dest) {
+        this(null, pmap, dest);
+    }
+
     // Nested messages are read up to their end position rather than by pushing
     // a limit on the CodedInputStream for each one. Pushing and popping limits,
     // and the isAtEnd() check against a limit, show up in profiles when done
@@ -136,6 +145,24 @@ final class ProtobufStreamReader {
                 // Keep the byte counter from growing without bound on a long stream.
                 in.resetSizeCounter();
                 row(end());
+            }
+        } catch (IOException ex) { IO.exception(ex); }
+    }
+
+    /**
+     * Read one frame: the bytes of an {@code RDF_Stream} message, that is a sequence of
+     * {@code rows} fields. The tables, prefixes and node cache carry over from one frame to
+     * the next, so the frames of one stream must be read in order by one reader.
+     */
+    void readFrame(ByteBuffer frame) {
+        in = CodedInputStream.newInstance(frame);
+        try {
+            while ( !in.isAtEnd() ) {
+                int tag = in.readTag();
+                if ( tag == STREAM_ROW )
+                    row(end());
+                else
+                    in.skipField(tag);
             }
         } catch (IOException ex) { IO.exception(ex); }
     }

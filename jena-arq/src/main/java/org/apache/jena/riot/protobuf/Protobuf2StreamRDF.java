@@ -21,6 +21,8 @@
 
 package org.apache.jena.riot.protobuf;
 
+import java.util.function.Consumer;
+
 import org.apache.jena.atlas.lib.Cache;
 import org.apache.jena.atlas.lib.CacheFactory;
 import org.apache.jena.graph.Node;
@@ -29,9 +31,12 @@ import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Header;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_IRI;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_PrefixDecl;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Quad;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Triple;
 import org.apache.jena.riot.system.FactoryRDFCaching;
 import org.apache.jena.riot.system.PrefixMap;
+import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.sparql.core.Quad;
 
@@ -40,32 +45,99 @@ import org.apache.jena.sparql.core.Quad;
  * @see StreamRDF2Protobuf for the reverse process.
  */
 
-public class Protobuf2StreamRDF implements VisitorStreamRowProtoRDF {
+public class Protobuf2StreamRDF implements VisitorStreamRowProtoRDF, Consumer<RDF_StreamRow> {
+
+    private static final String ERR_PMAP_NULL = "pmap must not be null";
+    private static final String ERR_STREAM_NULL = "stream must not be null";
+    private static final String ERR_ROW_NULL = "row must not be null";
 
     private final StreamRDF dest;
     private final PrefixMap pmap;
-    private final Cache<String, Node> uriCache =
-            CacheFactory.createSimpleCache(FactoryRDFCaching.DftNodeCacheSize);
+    private final Cache<String, Node> uriCache;
     // Set once a version 2 header has been seen.
     private ProtobufDecoderV2 decoder = null;
 
-    public Protobuf2StreamRDF(PrefixMap pmap, StreamRDF stream) {
-        this.pmap = pmap;
-        this.dest = stream;
+    /**
+     * Create a decoder writing to {@code stream} with a fresh {@link PrefixMap} and default URI cache.
+     *
+     * @param stream the destination {@link StreamRDF}
+     * @throws IllegalArgumentException Thrown if {@code stream} is {@code null}
+     */
+    public Protobuf2StreamRDF(StreamRDF stream) {
+        this(PrefixMapFactory.create(), stream);
     }
 
+    /**
+     * Create a decoder writing to {@code stream} with the supplied {@link PrefixMap} and default URI cache.
+     *
+     * @param pmap the prefix map to populate and consult
+     * @param stream the destination {@link StreamRDF}
+     * @throws IllegalArgumentException Thrown if {@code pmap} or {@code stream} is {@code null}
+     */
+    public Protobuf2StreamRDF(PrefixMap pmap, StreamRDF stream) {
+        this(pmap, stream, CacheFactory.createSimpleCache(FactoryRDFCaching.DftNodeCacheSize));
+    }
+
+    /**
+     * Create a decoder writing to {@code stream} with the supplied {@link PrefixMap} and optional URI cache.
+     *
+     * @param pmap the prefix map to populate and consult
+     * @param stream the destination {@link StreamRDF}
+     * @param uriCache optional cache for interning URI nodes, or {@code null} to disable caching
+     * @throws IllegalArgumentException Thrown if {@code pmap} or {@code stream} is {@code null}
+     */
+    public Protobuf2StreamRDF(PrefixMap pmap, StreamRDF stream, Cache<String, Node> uriCache) {
+        if ( pmap == null )
+            throw new IllegalArgumentException(ERR_PMAP_NULL);
+        if ( stream == null )
+            throw new IllegalArgumentException(ERR_STREAM_NULL);
+        this.pmap = pmap;
+        this.dest = stream;
+        this.uriCache = uriCache;
+    }
+
+    /**
+     * Decode a single {@link RDF_StreamRow} and forward it to the underlying {@link StreamRDF}.
+     *
+     * @param row the stream row message to decode
+     * @throws IllegalArgumentException Thrown if {@code row} is {@code null}
+     */
+    @Override
+    public void accept(RDF_StreamRow row) {
+        if ( row == null )
+            throw new IllegalArgumentException(ERR_ROW_NULL);
+        PBufRDF.visit(row, this);
+    }
+
+    /**
+     * Decode all rows in an {@link RDF_Stream} batch and forward them to the underlying {@link StreamRDF}.
+     *
+     * @param stream the batched stream message to decode
+     * @throws IllegalArgumentException Thrown if {@code stream} is {@code null}
+     */
+    public void accept(RDF_Stream stream) {
+        if ( stream == null )
+            throw new IllegalArgumentException(ERR_STREAM_NULL);
+        for ( RDF_StreamRow row : stream.getRowList() ) {
+            PBufRDF.visit(row, this);
+        }
+    }
+
+    /** {@inheritDoc} */
     @Override
     public void visit(RDF_Triple rt) {
         Triple t = ( decoder != null ) ? decoder.triple(rt) : ProtobufConvert.convert(uriCache, rt, pmap);
         dest.triple(t);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void visit(RDF_Quad rq) {
         Quad q = ( decoder != null ) ? decoder.quad(rq) : ProtobufConvert.convert(uriCache, rq, pmap);
         dest.quad(q);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void visit(RDF_PrefixDecl prefixDecl) {
         String prefix = prefixDecl.getPrefix();
@@ -74,6 +146,7 @@ public class Protobuf2StreamRDF implements VisitorStreamRowProtoRDF {
         dest.prefix(prefix, iriStr);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void visit(RDF_Header header) {
         if ( decoder == null )

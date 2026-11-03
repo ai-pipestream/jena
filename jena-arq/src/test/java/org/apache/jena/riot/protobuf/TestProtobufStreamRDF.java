@@ -22,31 +22,48 @@
 package org.apache.jena.riot.protobuf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
+import org.apache.jena.atlas.iterator.Iter;
+import org.apache.jena.atlas.lib.Cache;
+import org.apache.jena.atlas.lib.CacheFactory;
 import org.apache.jena.atlas.lib.StrUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow;
-import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term;
-import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Triple;
-import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Stream;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.TermCase;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Triple;
+import org.apache.jena.riot.system.PrefixMap;
+import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFBase;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.riot.system.StreamRDFOps;
+import org.apache.jena.riot.system.StreamRDFWriter;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.sse.SSE;
@@ -124,85 +141,8 @@ public class TestProtobufStreamRDF {
       sameTerms(graph, g2);
     }
 
-    // Wire compatibility: the delimited stream must be the same bytes as
-    // the protobuf library's own writeDelimitedTo/parseDelimitedFrom produce
-    // and accept, because files written by earlier versions of Jena used them.
+    // Using delimited streams.
 
-    @Test public void delimited_wire_read_compat() throws IOException {
-        // Written with the protobuf library, one message at a time.
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for ( RDF_StreamRow row : rows() )
-            row.writeDelimitedTo(out);
-        // Read with Jena.
-        Graph g2 = GraphFactory.createGraphMem();
-        ProtobufRDF.inputStreamToStreamRDF(new ByteArrayInputStream(out.toByteArray()), StreamRDFLib.graph(g2));
-        assertTrue(IsoMatcher.isomorphic(graph, g2));
-        sameTerms(graph, g2);
-    }
-
-    @Test public void delimited_wire_write_compat() throws IOException {
-        // Written with Jena.
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        StreamRDF stream = ProtobufRDF.streamToOutputStream(out);
-        StreamRDFOps.graphToStream(graph, stream);
-        // Read with the protobuf library, one message at a time.
-        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-        Graph g2 = GraphFactory.createGraphMem();
-        Protobuf2StreamRDF visitor = new Protobuf2StreamRDF(PrefixMapFactory.create(), StreamRDFLib.graph(g2));
-        int count = 0;
-        while ( true ) {
-            RDF_StreamRow row = RDF_StreamRow.parseDelimitedFrom(in);
-            if ( row == null )
-                break;
-            PBufRDF.visit(row, visitor);
-            count++;
-        }
-        assertEquals(graph.size(), count);
-        assertTrue(IsoMatcher.isomorphic(graph, g2));
-        sameTerms(graph, g2);
-    }
-
-    @Test public void delimited_empty_stream() {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        StreamRDF stream = ProtobufRDF.streamToOutputStream(out);
-        stream.start();
-        stream.finish();
-        assertEquals(0, out.size());
-        Graph g2 = GraphFactory.createGraphMem();
-        ProtobufRDF.inputStreamToStreamRDF(new ByteArrayInputStream(out.toByteArray()), StreamRDFLib.graph(g2));
-        assertEquals(0, g2.size());
-    }
-
-    // Many rows: more than one refill of the shared input buffer.
-    @Test public void delimited_many_rows() {
-        Graph big = GraphFactory.createGraphMem();
-        Node p = SSE.parseNode(":p");
-        for ( int i = 0 ; i < 20_000 ; i++ ) {
-            Node s = NodeFactory.createURI("http://example/subject/with/a/long/enough/name/" + i);
-            Node o = NodeFactory.createLiteralString("object value " + i);
-            big.add(Triple.create(s, p, o));
-        }
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        StreamRDF stream = ProtobufRDF.streamToOutputStream(out);
-        StreamRDFOps.graphToStream(big, stream);
-        Graph g2 = GraphFactory.createGraphMem();
-        ProtobufRDF.inputStreamToStreamRDF(new ByteArrayInputStream(out.toByteArray()), StreamRDFLib.graph(g2));
-        assertEquals(big.size(), g2.size());
-        sameTerms(big, g2);
-    }
-
-    private static java.util.List<RDF_StreamRow> rows() {
-        java.util.List<RDF_StreamRow> rows = new java.util.ArrayList<>();
-        RDF_StreamRow.Builder rowBuilder = RDF_StreamRow.newBuilder();
-        RDF_Triple.Builder tripleBuilder = RDF_Triple.newBuilder();
-        RDF_Term.Builder termBuilder = RDF_Term.newBuilder();
-        graph.find().forEachRemaining(t -> {
-            rowBuilder.clear();
-            rowBuilder.setTriple(PBufRDF.rdfTriple(t, tripleBuilder, termBuilder));
-            rows.add(rowBuilder.build());
-        });
-        return rows;
-    }
 
 //    // graph_01 and graph_02 are the same test but use different ways to read/write the graph.
 //    // Ditto dataset_01 and dataset_02
@@ -294,6 +234,86 @@ public class TestProtobufStreamRDF {
 //    }
 //
 
+    // Wire compatibility: the delimited stream must be the same bytes as
+    // the protobuf library's own writeDelimitedTo/parseDelimitedFrom produce
+    // and accept, because files written by earlier versions of Jena used them.
+
+    @Test public void delimited_wire_read_compat() throws IOException {
+        // Written with the protobuf library, one message at a time.
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for ( RDF_StreamRow row : rows() )
+            row.writeDelimitedTo(out);
+        // Read with Jena.
+        Graph g2 = GraphFactory.createGraphMem();
+        ProtobufRDF.inputStreamToStreamRDF(new ByteArrayInputStream(out.toByteArray()), StreamRDFLib.graph(g2));
+        assertTrue(IsoMatcher.isomorphic(graph, g2));
+        sameTerms(graph, g2);
+    }
+
+    @Test public void delimited_wire_write_compat() throws IOException {
+        // Written with Jena.
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamRDF stream = ProtobufRDF.streamToOutputStream(out);
+        StreamRDFOps.graphToStream(graph, stream);
+        // Read with the protobuf library, one message at a time.
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        Graph g2 = GraphFactory.createGraphMem();
+        Protobuf2StreamRDF visitor = new Protobuf2StreamRDF(PrefixMapFactory.create(), StreamRDFLib.graph(g2));
+        int count = 0;
+        while ( true ) {
+            RDF_StreamRow row = RDF_StreamRow.parseDelimitedFrom(in);
+            if ( row == null )
+                break;
+            PBufRDF.visit(row, visitor);
+            count++;
+        }
+        assertEquals(graph.size(), count);
+        assertTrue(IsoMatcher.isomorphic(graph, g2));
+        sameTerms(graph, g2);
+    }
+
+    @Test public void delimited_empty_stream() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamRDF stream = ProtobufRDF.streamToOutputStream(out);
+        stream.start();
+        stream.finish();
+        assertEquals(0, out.size());
+        Graph g2 = GraphFactory.createGraphMem();
+        ProtobufRDF.inputStreamToStreamRDF(new ByteArrayInputStream(out.toByteArray()), StreamRDFLib.graph(g2));
+        assertEquals(0, g2.size());
+    }
+
+    // Many rows: more than one refill of the shared input buffer.
+    @Test public void delimited_many_rows() {
+        Graph big = GraphFactory.createGraphMem();
+        Node p = SSE.parseNode(":p");
+        for ( int i = 0 ; i < 20_000 ; i++ ) {
+            Node s = NodeFactory.createURI("http://example/subject/with/a/long/enough/name/" + i);
+            Node o = NodeFactory.createLiteralString("object value " + i);
+            big.add(Triple.create(s, p, o));
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamRDF stream = ProtobufRDF.streamToOutputStream(out);
+        StreamRDFOps.graphToStream(big, stream);
+        Graph g2 = GraphFactory.createGraphMem();
+        ProtobufRDF.inputStreamToStreamRDF(new ByteArrayInputStream(out.toByteArray()), StreamRDFLib.graph(g2));
+        assertEquals(big.size(), g2.size());
+        sameTerms(big, g2);
+    }
+
+    private static java.util.List<RDF_StreamRow> rows() {
+        java.util.List<RDF_StreamRow> rows = new java.util.ArrayList<>();
+        RDF_StreamRow.Builder rowBuilder = RDF_StreamRow.newBuilder();
+        RDF_Triple.Builder tripleBuilder = RDF_Triple.newBuilder();
+        RDF_Term.Builder termBuilder = RDF_Term.newBuilder();
+        graph.find().forEachRemaining(t -> {
+            rowBuilder.clear();
+            rowBuilder.setTriple(PBufRDF.rdfTriple(t, tripleBuilder, termBuilder));
+            rows.add(rowBuilder.build());
+        });
+        return rows;
+    }
+
     static void sameTerms(Graph g1, Graph g2) {
         assertEquals(g1.size() , g2.size() );
         // ** Java8
@@ -313,6 +333,213 @@ public class TestProtobufStreamRDF {
                 return;
         }
         fail("Failed to find "+term);
+    }
+
+    @Test public void dataset_01() {
+        DatasetGraph dsg1 = datasetGraph;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamRDF stream = ProtobufRDF.streamToOutputStream(out);
+        StreamRDFOps.datasetToStream(dsg1, stream);
+
+        byte[] bytes = out.toByteArray();
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        DatasetGraph dsg2 = DatasetGraphFactory.create();
+        StreamRDF stream2 = StreamRDFLib.dataset(dsg2);
+        ProtobufRDF.inputStreamToStreamRDF(in, stream2);
+
+        boolean b = IsoMatcher.isomorphic(dsg1, dsg2);
+        assertTrue(b);
+        Node obj = Iter.first(dsg1.listGraphNodes(), Node::isBlank);
+        termAsObject(dsg2, obj);
+    }
+
+    @Test public void dataset_02() {
+        DatasetGraph dsg1 = datasetGraph;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamRDFWriter.write(out, dsg1, Lang.RDFPROTO);
+
+        byte[] bytes = out.toByteArray();
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        DatasetGraph dsg2 = DatasetGraphFactory.create();
+        StreamRDF stream2 = StreamRDFLib.dataset(dsg2);
+        ProtobufRDF.inputStreamToStreamRDF(in, stream2);
+
+        boolean b = IsoMatcher.isomorphic(dsg1, dsg2);
+        assertTrue(b);
+        Node obj = Iter.first(dsg1.listGraphNodes(), Node::isBlank);
+        termAsObject(dsg2, obj);
+    }
+
+    private static final String EX_PREFIX = "ex";
+    private static final String EX_NS = "http://example.org/ns#";
+    private static final String EX_PRED = EX_NS + "pred";
+    private static final String BASE_IRI = "http://example.org/base/";
+
+    @Test public void streamRowAdapter_graphAndDataset() {
+        List<RDF_StreamRow> rows = new ArrayList<>();
+        AtomicBoolean finished = new AtomicBoolean(false);
+        StreamRDF encoder = ProtobufRDF.streamToRowConsumer(rows::add, false, () -> finished.set(true));
+
+        Triple starTriple = SSE.parseTriple("(<<( _:a :p 123 )>> :q 'hello'@en--ltr)");
+        Quad namedQuad = SSE.parseQuad("(:g1 _:a <" + EX_PRED + "> 42)");
+
+        encoder.start();
+        encoder.base(BASE_IRI);
+        encoder.prefix(EX_PREFIX, EX_NS);
+        StreamRDFOps.sendGraphToStream(graph, encoder);
+        encoder.triple(starTriple);
+        encoder.quad(namedQuad);
+        encoder.finish();
+
+        assertTrue(finished.get());
+        assertTrue(rows.stream().anyMatch(RDF_StreamRow::hasBase));
+        assertTrue(rows.stream().anyMatch(RDF_StreamRow::hasPrefixDecl));
+        // Prefix compression must abbreviate http://example.org/ns#pred into a prefixName term.
+        assertTrue(rows.stream()
+            .filter(RDF_StreamRow::hasQuad)
+            .anyMatch(r -> r.getQuad().getP().hasPrefixName()));
+
+        DatasetGraph decodedDsg = DatasetGraphFactory.create();
+        List<String> bases = new ArrayList<>();
+        StreamRDF sink = new StreamRDFBase() {
+            private final StreamRDF inner = StreamRDFLib.dataset(decodedDsg);
+            @Override public void base(String base) { bases.add(base); }
+            @Override public void prefix(String prefix, String iri) { inner.prefix(prefix, iri); }
+            @Override public void triple(Triple triple) { inner.triple(triple); }
+            @Override public void quad(Quad quad) { inner.quad(quad); }
+        };
+
+        Cache<String, Node> customCache = CacheFactory.createSimpleCache(64);
+        PrefixMap pmap = PrefixMapFactory.create();
+        Consumer<RDF_StreamRow> decoder = ProtobufRDF.rowConsumerToStreamRDF(pmap, sink, customCache);
+        sink.start();
+        rows.forEach(decoder);
+        sink.finish();
+
+        assertEquals(List.of(BASE_IRI), bases);
+        assertEquals(EX_NS, decodedDsg.prefixes().get(EX_PREFIX));
+        assertTrue(decodedDsg.getDefaultGraph().contains(starTriple));
+        assertTrue(decodedDsg.contains(namedQuad));
+        Node cachedPred = customCache.getIfPresent(EX_PRED);
+        assertNotNull(cachedPred);
+        assertSame(cachedPred, decodedDsg.find(namedQuad.getGraph(), null, null, null).next().getPredicate());
+    }
+
+    @Test public void streamRowAdapter_withValues() {
+        List<RDF_StreamRow> rowsWithValues = new ArrayList<>();
+        StreamRDF encoderVal = ProtobufRDF.streamToRowConsumer(rowsWithValues::add, true);
+        Triple intTriple = SSE.parseTriple("(:s :p 123)");
+        encoderVal.start();
+        encoderVal.triple(intTriple);
+        encoderVal.finish();
+
+        assertEquals(1, rowsWithValues.size());
+        assertEquals(TermCase.VALINTEGER, rowsWithValues.get(0).getTriple().getO().getTermCase());
+        assertEquals(123L, rowsWithValues.get(0).getTriple().getO().getValInteger());
+
+        List<RDF_StreamRow> rowsLex = new ArrayList<>();
+        StreamRDF encoderLex = ProtobufRDF.streamToRowConsumer(rowsLex::add, false);
+        encoderLex.start();
+        encoderLex.triple(intTriple);
+        encoderLex.finish();
+
+        assertEquals(1, rowsLex.size());
+        assertEquals(TermCase.LITERAL, rowsLex.get(0).getTriple().getO().getTermCase());
+    }
+
+    @Test public void streamBatchAdapter_batchSizeAndFlush() {
+        List<RDF_Stream> batches = new ArrayList<>();
+        StreamRDF encoder = ProtobufRDF.streamToBatchConsumer(batches::add, 2, true);
+        StreamRDFOps.datasetToStream(datasetGraph, encoder);
+
+        // datasetGraph has 4 quads/triples total; with batchSize=2 that yields 2 full batches of 2.
+        assertEquals(2, batches.size());
+        assertEquals(2, batches.get(0).getRowCount());
+        assertEquals(2, batches.get(1).getRowCount());
+
+        // Test partial final batch with batchSize=3.
+        List<RDF_Stream> batchesPartial = new ArrayList<>();
+        StreamRDF encoderPartial = ProtobufRDF.streamToBatchConsumer(batchesPartial::add, 3, false);
+        StreamRDFOps.datasetToStream(datasetGraph, encoderPartial);
+        assertEquals(2, batchesPartial.size());
+        assertEquals(3, batchesPartial.get(0).getRowCount());
+        assertEquals(1, batchesPartial.get(1).getRowCount());
+
+        DatasetGraph decoded = DatasetGraphFactory.create();
+        StreamRDF dest = StreamRDFLib.dataset(decoded);
+        Consumer<RDF_Stream> batchDecoder = ProtobufRDF.batchConsumerToStreamRDF(dest);
+        dest.start();
+        batchesPartial.forEach(batchDecoder);
+        dest.finish();
+
+        assertTrue(IsoMatcher.isomorphic(datasetGraph, decoded));
+        Node obj = Iter.first(datasetGraph.listGraphNodes(), Node::isBlank);
+        termAsObject(decoded, obj);
+
+        // Verify explicit flush() emits an incomplete batch before finish().
+        List<RDF_Stream> flushedBatches = new ArrayList<>();
+        StreamRDF flushEncoder = ProtobufRDF.streamToBatchConsumer(flushedBatches::add, 10, false);
+        Triple t1 = SSE.parseTriple("(:s1 :p1 :o1)");
+        Triple t2 = SSE.parseTriple("(:s2 :p2 :o2)");
+        flushEncoder.start();
+        flushEncoder.triple(t1);
+        assertEquals(0, flushedBatches.size());
+        flushEncoder.flush();
+        assertEquals(1, flushedBatches.size());
+        assertEquals(1, flushedBatches.get(0).getRowCount());
+        flushEncoder.triple(t2);
+        flushEncoder.finish();
+        assertEquals(2, flushedBatches.size());
+        assertEquals(1, flushedBatches.get(1).getRowCount());
+    }
+
+    @Test public void streamRowAdapter_midStreamPrefixRebind() {
+        String ns1 = "http://example.org/ns1#";
+        String ns2 = "http://example.org/ns2#";
+        Triple t1 = SSE.parseTriple("(<" + ns1 + "s> <" + ns1 + "p> 'v1')");
+        Triple t2 = SSE.parseTriple("(<" + ns2 + "s> <" + ns2 + "p> 'v2')");
+
+        List<RDF_StreamRow> rows = new ArrayList<>();
+        StreamRDF encoder = ProtobufRDF.streamToRowConsumer(rows::add, false);
+        encoder.start();
+        encoder.prefix(EX_PREFIX, ns1);
+        encoder.triple(t1);
+        encoder.prefix(EX_PREFIX, ns2);
+        encoder.triple(t2);
+        encoder.finish();
+
+        Graph decoded = GraphFactory.createGraphMem();
+        StreamRDF sink = StreamRDFLib.graph(decoded);
+        Consumer<RDF_StreamRow> decoder = ProtobufRDF.rowConsumerToStreamRDF(sink);
+        sink.start();
+        rows.forEach(decoder);
+        sink.finish();
+
+        assertTrue(decoded.contains(t1));
+        assertTrue(decoded.contains(t2));
+        assertEquals(ns2, decoded.getPrefixMapping().getNsPrefixURI(EX_PREFIX));
+    }
+
+    @Test public void protobufToStreamRDF_singleMessage() {
+        List<RDF_Stream> batches = new ArrayList<>();
+        StreamRDF encoder = ProtobufRDF.streamToBatchConsumer(batches::add, 100, true);
+        StreamRDFOps.graphToStream(graph, encoder);
+        assertEquals(1, batches.size());
+
+        Graph decoded = GraphFactory.createGraphMem();
+        ProtobufRDF.protobufToStreamRDF(batches.get(0), StreamRDFLib.graph(decoded));
+        sameTerms(graph, decoded);
+    }
+
+    @Test public void streamAdapters_validation() {
+        assertThrows(IllegalArgumentException.class, () -> ProtobufRDF.streamToRowConsumer(null));
+        assertThrows(IllegalArgumentException.class, () -> ProtobufRDF.streamToBatchConsumer(null));
+        assertThrows(IllegalArgumentException.class, () -> ProtobufRDF.streamToBatchConsumer(b -> {}, 0));
+        assertThrows(IllegalArgumentException.class, () -> ProtobufRDF.streamToBatchConsumer(b -> {}, -5));
+        assertThrows(IllegalArgumentException.class, () -> ProtobufRDF.rowConsumerToStreamRDF(null));
+        assertThrows(IllegalArgumentException.class, () -> ProtobufRDF.batchConsumerToStreamRDF(null));
+        assertThrows(IllegalArgumentException.class, () -> ProtobufRDF.protobufToStreamRDF(null, StreamRDFLib.sinkNull()));
+        assertThrows(IllegalArgumentException.class, () -> ProtobufRDF.protobufToStreamRDF(RDF_Stream.getDefaultInstance(), null));
     }
 //
 //    // ** Java8

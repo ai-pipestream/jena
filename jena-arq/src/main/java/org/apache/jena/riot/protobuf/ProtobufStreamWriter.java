@@ -22,6 +22,8 @@ package org.apache.jena.riot.protobuf;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.function.Consumer;
 
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.MessageLite;
@@ -89,6 +91,12 @@ final class ProtobufStreamWriter implements StreamRDF {
     private final OutputStream outputStream;
     private final CodedOutputStream out;
     private final boolean encodeValues;
+    // Frames: rows are written as the repeated field of RDF_Stream messages, each
+    // of up to batchSize rows, and each finished frame is handed to the consumer.
+    private final FrameBuffer frameBuffer;
+    private final Consumer<ByteBuffer> frames;
+    private final int batchSize;
+    private int frameRows = 0;
     // Version 2 tables, or null for version 1 where every term is written in full.
     private final ProtobufEncoderV2 tables;
     private boolean headerSent = false;
@@ -100,6 +108,20 @@ final class ProtobufStreamWriter implements StreamRDF {
         this.out = PBufRDF.delimitedOutput(outputStream);
         this.encodeValues = encodeValues;
         this.tables = tables;
+        this.frameBuffer = null;
+        this.frames = null;
+        this.batchSize = 0;
+    }
+
+    /** A writer of frames: each is the bytes of an {@code RDF_Stream} message of up to {@code batchSize} rows. */
+    ProtobufStreamWriter(Consumer<ByteBuffer> frames, int batchSize, boolean encodeValues, ProtobufEncoderV2 tables) {
+        this.frameBuffer = new FrameBuffer();
+        this.outputStream = frameBuffer;
+        this.out = PBufRDF.delimitedOutput(frameBuffer);
+        this.encodeValues = encodeValues;
+        this.tables = tables;
+        this.frames = frames;
+        this.batchSize = batchSize;
     }
 
     @Override
@@ -109,8 +131,25 @@ final class ProtobufStreamWriter implements StreamRDF {
 
     @Override
     public void finish() {
+        if ( frames != null ) {
+            if ( frameRows > 0 )
+                emitFrame();
+            return;
+        }
         PBufRDF.flush(out);
         IO.flush(outputStream);
+    }
+
+    /** Count a row of a frame and hand the frame on when it is full. */
+    private void rowWritten() {
+        if ( frames != null && ++frameRows >= batchSize )
+            emitFrame();
+    }
+
+    private void emitFrame() {
+        PBufRDF.flush(out);
+        frameRows = 0;
+        frames.accept(frameBuffer.take());
     }
 
     // A version 2 stream starts with a header row. It is written before the
@@ -142,11 +181,22 @@ final class ProtobufStreamWriter implements StreamRDF {
     private void row(int field, MessageLite message) {
         try {
             int size = message.getSerializedSize();
-            out.writeUInt32NoTag(messageSize(size));
+            rowStart(messageSize(size));
             out.writeTag(field, LEN);
             out.writeUInt32NoTag(size);
             message.writeTo(out);
         } catch (IOException ex) { IO.exception(ex); }
+        rowWritten();
+    }
+
+    /**
+     * Start a row of the given size: its length for a delimited stream, or the tag of the
+     * {@code rows} field of {@code RDF_Stream} and the length for a frame.
+     */
+    private void rowStart(int size) throws IOException {
+        if ( frames != null )
+            out.writeTag(1, LEN);
+        out.writeUInt32NoTag(size);
     }
 
     @Override
@@ -156,13 +206,14 @@ final class ProtobufStreamWriter implements StreamRDF {
             int size = plan(triple.getSubject(), 0)
                      + plan(triple.getPredicate(), 1)
                      + plan(triple.getObject(), 2);
-            out.writeUInt32NoTag(messageSize(size));
+            rowStart(messageSize(size));
             out.writeTag(2, LEN);
             out.writeUInt32NoTag(size);
             term(1, plans[0]);
             term(2, plans[1]);
             term(3, plans[2]);
         } catch (IOException ex) { IO.exception(ex); }
+        rowWritten();
     }
 
     @Override
@@ -179,7 +230,7 @@ final class ProtobufStreamWriter implements StreamRDF {
             // object, graph, so write them in that order too.
             if ( withGraph )
                 size += plan(quad.getGraph(), 3);
-            out.writeUInt32NoTag(messageSize(size));
+            rowStart(messageSize(size));
             out.writeTag(3, LEN);
             out.writeUInt32NoTag(size);
             term(1, plans[0]);
@@ -188,6 +239,7 @@ final class ProtobufStreamWriter implements StreamRDF {
             if ( withGraph )
                 term(4, plans[3]);
         } catch (IOException ex) { IO.exception(ex); }
+        rowWritten();
     }
 
     /** Size of a length-delimited field holding a message of the given size: tag, length, bytes. */
@@ -323,6 +375,42 @@ final class ProtobufStreamWriter implements StreamRDF {
             }
             case MESSAGE -> plan.message.writeTo(out);
             default -> throw new RiotProtobufException("Bad term plan");
+        }
+    }
+
+    /**
+     * Bytes of the frame being written. {@link #take()} hands the filled part over as a
+     * buffer that the consumer owns and starts a new one.
+     */
+    private static final class FrameBuffer extends OutputStream {
+        private static final int INITIAL = 8 * 1024;
+        private byte[] bytes = new byte[INITIAL];
+        private int count = 0;
+
+        @Override
+        public void write(int b) {
+            ensure(1);
+            bytes[count++] = (byte)b;
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) {
+            ensure(len);
+            System.arraycopy(b, off, bytes, count, len);
+            count += len;
+        }
+
+        private void ensure(int more) {
+            if ( count + more > bytes.length )
+                bytes = java.util.Arrays.copyOf(bytes, Math.max(bytes.length * 2, count + more));
+        }
+
+        ByteBuffer take() {
+            ByteBuffer frame = ByteBuffer.wrap(bytes, 0, count);
+            // The next frame is likely about the same size.
+            bytes = new byte[Math.max(INITIAL, count)];
+            count = 0;
+            return frame;
         }
     }
 }
