@@ -7,3 +7,22 @@ name is known in various "Test*" classes.
 
 Replace the file with a file of your choice, e.g. for BSBM - create "bsbm-5m.nt.gz".
 
+The binary RDF benchmarks (org.apache.jena.riot.binary.TestBinaryRDFRead and
+TestBinaryRDFWrite in jena-benchmarks-jmh, and org.apache.jena.grpc.BenchGrpcTransportJmh
+in the jena-grpc test sources) read this placeholder by default. They take the file from
+the system property "benchmark.source", so another file can be given without editing the
+classes. From jena-benchmarks-jmh, after "mvn -Pdev install" of the checkout and
+"mvn -DskipTests install" in jena-benchmarks:
+
+    mvn -Dbenchmark.skip=false -Dtest=TestBinaryRDFRead test
+    mvn -Dbenchmark.skip=false -Dtest=TestBinaryRDFWrite -Dbenchmark.source=/data/bsbm-5m.nt test
+
+From the checkout root, for the gRPC transport benchmark:
+
+    mvn -pl jena-grpc -Dbenchmark.skip=false -Dtest=BenchGrpcTransportJmh -Dbenchmark.source=/data/bsbm-5m.nt test
+
+TestBinaryRDFRead writes the file in each format to a temporary file during setup and
+times the read of it. TestBinaryRDFWrite and BenchGrpcTransportJmh hold the parsed
+triples in memory, so their input has to fit in the heap as Triple objects: 5 million
+triples need a few gigabytes. Each writes a JSON result file (jena-benchmarks-jmh:
+Test*_<timestamp>.json in the module directory; jena-grpc: target/BenchGrpcTransportJmh.json).
