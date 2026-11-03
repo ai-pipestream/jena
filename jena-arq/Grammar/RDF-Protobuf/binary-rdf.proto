@@ -182,16 +182,59 @@ message RDF_Graph {
 }
 
 // ==== RDF Patch
-// 
-// # Includes 
-// # Prefix declaration
-// 
-// enum RDF_Patch {
-//      ADD, 
-//      ADD_NO_OP,         // ADD recorded that had no effect
-//      DELETE, 
-//      DELETE_NO_OP       // DELETE recorded that had no effect
-// }
+
+// Used exclusively inside RDF_Patch_Row.oneof row, which provides explicit presence tracking for TX = 0.
+enum PatchTxn {
+  TX      = 0 ;
+  TC      = 1 ;
+  TA      = 2 ;
+  Segment = 3 ;
+}
+
+message Patch_Prefix_Add {
+  RDF_Term graphNode = 1 ;
+  string   prefix    = 2 ;
+  string   iriStr    = 3 ;
+}
+
+message Patch_Prefix_Del {
+  RDF_Term graphNode = 1 ;
+  string   prefix    = 2 ;
+}
+
+message Patch_Header {
+  string   name  = 1 ;
+  RDF_Term value = 2 ;
+}
+
+message Patch_Data_Add {
+  RDF_Term s = 1 ;
+  RDF_Term p = 2 ;
+  RDF_Term o = 3 ;
+  RDF_Term g = 4 ;
+}
+
+message Patch_Data_Del {
+  RDF_Term s = 1 ;
+  RDF_Term p = 2 ;
+  RDF_Term o = 3 ;
+  RDF_Term g = 4 ;
+}
+
+message RDF_Patch_Row {
+  oneof row {
+    Patch_Header     header    = 1 ;
+    Patch_Data_Add   dataAdd   = 2 ;
+    Patch_Data_Del   dataDel   = 3 ;
+    Patch_Prefix_Add prefixAdd = 4 ;
+    Patch_Prefix_Del prefixDel = 5 ;
+    PatchTxn         txn       = 6 ;
+  }
+}
+
+message RDF_Patch {
+  repeated RDF_Patch_Row row = 1 ;
+}
 
 // Local Variables:
 // tab-width: 2

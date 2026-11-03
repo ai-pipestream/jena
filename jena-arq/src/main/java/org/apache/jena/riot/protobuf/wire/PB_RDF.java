@@ -47,6 +47,145 @@ public final class PB_RDF {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
+  /**
+   * <pre>
+   * Used exclusively inside RDF_Patch_Row.oneof row, which provides explicit presence tracking for TX = 0.
+   * </pre>
+   *
+   * Protobuf enum {@code PatchTxn}
+   */
+  public enum PatchTxn
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>TX = 0;</code>
+     */
+    TX(0),
+    /**
+     * <code>TC = 1;</code>
+     */
+    TC(1),
+    /**
+     * <code>TA = 2;</code>
+     */
+    TA(2),
+    /**
+     * <code>Segment = 3;</code>
+     */
+    Segment(3),
+    UNRECOGNIZED(-1),
+    ;
+
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 28,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        PatchTxn.class.getName());
+    }
+    /**
+     * <code>TX = 0;</code>
+     */
+    public static final int TX_VALUE = 0;
+    /**
+     * <code>TC = 1;</code>
+     */
+    public static final int TC_VALUE = 1;
+    /**
+     * <code>TA = 2;</code>
+     */
+    public static final int TA_VALUE = 2;
+    /**
+     * <code>Segment = 3;</code>
+     */
+    public static final int Segment_VALUE = 3;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static PatchTxn valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static PatchTxn forNumber(int value) {
+      switch (value) {
+        case 0: return TX;
+        case 1: return TC;
+        case 2: return TA;
+        case 3: return Segment;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<PatchTxn>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        PatchTxn> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<PatchTxn>() {
+            public PatchTxn findValueByNumber(int number) {
+              return PatchTxn.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final PatchTxn[] VALUES = values();
+
+    public static PatchTxn valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private PatchTxn(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:PatchTxn)
+  }
+
   public interface RDF_IRIOrBuilder extends
       // @@protoc_insertion_point(interface_extends:RDF_IRI)
       com.google.protobuf.MessageOrBuilder {
@@ -16628,6 +16767,7086 @@ public final class PB_RDF {
 
   }
 
+  public interface Patch_Prefix_AddOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:Patch_Prefix_Add)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     * @return Whether the graphNode field is set.
+     */
+    boolean hasGraphNode();
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     * @return The graphNode.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getGraphNode();
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGraphNodeOrBuilder();
+
+    /**
+     * <code>string prefix = 2;</code>
+     * @return The prefix.
+     */
+    java.lang.String getPrefix();
+    /**
+     * <code>string prefix = 2;</code>
+     * @return The bytes for prefix.
+     */
+    com.google.protobuf.ByteString
+        getPrefixBytes();
+
+    /**
+     * <code>string iriStr = 3;</code>
+     * @return The iriStr.
+     */
+    java.lang.String getIriStr();
+    /**
+     * <code>string iriStr = 3;</code>
+     * @return The bytes for iriStr.
+     */
+    com.google.protobuf.ByteString
+        getIriStrBytes();
+  }
+  /**
+   * Protobuf type {@code Patch_Prefix_Add}
+   */
+  public static final class Patch_Prefix_Add extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:Patch_Prefix_Add)
+      Patch_Prefix_AddOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 28,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        Patch_Prefix_Add.class.getName());
+    }
+    // Use Patch_Prefix_Add.newBuilder() to construct.
+    private Patch_Prefix_Add(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private Patch_Prefix_Add() {
+      prefix_ = "";
+      iriStr_ = "";
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Prefix_Add_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Prefix_Add_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.class, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int GRAPHNODE_FIELD_NUMBER = 1;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term graphNode_;
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     * @return Whether the graphNode field is set.
+     */
+    @java.lang.Override
+    public boolean hasGraphNode() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     * @return The graphNode.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getGraphNode() {
+      return graphNode_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : graphNode_;
+    }
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGraphNodeOrBuilder() {
+      return graphNode_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : graphNode_;
+    }
+
+    public static final int PREFIX_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object prefix_ = "";
+    /**
+     * <code>string prefix = 2;</code>
+     * @return The prefix.
+     */
+    @java.lang.Override
+    public java.lang.String getPrefix() {
+      java.lang.Object ref = prefix_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        prefix_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string prefix = 2;</code>
+     * @return The bytes for prefix.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPrefixBytes() {
+      java.lang.Object ref = prefix_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        prefix_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int IRISTR_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object iriStr_ = "";
+    /**
+     * <code>string iriStr = 3;</code>
+     * @return The iriStr.
+     */
+    @java.lang.Override
+    public java.lang.String getIriStr() {
+      java.lang.Object ref = iriStr_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        iriStr_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string iriStr = 3;</code>
+     * @return The bytes for iriStr.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getIriStrBytes() {
+      java.lang.Object ref = iriStr_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        iriStr_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getGraphNode());
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(prefix_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 2, prefix_);
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(iriStr_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 3, iriStr_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getGraphNode());
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(prefix_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(2, prefix_);
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(iriStr_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(3, iriStr_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add)) {
+        return super.equals(obj);
+      }
+      org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add other = (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add) obj;
+
+      if (hasGraphNode() != other.hasGraphNode()) return false;
+      if (hasGraphNode()) {
+        if (!getGraphNode()
+            .equals(other.getGraphNode())) return false;
+      }
+      if (!getPrefix()
+          .equals(other.getPrefix())) return false;
+      if (!getIriStr()
+          .equals(other.getIriStr())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasGraphNode()) {
+        hash = (37 * hash) + GRAPHNODE_FIELD_NUMBER;
+        hash = (53 * hash) + getGraphNode().hashCode();
+      }
+      hash = (37 * hash) + PREFIX_FIELD_NUMBER;
+      hash = (53 * hash) + getPrefix().hashCode();
+      hash = (37 * hash) + IRISTR_FIELD_NUMBER;
+      hash = (53 * hash) + getIriStr().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code Patch_Prefix_Add}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:Patch_Prefix_Add)
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_AddOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Prefix_Add_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Prefix_Add_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.class, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.Builder.class);
+      }
+
+      // Construct using org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage
+                .alwaysUseFieldBuilders) {
+          getGraphNodeFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        graphNode_ = null;
+        if (graphNodeBuilder_ != null) {
+          graphNodeBuilder_.dispose();
+          graphNodeBuilder_ = null;
+        }
+        prefix_ = "";
+        iriStr_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Prefix_Add_descriptor;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add getDefaultInstanceForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add build() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add buildPartial() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add result = new org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.graphNode_ = graphNodeBuilder_ == null
+              ? graphNode_
+              : graphNodeBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.prefix_ = prefix_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.iriStr_ = iriStr_;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add) {
+          return mergeFrom((org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add other) {
+        if (other == org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.getDefaultInstance()) return this;
+        if (other.hasGraphNode()) {
+          mergeGraphNode(other.getGraphNode());
+        }
+        if (!other.getPrefix().isEmpty()) {
+          prefix_ = other.prefix_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getIriStr().isEmpty()) {
+          iriStr_ = other.iriStr_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getGraphNodeFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                prefix_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                iriStr_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term graphNode_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> graphNodeBuilder_;
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       * @return Whether the graphNode field is set.
+       */
+      public boolean hasGraphNode() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       * @return The graphNode.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getGraphNode() {
+        if (graphNodeBuilder_ == null) {
+          return graphNode_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : graphNode_;
+        } else {
+          return graphNodeBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public Builder setGraphNode(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (graphNodeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          graphNode_ = value;
+        } else {
+          graphNodeBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public Builder setGraphNode(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (graphNodeBuilder_ == null) {
+          graphNode_ = builderForValue.build();
+        } else {
+          graphNodeBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public Builder mergeGraphNode(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (graphNodeBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+            graphNode_ != null &&
+            graphNode_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getGraphNodeBuilder().mergeFrom(value);
+          } else {
+            graphNode_ = value;
+          }
+        } else {
+          graphNodeBuilder_.mergeFrom(value);
+        }
+        if (graphNode_ != null) {
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public Builder clearGraphNode() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        graphNode_ = null;
+        if (graphNodeBuilder_ != null) {
+          graphNodeBuilder_.dispose();
+          graphNodeBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getGraphNodeBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getGraphNodeFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGraphNodeOrBuilder() {
+        if (graphNodeBuilder_ != null) {
+          return graphNodeBuilder_.getMessageOrBuilder();
+        } else {
+          return graphNode_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : graphNode_;
+        }
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getGraphNodeFieldBuilder() {
+        if (graphNodeBuilder_ == null) {
+          graphNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getGraphNode(),
+                  getParentForChildren(),
+                  isClean());
+          graphNode_ = null;
+        }
+        return graphNodeBuilder_;
+      }
+
+      private java.lang.Object prefix_ = "";
+      /**
+       * <code>string prefix = 2;</code>
+       * @return The prefix.
+       */
+      public java.lang.String getPrefix() {
+        java.lang.Object ref = prefix_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          prefix_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string prefix = 2;</code>
+       * @return The bytes for prefix.
+       */
+      public com.google.protobuf.ByteString
+          getPrefixBytes() {
+        java.lang.Object ref = prefix_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          prefix_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string prefix = 2;</code>
+       * @param value The prefix to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPrefix(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        prefix_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string prefix = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPrefix() {
+        prefix_ = getDefaultInstance().getPrefix();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string prefix = 2;</code>
+       * @param value The bytes for prefix to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPrefixBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        prefix_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object iriStr_ = "";
+      /**
+       * <code>string iriStr = 3;</code>
+       * @return The iriStr.
+       */
+      public java.lang.String getIriStr() {
+        java.lang.Object ref = iriStr_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          iriStr_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string iriStr = 3;</code>
+       * @return The bytes for iriStr.
+       */
+      public com.google.protobuf.ByteString
+          getIriStrBytes() {
+        java.lang.Object ref = iriStr_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          iriStr_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string iriStr = 3;</code>
+       * @param value The iriStr to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIriStr(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        iriStr_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string iriStr = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIriStr() {
+        iriStr_ = getDefaultInstance().getIriStr();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string iriStr = 3;</code>
+       * @param value The bytes for iriStr to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIriStrBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        iriStr_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:Patch_Prefix_Add)
+    }
+
+    // @@protoc_insertion_point(class_scope:Patch_Prefix_Add)
+    private static final org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add();
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Patch_Prefix_Add>
+        PARSER = new com.google.protobuf.AbstractParser<Patch_Prefix_Add>() {
+      @java.lang.Override
+      public Patch_Prefix_Add parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<Patch_Prefix_Add> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Patch_Prefix_Add> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface Patch_Prefix_DelOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:Patch_Prefix_Del)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     * @return Whether the graphNode field is set.
+     */
+    boolean hasGraphNode();
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     * @return The graphNode.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getGraphNode();
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGraphNodeOrBuilder();
+
+    /**
+     * <code>string prefix = 2;</code>
+     * @return The prefix.
+     */
+    java.lang.String getPrefix();
+    /**
+     * <code>string prefix = 2;</code>
+     * @return The bytes for prefix.
+     */
+    com.google.protobuf.ByteString
+        getPrefixBytes();
+  }
+  /**
+   * Protobuf type {@code Patch_Prefix_Del}
+   */
+  public static final class Patch_Prefix_Del extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:Patch_Prefix_Del)
+      Patch_Prefix_DelOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 28,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        Patch_Prefix_Del.class.getName());
+    }
+    // Use Patch_Prefix_Del.newBuilder() to construct.
+    private Patch_Prefix_Del(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private Patch_Prefix_Del() {
+      prefix_ = "";
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Prefix_Del_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Prefix_Del_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.class, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int GRAPHNODE_FIELD_NUMBER = 1;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term graphNode_;
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     * @return Whether the graphNode field is set.
+     */
+    @java.lang.Override
+    public boolean hasGraphNode() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     * @return The graphNode.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getGraphNode() {
+      return graphNode_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : graphNode_;
+    }
+    /**
+     * <code>.RDF_Term graphNode = 1;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGraphNodeOrBuilder() {
+      return graphNode_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : graphNode_;
+    }
+
+    public static final int PREFIX_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object prefix_ = "";
+    /**
+     * <code>string prefix = 2;</code>
+     * @return The prefix.
+     */
+    @java.lang.Override
+    public java.lang.String getPrefix() {
+      java.lang.Object ref = prefix_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        prefix_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string prefix = 2;</code>
+     * @return The bytes for prefix.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPrefixBytes() {
+      java.lang.Object ref = prefix_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        prefix_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getGraphNode());
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(prefix_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 2, prefix_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getGraphNode());
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(prefix_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(2, prefix_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del)) {
+        return super.equals(obj);
+      }
+      org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del other = (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del) obj;
+
+      if (hasGraphNode() != other.hasGraphNode()) return false;
+      if (hasGraphNode()) {
+        if (!getGraphNode()
+            .equals(other.getGraphNode())) return false;
+      }
+      if (!getPrefix()
+          .equals(other.getPrefix())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasGraphNode()) {
+        hash = (37 * hash) + GRAPHNODE_FIELD_NUMBER;
+        hash = (53 * hash) + getGraphNode().hashCode();
+      }
+      hash = (37 * hash) + PREFIX_FIELD_NUMBER;
+      hash = (53 * hash) + getPrefix().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code Patch_Prefix_Del}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:Patch_Prefix_Del)
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_DelOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Prefix_Del_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Prefix_Del_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.class, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.Builder.class);
+      }
+
+      // Construct using org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage
+                .alwaysUseFieldBuilders) {
+          getGraphNodeFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        graphNode_ = null;
+        if (graphNodeBuilder_ != null) {
+          graphNodeBuilder_.dispose();
+          graphNodeBuilder_ = null;
+        }
+        prefix_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Prefix_Del_descriptor;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del getDefaultInstanceForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del build() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del buildPartial() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del result = new org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.graphNode_ = graphNodeBuilder_ == null
+              ? graphNode_
+              : graphNodeBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.prefix_ = prefix_;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del) {
+          return mergeFrom((org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del other) {
+        if (other == org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.getDefaultInstance()) return this;
+        if (other.hasGraphNode()) {
+          mergeGraphNode(other.getGraphNode());
+        }
+        if (!other.getPrefix().isEmpty()) {
+          prefix_ = other.prefix_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getGraphNodeFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                prefix_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term graphNode_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> graphNodeBuilder_;
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       * @return Whether the graphNode field is set.
+       */
+      public boolean hasGraphNode() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       * @return The graphNode.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getGraphNode() {
+        if (graphNodeBuilder_ == null) {
+          return graphNode_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : graphNode_;
+        } else {
+          return graphNodeBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public Builder setGraphNode(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (graphNodeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          graphNode_ = value;
+        } else {
+          graphNodeBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public Builder setGraphNode(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (graphNodeBuilder_ == null) {
+          graphNode_ = builderForValue.build();
+        } else {
+          graphNodeBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public Builder mergeGraphNode(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (graphNodeBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+            graphNode_ != null &&
+            graphNode_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getGraphNodeBuilder().mergeFrom(value);
+          } else {
+            graphNode_ = value;
+          }
+        } else {
+          graphNodeBuilder_.mergeFrom(value);
+        }
+        if (graphNode_ != null) {
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public Builder clearGraphNode() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        graphNode_ = null;
+        if (graphNodeBuilder_ != null) {
+          graphNodeBuilder_.dispose();
+          graphNodeBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getGraphNodeBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getGraphNodeFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGraphNodeOrBuilder() {
+        if (graphNodeBuilder_ != null) {
+          return graphNodeBuilder_.getMessageOrBuilder();
+        } else {
+          return graphNode_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : graphNode_;
+        }
+      }
+      /**
+       * <code>.RDF_Term graphNode = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getGraphNodeFieldBuilder() {
+        if (graphNodeBuilder_ == null) {
+          graphNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getGraphNode(),
+                  getParentForChildren(),
+                  isClean());
+          graphNode_ = null;
+        }
+        return graphNodeBuilder_;
+      }
+
+      private java.lang.Object prefix_ = "";
+      /**
+       * <code>string prefix = 2;</code>
+       * @return The prefix.
+       */
+      public java.lang.String getPrefix() {
+        java.lang.Object ref = prefix_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          prefix_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string prefix = 2;</code>
+       * @return The bytes for prefix.
+       */
+      public com.google.protobuf.ByteString
+          getPrefixBytes() {
+        java.lang.Object ref = prefix_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          prefix_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string prefix = 2;</code>
+       * @param value The prefix to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPrefix(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        prefix_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string prefix = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPrefix() {
+        prefix_ = getDefaultInstance().getPrefix();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string prefix = 2;</code>
+       * @param value The bytes for prefix to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPrefixBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        prefix_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:Patch_Prefix_Del)
+    }
+
+    // @@protoc_insertion_point(class_scope:Patch_Prefix_Del)
+    private static final org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del();
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Patch_Prefix_Del>
+        PARSER = new com.google.protobuf.AbstractParser<Patch_Prefix_Del>() {
+      @java.lang.Override
+      public Patch_Prefix_Del parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<Patch_Prefix_Del> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Patch_Prefix_Del> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface Patch_HeaderOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:Patch_Header)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <code>.RDF_Term value = 2;</code>
+     * @return Whether the value field is set.
+     */
+    boolean hasValue();
+    /**
+     * <code>.RDF_Term value = 2;</code>
+     * @return The value.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getValue();
+    /**
+     * <code>.RDF_Term value = 2;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getValueOrBuilder();
+  }
+  /**
+   * Protobuf type {@code Patch_Header}
+   */
+  public static final class Patch_Header extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:Patch_Header)
+      Patch_HeaderOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 28,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        Patch_Header.class.getName());
+    }
+    // Use Patch_Header.newBuilder() to construct.
+    private Patch_Header(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private Patch_Header() {
+      name_ = "";
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Header_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Header_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.class, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VALUE_FIELD_NUMBER = 2;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value_;
+    /**
+     * <code>.RDF_Term value = 2;</code>
+     * @return Whether the value field is set.
+     */
+    @java.lang.Override
+    public boolean hasValue() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>.RDF_Term value = 2;</code>
+     * @return The value.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getValue() {
+      return value_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : value_;
+    }
+    /**
+     * <code>.RDF_Term value = 2;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getValueOrBuilder() {
+      return value_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : value_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 1, name_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(2, getValue());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(1, name_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getValue());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header)) {
+        return super.equals(obj);
+      }
+      org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header other = (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (hasValue() != other.hasValue()) return false;
+      if (hasValue()) {
+        if (!getValue()
+            .equals(other.getValue())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      if (hasValue()) {
+        hash = (37 * hash) + VALUE_FIELD_NUMBER;
+        hash = (53 * hash) + getValue().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code Patch_Header}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:Patch_Header)
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_HeaderOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Header_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Header_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.class, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.Builder.class);
+      }
+
+      // Construct using org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage
+                .alwaysUseFieldBuilders) {
+          getValueFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        name_ = "";
+        value_ = null;
+        if (valueBuilder_ != null) {
+          valueBuilder_.dispose();
+          valueBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Header_descriptor;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header getDefaultInstanceForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header build() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header buildPartial() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header result = new org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.value_ = valueBuilder_ == null
+              ? value_
+              : valueBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header) {
+          return mergeFrom((org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header other) {
+        if (other == org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.hasValue()) {
+          mergeValue(other.getValue());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getValueFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> valueBuilder_;
+      /**
+       * <code>.RDF_Term value = 2;</code>
+       * @return Whether the value field is set.
+       */
+      public boolean hasValue() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>.RDF_Term value = 2;</code>
+       * @return The value.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getValue() {
+        if (valueBuilder_ == null) {
+          return value_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : value_;
+        } else {
+          return valueBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term value = 2;</code>
+       */
+      public Builder setValue(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (valueBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          value_ = value;
+        } else {
+          valueBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term value = 2;</code>
+       */
+      public Builder setValue(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (valueBuilder_ == null) {
+          value_ = builderForValue.build();
+        } else {
+          valueBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term value = 2;</code>
+       */
+      public Builder mergeValue(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (valueBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0) &&
+            value_ != null &&
+            value_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getValueBuilder().mergeFrom(value);
+          } else {
+            value_ = value;
+          }
+        } else {
+          valueBuilder_.mergeFrom(value);
+        }
+        if (value_ != null) {
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term value = 2;</code>
+       */
+      public Builder clearValue() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        value_ = null;
+        if (valueBuilder_ != null) {
+          valueBuilder_.dispose();
+          valueBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term value = 2;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getValueBuilder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return getValueFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term value = 2;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getValueOrBuilder() {
+        if (valueBuilder_ != null) {
+          return valueBuilder_.getMessageOrBuilder();
+        } else {
+          return value_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : value_;
+        }
+      }
+      /**
+       * <code>.RDF_Term value = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getValueFieldBuilder() {
+        if (valueBuilder_ == null) {
+          valueBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getValue(),
+                  getParentForChildren(),
+                  isClean());
+          value_ = null;
+        }
+        return valueBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:Patch_Header)
+    }
+
+    // @@protoc_insertion_point(class_scope:Patch_Header)
+    private static final org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header();
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Patch_Header>
+        PARSER = new com.google.protobuf.AbstractParser<Patch_Header>() {
+      @java.lang.Override
+      public Patch_Header parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<Patch_Header> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Patch_Header> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface Patch_Data_AddOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:Patch_Data_Add)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     * @return Whether the s field is set.
+     */
+    boolean hasS();
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     * @return The s.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getS();
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getSOrBuilder();
+
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     * @return Whether the p field is set.
+     */
+    boolean hasP();
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     * @return The p.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getP();
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getPOrBuilder();
+
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     * @return Whether the o field is set.
+     */
+    boolean hasO();
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     * @return The o.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getO();
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getOOrBuilder();
+
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     * @return Whether the g field is set.
+     */
+    boolean hasG();
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     * @return The g.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getG();
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGOrBuilder();
+  }
+  /**
+   * Protobuf type {@code Patch_Data_Add}
+   */
+  public static final class Patch_Data_Add extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:Patch_Data_Add)
+      Patch_Data_AddOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 28,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        Patch_Data_Add.class.getName());
+    }
+    // Use Patch_Data_Add.newBuilder() to construct.
+    private Patch_Data_Add(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private Patch_Data_Add() {
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Data_Add_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Data_Add_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.class, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int S_FIELD_NUMBER = 1;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term s_;
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     * @return Whether the s field is set.
+     */
+    @java.lang.Override
+    public boolean hasS() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     * @return The s.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getS() {
+      return s_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : s_;
+    }
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getSOrBuilder() {
+      return s_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : s_;
+    }
+
+    public static final int P_FIELD_NUMBER = 2;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term p_;
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     * @return Whether the p field is set.
+     */
+    @java.lang.Override
+    public boolean hasP() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     * @return The p.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getP() {
+      return p_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : p_;
+    }
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getPOrBuilder() {
+      return p_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : p_;
+    }
+
+    public static final int O_FIELD_NUMBER = 3;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term o_;
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     * @return Whether the o field is set.
+     */
+    @java.lang.Override
+    public boolean hasO() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     * @return The o.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getO() {
+      return o_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : o_;
+    }
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getOOrBuilder() {
+      return o_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : o_;
+    }
+
+    public static final int G_FIELD_NUMBER = 4;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term g_;
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     * @return Whether the g field is set.
+     */
+    @java.lang.Override
+    public boolean hasG() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     * @return The g.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getG() {
+      return g_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : g_;
+    }
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGOrBuilder() {
+      return g_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : g_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getS());
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeMessage(2, getP());
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeMessage(3, getO());
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeMessage(4, getG());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getS());
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getP());
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getO());
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getG());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add)) {
+        return super.equals(obj);
+      }
+      org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add other = (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add) obj;
+
+      if (hasS() != other.hasS()) return false;
+      if (hasS()) {
+        if (!getS()
+            .equals(other.getS())) return false;
+      }
+      if (hasP() != other.hasP()) return false;
+      if (hasP()) {
+        if (!getP()
+            .equals(other.getP())) return false;
+      }
+      if (hasO() != other.hasO()) return false;
+      if (hasO()) {
+        if (!getO()
+            .equals(other.getO())) return false;
+      }
+      if (hasG() != other.hasG()) return false;
+      if (hasG()) {
+        if (!getG()
+            .equals(other.getG())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasS()) {
+        hash = (37 * hash) + S_FIELD_NUMBER;
+        hash = (53 * hash) + getS().hashCode();
+      }
+      if (hasP()) {
+        hash = (37 * hash) + P_FIELD_NUMBER;
+        hash = (53 * hash) + getP().hashCode();
+      }
+      if (hasO()) {
+        hash = (37 * hash) + O_FIELD_NUMBER;
+        hash = (53 * hash) + getO().hashCode();
+      }
+      if (hasG()) {
+        hash = (37 * hash) + G_FIELD_NUMBER;
+        hash = (53 * hash) + getG().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code Patch_Data_Add}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:Patch_Data_Add)
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_AddOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Data_Add_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Data_Add_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.class, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.Builder.class);
+      }
+
+      // Construct using org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage
+                .alwaysUseFieldBuilders) {
+          getSFieldBuilder();
+          getPFieldBuilder();
+          getOFieldBuilder();
+          getGFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        s_ = null;
+        if (sBuilder_ != null) {
+          sBuilder_.dispose();
+          sBuilder_ = null;
+        }
+        p_ = null;
+        if (pBuilder_ != null) {
+          pBuilder_.dispose();
+          pBuilder_ = null;
+        }
+        o_ = null;
+        if (oBuilder_ != null) {
+          oBuilder_.dispose();
+          oBuilder_ = null;
+        }
+        g_ = null;
+        if (gBuilder_ != null) {
+          gBuilder_.dispose();
+          gBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Data_Add_descriptor;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add getDefaultInstanceForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add build() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add buildPartial() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add result = new org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.s_ = sBuilder_ == null
+              ? s_
+              : sBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.p_ = pBuilder_ == null
+              ? p_
+              : pBuilder_.build();
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.o_ = oBuilder_ == null
+              ? o_
+              : oBuilder_.build();
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.g_ = gBuilder_ == null
+              ? g_
+              : gBuilder_.build();
+          to_bitField0_ |= 0x00000008;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add) {
+          return mergeFrom((org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add other) {
+        if (other == org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.getDefaultInstance()) return this;
+        if (other.hasS()) {
+          mergeS(other.getS());
+        }
+        if (other.hasP()) {
+          mergeP(other.getP());
+        }
+        if (other.hasO()) {
+          mergeO(other.getO());
+        }
+        if (other.hasG()) {
+          mergeG(other.getG());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getSFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getPFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getOFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getGFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term s_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> sBuilder_;
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       * @return Whether the s field is set.
+       */
+      public boolean hasS() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       * @return The s.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getS() {
+        if (sBuilder_ == null) {
+          return s_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : s_;
+        } else {
+          return sBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public Builder setS(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (sBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          s_ = value;
+        } else {
+          sBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public Builder setS(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (sBuilder_ == null) {
+          s_ = builderForValue.build();
+        } else {
+          sBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public Builder mergeS(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (sBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+            s_ != null &&
+            s_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getSBuilder().mergeFrom(value);
+          } else {
+            s_ = value;
+          }
+        } else {
+          sBuilder_.mergeFrom(value);
+        }
+        if (s_ != null) {
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public Builder clearS() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        s_ = null;
+        if (sBuilder_ != null) {
+          sBuilder_.dispose();
+          sBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getSBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getSFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getSOrBuilder() {
+        if (sBuilder_ != null) {
+          return sBuilder_.getMessageOrBuilder();
+        } else {
+          return s_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : s_;
+        }
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getSFieldBuilder() {
+        if (sBuilder_ == null) {
+          sBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getS(),
+                  getParentForChildren(),
+                  isClean());
+          s_ = null;
+        }
+        return sBuilder_;
+      }
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term p_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> pBuilder_;
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       * @return Whether the p field is set.
+       */
+      public boolean hasP() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       * @return The p.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getP() {
+        if (pBuilder_ == null) {
+          return p_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : p_;
+        } else {
+          return pBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public Builder setP(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (pBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          p_ = value;
+        } else {
+          pBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public Builder setP(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (pBuilder_ == null) {
+          p_ = builderForValue.build();
+        } else {
+          pBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public Builder mergeP(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (pBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0) &&
+            p_ != null &&
+            p_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getPBuilder().mergeFrom(value);
+          } else {
+            p_ = value;
+          }
+        } else {
+          pBuilder_.mergeFrom(value);
+        }
+        if (p_ != null) {
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public Builder clearP() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        p_ = null;
+        if (pBuilder_ != null) {
+          pBuilder_.dispose();
+          pBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getPBuilder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return getPFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getPOrBuilder() {
+        if (pBuilder_ != null) {
+          return pBuilder_.getMessageOrBuilder();
+        } else {
+          return p_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : p_;
+        }
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getPFieldBuilder() {
+        if (pBuilder_ == null) {
+          pBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getP(),
+                  getParentForChildren(),
+                  isClean());
+          p_ = null;
+        }
+        return pBuilder_;
+      }
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term o_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> oBuilder_;
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       * @return Whether the o field is set.
+       */
+      public boolean hasO() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       * @return The o.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getO() {
+        if (oBuilder_ == null) {
+          return o_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : o_;
+        } else {
+          return oBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public Builder setO(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (oBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          o_ = value;
+        } else {
+          oBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public Builder setO(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (oBuilder_ == null) {
+          o_ = builderForValue.build();
+        } else {
+          oBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public Builder mergeO(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (oBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0) &&
+            o_ != null &&
+            o_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getOBuilder().mergeFrom(value);
+          } else {
+            o_ = value;
+          }
+        } else {
+          oBuilder_.mergeFrom(value);
+        }
+        if (o_ != null) {
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public Builder clearO() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        o_ = null;
+        if (oBuilder_ != null) {
+          oBuilder_.dispose();
+          oBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getOBuilder() {
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return getOFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getOOrBuilder() {
+        if (oBuilder_ != null) {
+          return oBuilder_.getMessageOrBuilder();
+        } else {
+          return o_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : o_;
+        }
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getOFieldBuilder() {
+        if (oBuilder_ == null) {
+          oBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getO(),
+                  getParentForChildren(),
+                  isClean());
+          o_ = null;
+        }
+        return oBuilder_;
+      }
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term g_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> gBuilder_;
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       * @return Whether the g field is set.
+       */
+      public boolean hasG() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       * @return The g.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getG() {
+        if (gBuilder_ == null) {
+          return g_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : g_;
+        } else {
+          return gBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public Builder setG(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (gBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          g_ = value;
+        } else {
+          gBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public Builder setG(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (gBuilder_ == null) {
+          g_ = builderForValue.build();
+        } else {
+          gBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public Builder mergeG(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (gBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0) &&
+            g_ != null &&
+            g_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getGBuilder().mergeFrom(value);
+          } else {
+            g_ = value;
+          }
+        } else {
+          gBuilder_.mergeFrom(value);
+        }
+        if (g_ != null) {
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public Builder clearG() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        g_ = null;
+        if (gBuilder_ != null) {
+          gBuilder_.dispose();
+          gBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getGBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getGFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGOrBuilder() {
+        if (gBuilder_ != null) {
+          return gBuilder_.getMessageOrBuilder();
+        } else {
+          return g_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : g_;
+        }
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getGFieldBuilder() {
+        if (gBuilder_ == null) {
+          gBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getG(),
+                  getParentForChildren(),
+                  isClean());
+          g_ = null;
+        }
+        return gBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:Patch_Data_Add)
+    }
+
+    // @@protoc_insertion_point(class_scope:Patch_Data_Add)
+    private static final org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add();
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Patch_Data_Add>
+        PARSER = new com.google.protobuf.AbstractParser<Patch_Data_Add>() {
+      @java.lang.Override
+      public Patch_Data_Add parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<Patch_Data_Add> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Patch_Data_Add> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface Patch_Data_DelOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:Patch_Data_Del)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     * @return Whether the s field is set.
+     */
+    boolean hasS();
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     * @return The s.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getS();
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getSOrBuilder();
+
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     * @return Whether the p field is set.
+     */
+    boolean hasP();
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     * @return The p.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getP();
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getPOrBuilder();
+
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     * @return Whether the o field is set.
+     */
+    boolean hasO();
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     * @return The o.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getO();
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getOOrBuilder();
+
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     * @return Whether the g field is set.
+     */
+    boolean hasG();
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     * @return The g.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getG();
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGOrBuilder();
+  }
+  /**
+   * Protobuf type {@code Patch_Data_Del}
+   */
+  public static final class Patch_Data_Del extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:Patch_Data_Del)
+      Patch_Data_DelOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 28,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        Patch_Data_Del.class.getName());
+    }
+    // Use Patch_Data_Del.newBuilder() to construct.
+    private Patch_Data_Del(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private Patch_Data_Del() {
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Data_Del_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Data_Del_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.class, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int S_FIELD_NUMBER = 1;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term s_;
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     * @return Whether the s field is set.
+     */
+    @java.lang.Override
+    public boolean hasS() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     * @return The s.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getS() {
+      return s_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : s_;
+    }
+    /**
+     * <code>.RDF_Term s = 1;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getSOrBuilder() {
+      return s_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : s_;
+    }
+
+    public static final int P_FIELD_NUMBER = 2;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term p_;
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     * @return Whether the p field is set.
+     */
+    @java.lang.Override
+    public boolean hasP() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     * @return The p.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getP() {
+      return p_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : p_;
+    }
+    /**
+     * <code>.RDF_Term p = 2;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getPOrBuilder() {
+      return p_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : p_;
+    }
+
+    public static final int O_FIELD_NUMBER = 3;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term o_;
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     * @return Whether the o field is set.
+     */
+    @java.lang.Override
+    public boolean hasO() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     * @return The o.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getO() {
+      return o_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : o_;
+    }
+    /**
+     * <code>.RDF_Term o = 3;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getOOrBuilder() {
+      return o_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : o_;
+    }
+
+    public static final int G_FIELD_NUMBER = 4;
+    private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term g_;
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     * @return Whether the g field is set.
+     */
+    @java.lang.Override
+    public boolean hasG() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     * @return The g.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getG() {
+      return g_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : g_;
+    }
+    /**
+     * <code>.RDF_Term g = 4;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGOrBuilder() {
+      return g_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : g_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getS());
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeMessage(2, getP());
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeMessage(3, getO());
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeMessage(4, getG());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getS());
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getP());
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getO());
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getG());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del)) {
+        return super.equals(obj);
+      }
+      org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del other = (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del) obj;
+
+      if (hasS() != other.hasS()) return false;
+      if (hasS()) {
+        if (!getS()
+            .equals(other.getS())) return false;
+      }
+      if (hasP() != other.hasP()) return false;
+      if (hasP()) {
+        if (!getP()
+            .equals(other.getP())) return false;
+      }
+      if (hasO() != other.hasO()) return false;
+      if (hasO()) {
+        if (!getO()
+            .equals(other.getO())) return false;
+      }
+      if (hasG() != other.hasG()) return false;
+      if (hasG()) {
+        if (!getG()
+            .equals(other.getG())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasS()) {
+        hash = (37 * hash) + S_FIELD_NUMBER;
+        hash = (53 * hash) + getS().hashCode();
+      }
+      if (hasP()) {
+        hash = (37 * hash) + P_FIELD_NUMBER;
+        hash = (53 * hash) + getP().hashCode();
+      }
+      if (hasO()) {
+        hash = (37 * hash) + O_FIELD_NUMBER;
+        hash = (53 * hash) + getO().hashCode();
+      }
+      if (hasG()) {
+        hash = (37 * hash) + G_FIELD_NUMBER;
+        hash = (53 * hash) + getG().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code Patch_Data_Del}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:Patch_Data_Del)
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_DelOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Data_Del_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Data_Del_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.class, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.Builder.class);
+      }
+
+      // Construct using org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage
+                .alwaysUseFieldBuilders) {
+          getSFieldBuilder();
+          getPFieldBuilder();
+          getOFieldBuilder();
+          getGFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        s_ = null;
+        if (sBuilder_ != null) {
+          sBuilder_.dispose();
+          sBuilder_ = null;
+        }
+        p_ = null;
+        if (pBuilder_ != null) {
+          pBuilder_.dispose();
+          pBuilder_ = null;
+        }
+        o_ = null;
+        if (oBuilder_ != null) {
+          oBuilder_.dispose();
+          oBuilder_ = null;
+        }
+        g_ = null;
+        if (gBuilder_ != null) {
+          gBuilder_.dispose();
+          gBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_Patch_Data_Del_descriptor;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del getDefaultInstanceForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del build() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del buildPartial() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del result = new org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.s_ = sBuilder_ == null
+              ? s_
+              : sBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.p_ = pBuilder_ == null
+              ? p_
+              : pBuilder_.build();
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.o_ = oBuilder_ == null
+              ? o_
+              : oBuilder_.build();
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.g_ = gBuilder_ == null
+              ? g_
+              : gBuilder_.build();
+          to_bitField0_ |= 0x00000008;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del) {
+          return mergeFrom((org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del other) {
+        if (other == org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.getDefaultInstance()) return this;
+        if (other.hasS()) {
+          mergeS(other.getS());
+        }
+        if (other.hasP()) {
+          mergeP(other.getP());
+        }
+        if (other.hasO()) {
+          mergeO(other.getO());
+        }
+        if (other.hasG()) {
+          mergeG(other.getG());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getSFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getPFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getOFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getGFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term s_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> sBuilder_;
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       * @return Whether the s field is set.
+       */
+      public boolean hasS() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       * @return The s.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getS() {
+        if (sBuilder_ == null) {
+          return s_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : s_;
+        } else {
+          return sBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public Builder setS(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (sBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          s_ = value;
+        } else {
+          sBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public Builder setS(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (sBuilder_ == null) {
+          s_ = builderForValue.build();
+        } else {
+          sBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public Builder mergeS(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (sBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+            s_ != null &&
+            s_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getSBuilder().mergeFrom(value);
+          } else {
+            s_ = value;
+          }
+        } else {
+          sBuilder_.mergeFrom(value);
+        }
+        if (s_ != null) {
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public Builder clearS() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        s_ = null;
+        if (sBuilder_ != null) {
+          sBuilder_.dispose();
+          sBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getSBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getSFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getSOrBuilder() {
+        if (sBuilder_ != null) {
+          return sBuilder_.getMessageOrBuilder();
+        } else {
+          return s_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : s_;
+        }
+      }
+      /**
+       * <code>.RDF_Term s = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getSFieldBuilder() {
+        if (sBuilder_ == null) {
+          sBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getS(),
+                  getParentForChildren(),
+                  isClean());
+          s_ = null;
+        }
+        return sBuilder_;
+      }
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term p_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> pBuilder_;
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       * @return Whether the p field is set.
+       */
+      public boolean hasP() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       * @return The p.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getP() {
+        if (pBuilder_ == null) {
+          return p_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : p_;
+        } else {
+          return pBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public Builder setP(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (pBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          p_ = value;
+        } else {
+          pBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public Builder setP(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (pBuilder_ == null) {
+          p_ = builderForValue.build();
+        } else {
+          pBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public Builder mergeP(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (pBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0) &&
+            p_ != null &&
+            p_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getPBuilder().mergeFrom(value);
+          } else {
+            p_ = value;
+          }
+        } else {
+          pBuilder_.mergeFrom(value);
+        }
+        if (p_ != null) {
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public Builder clearP() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        p_ = null;
+        if (pBuilder_ != null) {
+          pBuilder_.dispose();
+          pBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getPBuilder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return getPFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getPOrBuilder() {
+        if (pBuilder_ != null) {
+          return pBuilder_.getMessageOrBuilder();
+        } else {
+          return p_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : p_;
+        }
+      }
+      /**
+       * <code>.RDF_Term p = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getPFieldBuilder() {
+        if (pBuilder_ == null) {
+          pBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getP(),
+                  getParentForChildren(),
+                  isClean());
+          p_ = null;
+        }
+        return pBuilder_;
+      }
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term o_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> oBuilder_;
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       * @return Whether the o field is set.
+       */
+      public boolean hasO() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       * @return The o.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getO() {
+        if (oBuilder_ == null) {
+          return o_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : o_;
+        } else {
+          return oBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public Builder setO(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (oBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          o_ = value;
+        } else {
+          oBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public Builder setO(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (oBuilder_ == null) {
+          o_ = builderForValue.build();
+        } else {
+          oBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public Builder mergeO(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (oBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0) &&
+            o_ != null &&
+            o_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getOBuilder().mergeFrom(value);
+          } else {
+            o_ = value;
+          }
+        } else {
+          oBuilder_.mergeFrom(value);
+        }
+        if (o_ != null) {
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public Builder clearO() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        o_ = null;
+        if (oBuilder_ != null) {
+          oBuilder_.dispose();
+          oBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getOBuilder() {
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return getOFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getOOrBuilder() {
+        if (oBuilder_ != null) {
+          return oBuilder_.getMessageOrBuilder();
+        } else {
+          return o_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : o_;
+        }
+      }
+      /**
+       * <code>.RDF_Term o = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getOFieldBuilder() {
+        if (oBuilder_ == null) {
+          oBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getO(),
+                  getParentForChildren(),
+                  isClean());
+          o_ = null;
+        }
+        return oBuilder_;
+      }
+
+      private org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term g_;
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> gBuilder_;
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       * @return Whether the g field is set.
+       */
+      public boolean hasG() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       * @return The g.
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term getG() {
+        if (gBuilder_ == null) {
+          return g_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : g_;
+        } else {
+          return gBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public Builder setG(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (gBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          g_ = value;
+        } else {
+          gBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public Builder setG(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder builderForValue) {
+        if (gBuilder_ == null) {
+          g_ = builderForValue.build();
+        } else {
+          gBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public Builder mergeG(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term value) {
+        if (gBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0) &&
+            g_ != null &&
+            g_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance()) {
+            getGBuilder().mergeFrom(value);
+          } else {
+            g_ = value;
+          }
+        } else {
+          gBuilder_.mergeFrom(value);
+        }
+        if (g_ != null) {
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public Builder clearG() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        g_ = null;
+        if (gBuilder_ != null) {
+          gBuilder_.dispose();
+          gBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder getGBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getGFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGOrBuilder() {
+        if (gBuilder_ != null) {
+          return gBuilder_.getMessageOrBuilder();
+        } else {
+          return g_ == null ?
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : g_;
+        }
+      }
+      /**
+       * <code>.RDF_Term g = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder> 
+          getGFieldBuilder() {
+        if (gBuilder_ == null) {
+          gBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder>(
+                  getG(),
+                  getParentForChildren(),
+                  isClean());
+          g_ = null;
+        }
+        return gBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:Patch_Data_Del)
+    }
+
+    // @@protoc_insertion_point(class_scope:Patch_Data_Del)
+    private static final org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del();
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Patch_Data_Del>
+        PARSER = new com.google.protobuf.AbstractParser<Patch_Data_Del>() {
+      @java.lang.Override
+      public Patch_Data_Del parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<Patch_Data_Del> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Patch_Data_Del> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RDF_Patch_RowOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:RDF_Patch_Row)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.Patch_Header header = 1;</code>
+     * @return Whether the header field is set.
+     */
+    boolean hasHeader();
+    /**
+     * <code>.Patch_Header header = 1;</code>
+     * @return The header.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header getHeader();
+    /**
+     * <code>.Patch_Header header = 1;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_HeaderOrBuilder getHeaderOrBuilder();
+
+    /**
+     * <code>.Patch_Data_Add dataAdd = 2;</code>
+     * @return Whether the dataAdd field is set.
+     */
+    boolean hasDataAdd();
+    /**
+     * <code>.Patch_Data_Add dataAdd = 2;</code>
+     * @return The dataAdd.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add getDataAdd();
+    /**
+     * <code>.Patch_Data_Add dataAdd = 2;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_AddOrBuilder getDataAddOrBuilder();
+
+    /**
+     * <code>.Patch_Data_Del dataDel = 3;</code>
+     * @return Whether the dataDel field is set.
+     */
+    boolean hasDataDel();
+    /**
+     * <code>.Patch_Data_Del dataDel = 3;</code>
+     * @return The dataDel.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del getDataDel();
+    /**
+     * <code>.Patch_Data_Del dataDel = 3;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_DelOrBuilder getDataDelOrBuilder();
+
+    /**
+     * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+     * @return Whether the prefixAdd field is set.
+     */
+    boolean hasPrefixAdd();
+    /**
+     * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+     * @return The prefixAdd.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add getPrefixAdd();
+    /**
+     * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_AddOrBuilder getPrefixAddOrBuilder();
+
+    /**
+     * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+     * @return Whether the prefixDel field is set.
+     */
+    boolean hasPrefixDel();
+    /**
+     * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+     * @return The prefixDel.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del getPrefixDel();
+    /**
+     * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_DelOrBuilder getPrefixDelOrBuilder();
+
+    /**
+     * <code>.PatchTxn txn = 6;</code>
+     * @return Whether the txn field is set.
+     */
+    boolean hasTxn();
+    /**
+     * <code>.PatchTxn txn = 6;</code>
+     * @return The enum numeric value on the wire for txn.
+     */
+    int getTxnValue();
+    /**
+     * <code>.PatchTxn txn = 6;</code>
+     * @return The txn.
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn getTxn();
+
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.RowCase getRowCase();
+  }
+  /**
+   * Protobuf type {@code RDF_Patch_Row}
+   */
+  public static final class RDF_Patch_Row extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:RDF_Patch_Row)
+      RDF_Patch_RowOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 28,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        RDF_Patch_Row.class.getName());
+    }
+    // Use RDF_Patch_Row.newBuilder() to construct.
+    private RDF_Patch_Row(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private RDF_Patch_Row() {
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Patch_Row_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Patch_Row_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.class, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder.class);
+    }
+
+    private int rowCase_ = 0;
+    @SuppressWarnings("serial")
+    private java.lang.Object row_;
+    public enum RowCase
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+      HEADER(1),
+      DATAADD(2),
+      DATADEL(3),
+      PREFIXADD(4),
+      PREFIXDEL(5),
+      TXN(6),
+      ROW_NOT_SET(0);
+      private final int value;
+      private RowCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static RowCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static RowCase forNumber(int value) {
+        switch (value) {
+          case 1: return HEADER;
+          case 2: return DATAADD;
+          case 3: return DATADEL;
+          case 4: return PREFIXADD;
+          case 5: return PREFIXDEL;
+          case 6: return TXN;
+          case 0: return ROW_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public RowCase
+    getRowCase() {
+      return RowCase.forNumber(
+          rowCase_);
+    }
+
+    public static final int HEADER_FIELD_NUMBER = 1;
+    /**
+     * <code>.Patch_Header header = 1;</code>
+     * @return Whether the header field is set.
+     */
+    @java.lang.Override
+    public boolean hasHeader() {
+      return rowCase_ == 1;
+    }
+    /**
+     * <code>.Patch_Header header = 1;</code>
+     * @return The header.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header getHeader() {
+      if (rowCase_ == 1) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.getDefaultInstance();
+    }
+    /**
+     * <code>.Patch_Header header = 1;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_HeaderOrBuilder getHeaderOrBuilder() {
+      if (rowCase_ == 1) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.getDefaultInstance();
+    }
+
+    public static final int DATAADD_FIELD_NUMBER = 2;
+    /**
+     * <code>.Patch_Data_Add dataAdd = 2;</code>
+     * @return Whether the dataAdd field is set.
+     */
+    @java.lang.Override
+    public boolean hasDataAdd() {
+      return rowCase_ == 2;
+    }
+    /**
+     * <code>.Patch_Data_Add dataAdd = 2;</code>
+     * @return The dataAdd.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add getDataAdd() {
+      if (rowCase_ == 2) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.getDefaultInstance();
+    }
+    /**
+     * <code>.Patch_Data_Add dataAdd = 2;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_AddOrBuilder getDataAddOrBuilder() {
+      if (rowCase_ == 2) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.getDefaultInstance();
+    }
+
+    public static final int DATADEL_FIELD_NUMBER = 3;
+    /**
+     * <code>.Patch_Data_Del dataDel = 3;</code>
+     * @return Whether the dataDel field is set.
+     */
+    @java.lang.Override
+    public boolean hasDataDel() {
+      return rowCase_ == 3;
+    }
+    /**
+     * <code>.Patch_Data_Del dataDel = 3;</code>
+     * @return The dataDel.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del getDataDel() {
+      if (rowCase_ == 3) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.getDefaultInstance();
+    }
+    /**
+     * <code>.Patch_Data_Del dataDel = 3;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_DelOrBuilder getDataDelOrBuilder() {
+      if (rowCase_ == 3) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.getDefaultInstance();
+    }
+
+    public static final int PREFIXADD_FIELD_NUMBER = 4;
+    /**
+     * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+     * @return Whether the prefixAdd field is set.
+     */
+    @java.lang.Override
+    public boolean hasPrefixAdd() {
+      return rowCase_ == 4;
+    }
+    /**
+     * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+     * @return The prefixAdd.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add getPrefixAdd() {
+      if (rowCase_ == 4) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.getDefaultInstance();
+    }
+    /**
+     * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_AddOrBuilder getPrefixAddOrBuilder() {
+      if (rowCase_ == 4) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.getDefaultInstance();
+    }
+
+    public static final int PREFIXDEL_FIELD_NUMBER = 5;
+    /**
+     * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+     * @return Whether the prefixDel field is set.
+     */
+    @java.lang.Override
+    public boolean hasPrefixDel() {
+      return rowCase_ == 5;
+    }
+    /**
+     * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+     * @return The prefixDel.
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del getPrefixDel() {
+      if (rowCase_ == 5) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.getDefaultInstance();
+    }
+    /**
+     * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_DelOrBuilder getPrefixDelOrBuilder() {
+      if (rowCase_ == 5) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del) row_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.getDefaultInstance();
+    }
+
+    public static final int TXN_FIELD_NUMBER = 6;
+    /**
+     * <code>.PatchTxn txn = 6;</code>
+     * @return Whether the txn field is set.
+     */
+    public boolean hasTxn() {
+      return rowCase_ == 6;
+    }
+    /**
+     * <code>.PatchTxn txn = 6;</code>
+     * @return The enum numeric value on the wire for txn.
+     */
+    public int getTxnValue() {
+      if (rowCase_ == 6) {
+        return (java.lang.Integer) row_;
+      }
+      return 0;
+    }
+    /**
+     * <code>.PatchTxn txn = 6;</code>
+     * @return The txn.
+     */
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn getTxn() {
+      if (rowCase_ == 6) {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn result = org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn.forNumber(
+            (java.lang.Integer) row_);
+        return result == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn.UNRECOGNIZED : result;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn.TX;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (rowCase_ == 1) {
+        output.writeMessage(1, (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header) row_);
+      }
+      if (rowCase_ == 2) {
+        output.writeMessage(2, (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add) row_);
+      }
+      if (rowCase_ == 3) {
+        output.writeMessage(3, (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del) row_);
+      }
+      if (rowCase_ == 4) {
+        output.writeMessage(4, (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add) row_);
+      }
+      if (rowCase_ == 5) {
+        output.writeMessage(5, (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del) row_);
+      }
+      if (rowCase_ == 6) {
+        output.writeEnum(6, ((java.lang.Integer) row_));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (rowCase_ == 1) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header) row_);
+      }
+      if (rowCase_ == 2) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add) row_);
+      }
+      if (rowCase_ == 3) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del) row_);
+      }
+      if (rowCase_ == 4) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add) row_);
+      }
+      if (rowCase_ == 5) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del) row_);
+      }
+      if (rowCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(6, ((java.lang.Integer) row_));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row)) {
+        return super.equals(obj);
+      }
+      org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row other = (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row) obj;
+
+      if (!getRowCase().equals(other.getRowCase())) return false;
+      switch (rowCase_) {
+        case 1:
+          if (!getHeader()
+              .equals(other.getHeader())) return false;
+          break;
+        case 2:
+          if (!getDataAdd()
+              .equals(other.getDataAdd())) return false;
+          break;
+        case 3:
+          if (!getDataDel()
+              .equals(other.getDataDel())) return false;
+          break;
+        case 4:
+          if (!getPrefixAdd()
+              .equals(other.getPrefixAdd())) return false;
+          break;
+        case 5:
+          if (!getPrefixDel()
+              .equals(other.getPrefixDel())) return false;
+          break;
+        case 6:
+          if (getTxnValue()
+              != other.getTxnValue()) return false;
+          break;
+        case 0:
+        default:
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      switch (rowCase_) {
+        case 1:
+          hash = (37 * hash) + HEADER_FIELD_NUMBER;
+          hash = (53 * hash) + getHeader().hashCode();
+          break;
+        case 2:
+          hash = (37 * hash) + DATAADD_FIELD_NUMBER;
+          hash = (53 * hash) + getDataAdd().hashCode();
+          break;
+        case 3:
+          hash = (37 * hash) + DATADEL_FIELD_NUMBER;
+          hash = (53 * hash) + getDataDel().hashCode();
+          break;
+        case 4:
+          hash = (37 * hash) + PREFIXADD_FIELD_NUMBER;
+          hash = (53 * hash) + getPrefixAdd().hashCode();
+          break;
+        case 5:
+          hash = (37 * hash) + PREFIXDEL_FIELD_NUMBER;
+          hash = (53 * hash) + getPrefixDel().hashCode();
+          break;
+        case 6:
+          hash = (37 * hash) + TXN_FIELD_NUMBER;
+          hash = (53 * hash) + getTxnValue();
+          break;
+        case 0:
+        default:
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code RDF_Patch_Row}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:RDF_Patch_Row)
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Patch_Row_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Patch_Row_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.class, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder.class);
+      }
+
+      // Construct using org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        if (headerBuilder_ != null) {
+          headerBuilder_.clear();
+        }
+        if (dataAddBuilder_ != null) {
+          dataAddBuilder_.clear();
+        }
+        if (dataDelBuilder_ != null) {
+          dataDelBuilder_.clear();
+        }
+        if (prefixAddBuilder_ != null) {
+          prefixAddBuilder_.clear();
+        }
+        if (prefixDelBuilder_ != null) {
+          prefixDelBuilder_.clear();
+        }
+        rowCase_ = 0;
+        row_ = null;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Patch_Row_descriptor;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row getDefaultInstanceForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row build() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row buildPartial() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row result = new org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row result) {
+        result.rowCase_ = rowCase_;
+        result.row_ = this.row_;
+        if (rowCase_ == 1 &&
+            headerBuilder_ != null) {
+          result.row_ = headerBuilder_.build();
+        }
+        if (rowCase_ == 2 &&
+            dataAddBuilder_ != null) {
+          result.row_ = dataAddBuilder_.build();
+        }
+        if (rowCase_ == 3 &&
+            dataDelBuilder_ != null) {
+          result.row_ = dataDelBuilder_.build();
+        }
+        if (rowCase_ == 4 &&
+            prefixAddBuilder_ != null) {
+          result.row_ = prefixAddBuilder_.build();
+        }
+        if (rowCase_ == 5 &&
+            prefixDelBuilder_ != null) {
+          result.row_ = prefixDelBuilder_.build();
+        }
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row) {
+          return mergeFrom((org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row other) {
+        if (other == org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.getDefaultInstance()) return this;
+        switch (other.getRowCase()) {
+          case HEADER: {
+            mergeHeader(other.getHeader());
+            break;
+          }
+          case DATAADD: {
+            mergeDataAdd(other.getDataAdd());
+            break;
+          }
+          case DATADEL: {
+            mergeDataDel(other.getDataDel());
+            break;
+          }
+          case PREFIXADD: {
+            mergePrefixAdd(other.getPrefixAdd());
+            break;
+          }
+          case PREFIXDEL: {
+            mergePrefixDel(other.getPrefixDel());
+            break;
+          }
+          case TXN: {
+            setTxnValue(other.getTxnValue());
+            break;
+          }
+          case ROW_NOT_SET: {
+            break;
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getHeaderFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                rowCase_ = 1;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getDataAddFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                rowCase_ = 2;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getDataDelFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                rowCase_ = 3;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getPrefixAddFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                rowCase_ = 4;
+                break;
+              } // case 34
+              case 42: {
+                input.readMessage(
+                    getPrefixDelFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                rowCase_ = 5;
+                break;
+              } // case 42
+              case 48: {
+                int rawValue = input.readEnum();
+                rowCase_ = 6;
+                row_ = rawValue;
+                break;
+              } // case 48
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int rowCase_ = 0;
+      private java.lang.Object row_;
+      public RowCase
+          getRowCase() {
+        return RowCase.forNumber(
+            rowCase_);
+      }
+
+      public Builder clearRow() {
+        rowCase_ = 0;
+        row_ = null;
+        onChanged();
+        return this;
+      }
+
+      private int bitField0_;
+
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_HeaderOrBuilder> headerBuilder_;
+      /**
+       * <code>.Patch_Header header = 1;</code>
+       * @return Whether the header field is set.
+       */
+      @java.lang.Override
+      public boolean hasHeader() {
+        return rowCase_ == 1;
+      }
+      /**
+       * <code>.Patch_Header header = 1;</code>
+       * @return The header.
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header getHeader() {
+        if (headerBuilder_ == null) {
+          if (rowCase_ == 1) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.getDefaultInstance();
+        } else {
+          if (rowCase_ == 1) {
+            return headerBuilder_.getMessage();
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.Patch_Header header = 1;</code>
+       */
+      public Builder setHeader(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header value) {
+        if (headerBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          row_ = value;
+          onChanged();
+        } else {
+          headerBuilder_.setMessage(value);
+        }
+        rowCase_ = 1;
+        return this;
+      }
+      /**
+       * <code>.Patch_Header header = 1;</code>
+       */
+      public Builder setHeader(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.Builder builderForValue) {
+        if (headerBuilder_ == null) {
+          row_ = builderForValue.build();
+          onChanged();
+        } else {
+          headerBuilder_.setMessage(builderForValue.build());
+        }
+        rowCase_ = 1;
+        return this;
+      }
+      /**
+       * <code>.Patch_Header header = 1;</code>
+       */
+      public Builder mergeHeader(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header value) {
+        if (headerBuilder_ == null) {
+          if (rowCase_ == 1 &&
+              row_ != org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.getDefaultInstance()) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.newBuilder((org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header) row_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            row_ = value;
+          }
+          onChanged();
+        } else {
+          if (rowCase_ == 1) {
+            headerBuilder_.mergeFrom(value);
+          } else {
+            headerBuilder_.setMessage(value);
+          }
+        }
+        rowCase_ = 1;
+        return this;
+      }
+      /**
+       * <code>.Patch_Header header = 1;</code>
+       */
+      public Builder clearHeader() {
+        if (headerBuilder_ == null) {
+          if (rowCase_ == 1) {
+            rowCase_ = 0;
+            row_ = null;
+            onChanged();
+          }
+        } else {
+          if (rowCase_ == 1) {
+            rowCase_ = 0;
+            row_ = null;
+          }
+          headerBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.Patch_Header header = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.Builder getHeaderBuilder() {
+        return getHeaderFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.Patch_Header header = 1;</code>
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_HeaderOrBuilder getHeaderOrBuilder() {
+        if ((rowCase_ == 1) && (headerBuilder_ != null)) {
+          return headerBuilder_.getMessageOrBuilder();
+        } else {
+          if (rowCase_ == 1) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.Patch_Header header = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_HeaderOrBuilder> 
+          getHeaderFieldBuilder() {
+        if (headerBuilder_ == null) {
+          if (!(rowCase_ == 1)) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.getDefaultInstance();
+          }
+          headerBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_HeaderOrBuilder>(
+                  (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Header) row_,
+                  getParentForChildren(),
+                  isClean());
+          row_ = null;
+        }
+        rowCase_ = 1;
+        onChanged();
+        return headerBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_AddOrBuilder> dataAddBuilder_;
+      /**
+       * <code>.Patch_Data_Add dataAdd = 2;</code>
+       * @return Whether the dataAdd field is set.
+       */
+      @java.lang.Override
+      public boolean hasDataAdd() {
+        return rowCase_ == 2;
+      }
+      /**
+       * <code>.Patch_Data_Add dataAdd = 2;</code>
+       * @return The dataAdd.
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add getDataAdd() {
+        if (dataAddBuilder_ == null) {
+          if (rowCase_ == 2) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.getDefaultInstance();
+        } else {
+          if (rowCase_ == 2) {
+            return dataAddBuilder_.getMessage();
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.Patch_Data_Add dataAdd = 2;</code>
+       */
+      public Builder setDataAdd(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add value) {
+        if (dataAddBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          row_ = value;
+          onChanged();
+        } else {
+          dataAddBuilder_.setMessage(value);
+        }
+        rowCase_ = 2;
+        return this;
+      }
+      /**
+       * <code>.Patch_Data_Add dataAdd = 2;</code>
+       */
+      public Builder setDataAdd(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.Builder builderForValue) {
+        if (dataAddBuilder_ == null) {
+          row_ = builderForValue.build();
+          onChanged();
+        } else {
+          dataAddBuilder_.setMessage(builderForValue.build());
+        }
+        rowCase_ = 2;
+        return this;
+      }
+      /**
+       * <code>.Patch_Data_Add dataAdd = 2;</code>
+       */
+      public Builder mergeDataAdd(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add value) {
+        if (dataAddBuilder_ == null) {
+          if (rowCase_ == 2 &&
+              row_ != org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.getDefaultInstance()) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.newBuilder((org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add) row_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            row_ = value;
+          }
+          onChanged();
+        } else {
+          if (rowCase_ == 2) {
+            dataAddBuilder_.mergeFrom(value);
+          } else {
+            dataAddBuilder_.setMessage(value);
+          }
+        }
+        rowCase_ = 2;
+        return this;
+      }
+      /**
+       * <code>.Patch_Data_Add dataAdd = 2;</code>
+       */
+      public Builder clearDataAdd() {
+        if (dataAddBuilder_ == null) {
+          if (rowCase_ == 2) {
+            rowCase_ = 0;
+            row_ = null;
+            onChanged();
+          }
+        } else {
+          if (rowCase_ == 2) {
+            rowCase_ = 0;
+            row_ = null;
+          }
+          dataAddBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.Patch_Data_Add dataAdd = 2;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.Builder getDataAddBuilder() {
+        return getDataAddFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.Patch_Data_Add dataAdd = 2;</code>
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_AddOrBuilder getDataAddOrBuilder() {
+        if ((rowCase_ == 2) && (dataAddBuilder_ != null)) {
+          return dataAddBuilder_.getMessageOrBuilder();
+        } else {
+          if (rowCase_ == 2) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.Patch_Data_Add dataAdd = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_AddOrBuilder> 
+          getDataAddFieldBuilder() {
+        if (dataAddBuilder_ == null) {
+          if (!(rowCase_ == 2)) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.getDefaultInstance();
+          }
+          dataAddBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_AddOrBuilder>(
+                  (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Add) row_,
+                  getParentForChildren(),
+                  isClean());
+          row_ = null;
+        }
+        rowCase_ = 2;
+        onChanged();
+        return dataAddBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_DelOrBuilder> dataDelBuilder_;
+      /**
+       * <code>.Patch_Data_Del dataDel = 3;</code>
+       * @return Whether the dataDel field is set.
+       */
+      @java.lang.Override
+      public boolean hasDataDel() {
+        return rowCase_ == 3;
+      }
+      /**
+       * <code>.Patch_Data_Del dataDel = 3;</code>
+       * @return The dataDel.
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del getDataDel() {
+        if (dataDelBuilder_ == null) {
+          if (rowCase_ == 3) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.getDefaultInstance();
+        } else {
+          if (rowCase_ == 3) {
+            return dataDelBuilder_.getMessage();
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.Patch_Data_Del dataDel = 3;</code>
+       */
+      public Builder setDataDel(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del value) {
+        if (dataDelBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          row_ = value;
+          onChanged();
+        } else {
+          dataDelBuilder_.setMessage(value);
+        }
+        rowCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.Patch_Data_Del dataDel = 3;</code>
+       */
+      public Builder setDataDel(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.Builder builderForValue) {
+        if (dataDelBuilder_ == null) {
+          row_ = builderForValue.build();
+          onChanged();
+        } else {
+          dataDelBuilder_.setMessage(builderForValue.build());
+        }
+        rowCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.Patch_Data_Del dataDel = 3;</code>
+       */
+      public Builder mergeDataDel(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del value) {
+        if (dataDelBuilder_ == null) {
+          if (rowCase_ == 3 &&
+              row_ != org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.getDefaultInstance()) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.newBuilder((org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del) row_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            row_ = value;
+          }
+          onChanged();
+        } else {
+          if (rowCase_ == 3) {
+            dataDelBuilder_.mergeFrom(value);
+          } else {
+            dataDelBuilder_.setMessage(value);
+          }
+        }
+        rowCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.Patch_Data_Del dataDel = 3;</code>
+       */
+      public Builder clearDataDel() {
+        if (dataDelBuilder_ == null) {
+          if (rowCase_ == 3) {
+            rowCase_ = 0;
+            row_ = null;
+            onChanged();
+          }
+        } else {
+          if (rowCase_ == 3) {
+            rowCase_ = 0;
+            row_ = null;
+          }
+          dataDelBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.Patch_Data_Del dataDel = 3;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.Builder getDataDelBuilder() {
+        return getDataDelFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.Patch_Data_Del dataDel = 3;</code>
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_DelOrBuilder getDataDelOrBuilder() {
+        if ((rowCase_ == 3) && (dataDelBuilder_ != null)) {
+          return dataDelBuilder_.getMessageOrBuilder();
+        } else {
+          if (rowCase_ == 3) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.Patch_Data_Del dataDel = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_DelOrBuilder> 
+          getDataDelFieldBuilder() {
+        if (dataDelBuilder_ == null) {
+          if (!(rowCase_ == 3)) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.getDefaultInstance();
+          }
+          dataDelBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_DelOrBuilder>(
+                  (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Data_Del) row_,
+                  getParentForChildren(),
+                  isClean());
+          row_ = null;
+        }
+        rowCase_ = 3;
+        onChanged();
+        return dataDelBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_AddOrBuilder> prefixAddBuilder_;
+      /**
+       * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+       * @return Whether the prefixAdd field is set.
+       */
+      @java.lang.Override
+      public boolean hasPrefixAdd() {
+        return rowCase_ == 4;
+      }
+      /**
+       * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+       * @return The prefixAdd.
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add getPrefixAdd() {
+        if (prefixAddBuilder_ == null) {
+          if (rowCase_ == 4) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.getDefaultInstance();
+        } else {
+          if (rowCase_ == 4) {
+            return prefixAddBuilder_.getMessage();
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+       */
+      public Builder setPrefixAdd(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add value) {
+        if (prefixAddBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          row_ = value;
+          onChanged();
+        } else {
+          prefixAddBuilder_.setMessage(value);
+        }
+        rowCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+       */
+      public Builder setPrefixAdd(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.Builder builderForValue) {
+        if (prefixAddBuilder_ == null) {
+          row_ = builderForValue.build();
+          onChanged();
+        } else {
+          prefixAddBuilder_.setMessage(builderForValue.build());
+        }
+        rowCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+       */
+      public Builder mergePrefixAdd(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add value) {
+        if (prefixAddBuilder_ == null) {
+          if (rowCase_ == 4 &&
+              row_ != org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.getDefaultInstance()) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.newBuilder((org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add) row_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            row_ = value;
+          }
+          onChanged();
+        } else {
+          if (rowCase_ == 4) {
+            prefixAddBuilder_.mergeFrom(value);
+          } else {
+            prefixAddBuilder_.setMessage(value);
+          }
+        }
+        rowCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+       */
+      public Builder clearPrefixAdd() {
+        if (prefixAddBuilder_ == null) {
+          if (rowCase_ == 4) {
+            rowCase_ = 0;
+            row_ = null;
+            onChanged();
+          }
+        } else {
+          if (rowCase_ == 4) {
+            rowCase_ = 0;
+            row_ = null;
+          }
+          prefixAddBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.Builder getPrefixAddBuilder() {
+        return getPrefixAddFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_AddOrBuilder getPrefixAddOrBuilder() {
+        if ((rowCase_ == 4) && (prefixAddBuilder_ != null)) {
+          return prefixAddBuilder_.getMessageOrBuilder();
+        } else {
+          if (rowCase_ == 4) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.Patch_Prefix_Add prefixAdd = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_AddOrBuilder> 
+          getPrefixAddFieldBuilder() {
+        if (prefixAddBuilder_ == null) {
+          if (!(rowCase_ == 4)) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.getDefaultInstance();
+          }
+          prefixAddBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_AddOrBuilder>(
+                  (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Add) row_,
+                  getParentForChildren(),
+                  isClean());
+          row_ = null;
+        }
+        rowCase_ = 4;
+        onChanged();
+        return prefixAddBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_DelOrBuilder> prefixDelBuilder_;
+      /**
+       * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+       * @return Whether the prefixDel field is set.
+       */
+      @java.lang.Override
+      public boolean hasPrefixDel() {
+        return rowCase_ == 5;
+      }
+      /**
+       * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+       * @return The prefixDel.
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del getPrefixDel() {
+        if (prefixDelBuilder_ == null) {
+          if (rowCase_ == 5) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.getDefaultInstance();
+        } else {
+          if (rowCase_ == 5) {
+            return prefixDelBuilder_.getMessage();
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+       */
+      public Builder setPrefixDel(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del value) {
+        if (prefixDelBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          row_ = value;
+          onChanged();
+        } else {
+          prefixDelBuilder_.setMessage(value);
+        }
+        rowCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+       */
+      public Builder setPrefixDel(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.Builder builderForValue) {
+        if (prefixDelBuilder_ == null) {
+          row_ = builderForValue.build();
+          onChanged();
+        } else {
+          prefixDelBuilder_.setMessage(builderForValue.build());
+        }
+        rowCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+       */
+      public Builder mergePrefixDel(org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del value) {
+        if (prefixDelBuilder_ == null) {
+          if (rowCase_ == 5 &&
+              row_ != org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.getDefaultInstance()) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.newBuilder((org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del) row_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            row_ = value;
+          }
+          onChanged();
+        } else {
+          if (rowCase_ == 5) {
+            prefixDelBuilder_.mergeFrom(value);
+          } else {
+            prefixDelBuilder_.setMessage(value);
+          }
+        }
+        rowCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+       */
+      public Builder clearPrefixDel() {
+        if (prefixDelBuilder_ == null) {
+          if (rowCase_ == 5) {
+            rowCase_ = 0;
+            row_ = null;
+            onChanged();
+          }
+        } else {
+          if (rowCase_ == 5) {
+            rowCase_ = 0;
+            row_ = null;
+          }
+          prefixDelBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.Builder getPrefixDelBuilder() {
+        return getPrefixDelFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_DelOrBuilder getPrefixDelOrBuilder() {
+        if ((rowCase_ == 5) && (prefixDelBuilder_ != null)) {
+          return prefixDelBuilder_.getMessageOrBuilder();
+        } else {
+          if (rowCase_ == 5) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del) row_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.Patch_Prefix_Del prefixDel = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_DelOrBuilder> 
+          getPrefixDelFieldBuilder() {
+        if (prefixDelBuilder_ == null) {
+          if (!(rowCase_ == 5)) {
+            row_ = org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.getDefaultInstance();
+          }
+          prefixDelBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_DelOrBuilder>(
+                  (org.apache.jena.riot.protobuf.wire.PB_RDF.Patch_Prefix_Del) row_,
+                  getParentForChildren(),
+                  isClean());
+          row_ = null;
+        }
+        rowCase_ = 5;
+        onChanged();
+        return prefixDelBuilder_;
+      }
+
+      /**
+       * <code>.PatchTxn txn = 6;</code>
+       * @return Whether the txn field is set.
+       */
+      @java.lang.Override
+      public boolean hasTxn() {
+        return rowCase_ == 6;
+      }
+      /**
+       * <code>.PatchTxn txn = 6;</code>
+       * @return The enum numeric value on the wire for txn.
+       */
+      @java.lang.Override
+      public int getTxnValue() {
+        if (rowCase_ == 6) {
+          return ((java.lang.Integer) row_).intValue();
+        }
+        return 0;
+      }
+      /**
+       * <code>.PatchTxn txn = 6;</code>
+       * @param value The enum numeric value on the wire for txn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTxnValue(int value) {
+        rowCase_ = 6;
+        row_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.PatchTxn txn = 6;</code>
+       * @return The txn.
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn getTxn() {
+        if (rowCase_ == 6) {
+          org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn result = org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn.forNumber(
+              (java.lang.Integer) row_);
+          return result == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn.UNRECOGNIZED : result;
+        }
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn.TX;
+      }
+      /**
+       * <code>.PatchTxn txn = 6;</code>
+       * @param value The txn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTxn(org.apache.jena.riot.protobuf.wire.PB_RDF.PatchTxn value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        rowCase_ = 6;
+        row_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.PatchTxn txn = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTxn() {
+        if (rowCase_ == 6) {
+          rowCase_ = 0;
+          row_ = null;
+          onChanged();
+        }
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:RDF_Patch_Row)
+    }
+
+    // @@protoc_insertion_point(class_scope:RDF_Patch_Row)
+    private static final org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row();
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RDF_Patch_Row>
+        PARSER = new com.google.protobuf.AbstractParser<RDF_Patch_Row>() {
+      @java.lang.Override
+      public RDF_Patch_Row parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<RDF_Patch_Row> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RDF_Patch_Row> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RDF_PatchOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:RDF_Patch)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .RDF_Patch_Row row = 1;</code>
+     */
+    java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row> 
+        getRowList();
+    /**
+     * <code>repeated .RDF_Patch_Row row = 1;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row getRow(int index);
+    /**
+     * <code>repeated .RDF_Patch_Row row = 1;</code>
+     */
+    int getRowCount();
+    /**
+     * <code>repeated .RDF_Patch_Row row = 1;</code>
+     */
+    java.util.List<? extends org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder> 
+        getRowOrBuilderList();
+    /**
+     * <code>repeated .RDF_Patch_Row row = 1;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder getRowOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code RDF_Patch}
+   */
+  public static final class RDF_Patch extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:RDF_Patch)
+      RDF_PatchOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 28,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        RDF_Patch.class.getName());
+    }
+    // Use RDF_Patch.newBuilder() to construct.
+    private RDF_Patch(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private RDF_Patch() {
+      row_ = java.util.Collections.emptyList();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Patch_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Patch_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch.class, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch.Builder.class);
+    }
+
+    public static final int ROW_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row> row_;
+    /**
+     * <code>repeated .RDF_Patch_Row row = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row> getRowList() {
+      return row_;
+    }
+    /**
+     * <code>repeated .RDF_Patch_Row row = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder> 
+        getRowOrBuilderList() {
+      return row_;
+    }
+    /**
+     * <code>repeated .RDF_Patch_Row row = 1;</code>
+     */
+    @java.lang.Override
+    public int getRowCount() {
+      return row_.size();
+    }
+    /**
+     * <code>repeated .RDF_Patch_Row row = 1;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row getRow(int index) {
+      return row_.get(index);
+    }
+    /**
+     * <code>repeated .RDF_Patch_Row row = 1;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder getRowOrBuilder(
+        int index) {
+      return row_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < row_.size(); i++) {
+        output.writeMessage(1, row_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < row_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, row_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch)) {
+        return super.equals(obj);
+      }
+      org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch other = (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch) obj;
+
+      if (!getRowList()
+          .equals(other.getRowList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getRowCount() > 0) {
+        hash = (37 * hash) + ROW_FIELD_NUMBER;
+        hash = (53 * hash) + getRowList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code RDF_Patch}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:RDF_Patch)
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_PatchOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Patch_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Patch_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch.class, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch.Builder.class);
+      }
+
+      // Construct using org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        if (rowBuilder_ == null) {
+          row_ = java.util.Collections.emptyList();
+        } else {
+          row_ = null;
+          rowBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_Patch_descriptor;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch getDefaultInstanceForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch build() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch buildPartial() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch result = new org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch result) {
+        if (rowBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            row_ = java.util.Collections.unmodifiableList(row_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.row_ = row_;
+        } else {
+          result.row_ = rowBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch) {
+          return mergeFrom((org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch other) {
+        if (other == org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch.getDefaultInstance()) return this;
+        if (rowBuilder_ == null) {
+          if (!other.row_.isEmpty()) {
+            if (row_.isEmpty()) {
+              row_ = other.row_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureRowIsMutable();
+              row_.addAll(other.row_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.row_.isEmpty()) {
+            if (rowBuilder_.isEmpty()) {
+              rowBuilder_.dispose();
+              rowBuilder_ = null;
+              row_ = other.row_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              rowBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getRowFieldBuilder() : null;
+            } else {
+              rowBuilder_.addAllMessages(other.row_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row m =
+                    input.readMessage(
+                        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.parser(),
+                        extensionRegistry);
+                if (rowBuilder_ == null) {
+                  ensureRowIsMutable();
+                  row_.add(m);
+                } else {
+                  rowBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row> row_ =
+        java.util.Collections.emptyList();
+      private void ensureRowIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          row_ = new java.util.ArrayList<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row>(row_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder> rowBuilder_;
+
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row> getRowList() {
+        if (rowBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(row_);
+        } else {
+          return rowBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public int getRowCount() {
+        if (rowBuilder_ == null) {
+          return row_.size();
+        } else {
+          return rowBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row getRow(int index) {
+        if (rowBuilder_ == null) {
+          return row_.get(index);
+        } else {
+          return rowBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public Builder setRow(
+          int index, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row value) {
+        if (rowBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureRowIsMutable();
+          row_.set(index, value);
+          onChanged();
+        } else {
+          rowBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public Builder setRow(
+          int index, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder builderForValue) {
+        if (rowBuilder_ == null) {
+          ensureRowIsMutable();
+          row_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          rowBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public Builder addRow(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row value) {
+        if (rowBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureRowIsMutable();
+          row_.add(value);
+          onChanged();
+        } else {
+          rowBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public Builder addRow(
+          int index, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row value) {
+        if (rowBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureRowIsMutable();
+          row_.add(index, value);
+          onChanged();
+        } else {
+          rowBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public Builder addRow(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder builderForValue) {
+        if (rowBuilder_ == null) {
+          ensureRowIsMutable();
+          row_.add(builderForValue.build());
+          onChanged();
+        } else {
+          rowBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public Builder addRow(
+          int index, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder builderForValue) {
+        if (rowBuilder_ == null) {
+          ensureRowIsMutable();
+          row_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          rowBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public Builder addAllRow(
+          java.lang.Iterable<? extends org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row> values) {
+        if (rowBuilder_ == null) {
+          ensureRowIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, row_);
+          onChanged();
+        } else {
+          rowBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public Builder clearRow() {
+        if (rowBuilder_ == null) {
+          row_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          rowBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public Builder removeRow(int index) {
+        if (rowBuilder_ == null) {
+          ensureRowIsMutable();
+          row_.remove(index);
+          onChanged();
+        } else {
+          rowBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder getRowBuilder(
+          int index) {
+        return getRowFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder getRowOrBuilder(
+          int index) {
+        if (rowBuilder_ == null) {
+          return row_.get(index);  } else {
+          return rowBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public java.util.List<? extends org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder> 
+           getRowOrBuilderList() {
+        if (rowBuilder_ != null) {
+          return rowBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(row_);
+        }
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder addRowBuilder() {
+        return getRowFieldBuilder().addBuilder(
+            org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder addRowBuilder(
+          int index) {
+        return getRowFieldBuilder().addBuilder(
+            index, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .RDF_Patch_Row row = 1;</code>
+       */
+      public java.util.List<org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder> 
+           getRowBuilderList() {
+        return getRowFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder> 
+          getRowFieldBuilder() {
+        if (rowBuilder_ == null) {
+          rowBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_Row.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch_RowOrBuilder>(
+                  row_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          row_ = null;
+        }
+        return rowBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:RDF_Patch)
+    }
+
+    // @@protoc_insertion_point(class_scope:RDF_Patch)
+    private static final org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch();
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RDF_Patch>
+        PARSER = new com.google.protobuf.AbstractParser<RDF_Patch>() {
+      @java.lang.Override
+      public RDF_Patch parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<RDF_Patch> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RDF_Patch> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Patch getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_RDF_IRI_descriptor;
   private static final 
@@ -16723,6 +23942,41 @@ public final class PB_RDF {
   private static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_RDF_Graph_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_Patch_Prefix_Add_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_Patch_Prefix_Add_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_Patch_Prefix_Del_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_Patch_Prefix_Del_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_Patch_Header_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_Patch_Header_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_Patch_Data_Add_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_Patch_Data_Add_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_Patch_Data_Del_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_Patch_Data_Del_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_RDF_Patch_Row_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_RDF_Patch_Row_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_RDF_Patch_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_RDF_Patch_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -16768,8 +24022,27 @@ public final class PB_RDF {
       " \003(\0132\016.RDF_StreamRow\"&\n\014RDF_VarTuple\022\026\n\004" +
       "vars\030\001 \003(\0132\010.RDF_Var\"\'\n\rRDF_DataTuple\022\026\n" +
       "\003row\030\001 \003(\0132\t.RDF_Term\"(\n\tRDF_Graph\022\033\n\006tr" +
-      "iple\030\001 \003(\0132\013.RDF_TripleB.\n\"org.apache.je" +
-      "na.riot.protobuf.wireB\006PB_RDFH\001b\006proto3"
+      "iple\030\001 \003(\0132\013.RDF_Triple\"P\n\020Patch_Prefix_" +
+      "Add\022\034\n\tgraphNode\030\001 \001(\0132\t.RDF_Term\022\016\n\006pre" +
+      "fix\030\002 \001(\t\022\016\n\006iriStr\030\003 \001(\t\"@\n\020Patch_Prefi" +
+      "x_Del\022\034\n\tgraphNode\030\001 \001(\0132\t.RDF_Term\022\016\n\006p" +
+      "refix\030\002 \001(\t\"6\n\014Patch_Header\022\014\n\004name\030\001 \001(" +
+      "\t\022\030\n\005value\030\002 \001(\0132\t.RDF_Term\"h\n\016Patch_Dat" +
+      "a_Add\022\024\n\001s\030\001 \001(\0132\t.RDF_Term\022\024\n\001p\030\002 \001(\0132\t" +
+      ".RDF_Term\022\024\n\001o\030\003 \001(\0132\t.RDF_Term\022\024\n\001g\030\004 \001" +
+      "(\0132\t.RDF_Term\"h\n\016Patch_Data_Del\022\024\n\001s\030\001 \001" +
+      "(\0132\t.RDF_Term\022\024\n\001p\030\002 \001(\0132\t.RDF_Term\022\024\n\001o" +
+      "\030\003 \001(\0132\t.RDF_Term\022\024\n\001g\030\004 \001(\0132\t.RDF_Term\"" +
+      "\351\001\n\rRDF_Patch_Row\022\037\n\006header\030\001 \001(\0132\r.Patc" +
+      "h_HeaderH\000\022\"\n\007dataAdd\030\002 \001(\0132\017.Patch_Data" +
+      "_AddH\000\022\"\n\007dataDel\030\003 \001(\0132\017.Patch_Data_Del" +
+      "H\000\022&\n\tprefixAdd\030\004 \001(\0132\021.Patch_Prefix_Add" +
+      "H\000\022&\n\tprefixDel\030\005 \001(\0132\021.Patch_Prefix_Del" +
+      "H\000\022\030\n\003txn\030\006 \001(\0162\t.PatchTxnH\000B\005\n\003row\"(\n\tR" +
+      "DF_Patch\022\033\n\003row\030\001 \003(\0132\016.RDF_Patch_Row*/\n" +
+      "\010PatchTxn\022\006\n\002TX\020\000\022\006\n\002TC\020\001\022\006\n\002TA\020\002\022\013\n\007Seg" +
+      "ment\020\003B.\n\"org.apache.jena.riot.protobuf." +
+      "wireB\006PB_RDFH\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -16889,6 +24162,48 @@ public final class PB_RDF {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Graph_descriptor,
         new java.lang.String[] { "Triple", });
+    internal_static_Patch_Prefix_Add_descriptor =
+      getDescriptor().getMessageTypes().get(19);
+    internal_static_Patch_Prefix_Add_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_Patch_Prefix_Add_descriptor,
+        new java.lang.String[] { "GraphNode", "Prefix", "IriStr", });
+    internal_static_Patch_Prefix_Del_descriptor =
+      getDescriptor().getMessageTypes().get(20);
+    internal_static_Patch_Prefix_Del_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_Patch_Prefix_Del_descriptor,
+        new java.lang.String[] { "GraphNode", "Prefix", });
+    internal_static_Patch_Header_descriptor =
+      getDescriptor().getMessageTypes().get(21);
+    internal_static_Patch_Header_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_Patch_Header_descriptor,
+        new java.lang.String[] { "Name", "Value", });
+    internal_static_Patch_Data_Add_descriptor =
+      getDescriptor().getMessageTypes().get(22);
+    internal_static_Patch_Data_Add_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_Patch_Data_Add_descriptor,
+        new java.lang.String[] { "S", "P", "O", "G", });
+    internal_static_Patch_Data_Del_descriptor =
+      getDescriptor().getMessageTypes().get(23);
+    internal_static_Patch_Data_Del_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_Patch_Data_Del_descriptor,
+        new java.lang.String[] { "S", "P", "O", "G", });
+    internal_static_RDF_Patch_Row_descriptor =
+      getDescriptor().getMessageTypes().get(24);
+    internal_static_RDF_Patch_Row_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_RDF_Patch_Row_descriptor,
+        new java.lang.String[] { "Header", "DataAdd", "DataDel", "PrefixAdd", "PrefixDel", "Txn", "Row", });
+    internal_static_RDF_Patch_descriptor =
+      getDescriptor().getMessageTypes().get(25);
+    internal_static_RDF_Patch_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_RDF_Patch_descriptor,
+        new java.lang.String[] { "Row", });
     descriptor.resolveAllFeaturesImmutable();
   }
 
