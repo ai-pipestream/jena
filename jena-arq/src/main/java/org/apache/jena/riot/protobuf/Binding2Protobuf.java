@@ -25,6 +25,8 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.google.protobuf.CodedOutputStream;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.*;
 import org.apache.jena.sparql.core.Var;
@@ -35,11 +37,11 @@ public class Binding2Protobuf implements AutoCloseable {
     private final RDF_DataTuple.Builder row = RDF_DataTuple.newBuilder();
     private final RDF_Term.Builder term = RDF_Term.newBuilder();
     private final Collection<Var> vars;
-    private final OutputStream out;
+    private final CodedOutputStream out;
     private final boolean encodeValues;
 
     public Binding2Protobuf(OutputStream out, Collection<Var> vars, boolean encodeValues) {
-        this.out = out;
+        this.out = PBufRDF.delimitedOutput(out);
         this.vars = vars;
         this.encodeValues = encodeValues;
         varsRow();
@@ -53,7 +55,7 @@ public class Binding2Protobuf implements AutoCloseable {
             var.setName(v.getVarName());
             vrow.addVars(var);
         });
-        PBufRDF.writeDelimitedTo(vrow.build(), out);
+        PBufRDF.writeDelimited(vrow.build(), out);
     }
 
     public void output(Binding binding) {
@@ -67,9 +69,12 @@ public class Binding2Protobuf implements AutoCloseable {
             RDF_Term rt = ProtobufConvert.toProtobuf(n, term, encodeValues);
             row.addRow(rt);
         });
-        PBufRDF.writeDelimitedTo(row.build(), out);
+        PBufRDF.writeDelimited(row.build(), out);
     }
 
+    /** Flush buffered output. The underlying {@link OutputStream} is not closed. */
     @Override
-    public void close() {}
+    public void close() {
+        PBufRDF.flush(out);
+    }
 }

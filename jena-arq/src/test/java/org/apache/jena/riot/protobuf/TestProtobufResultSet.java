@@ -21,12 +21,15 @@
 
 package org.apache.jena.riot.protobuf;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +39,13 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.ResultSetRewindable;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_DataTuple;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Var;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_VarTuple;
 import org.apache.jena.riot.resultset.ResultSetLang;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.resultset.ResultsCompare;
 import org.apache.jena.sparql.sse.Item;
@@ -102,7 +111,7 @@ public class TestProtobufResultSet {
         RowSet rs$ = ProtobufRDF.readRowSet(in);
         ResultSetRewindable resultSet2 = ResultSetFactory.makeRewindable(rs$);
         // Includes bnode labels.
-        ResultsCompare.equalsExact(resultSet, resultSet2);
+        assertTrue(ResultsCompare.equalsExact(resultSet, resultSet2));
         resultSet.reset();
         resultSet2.reset();
         return resultSet2;
@@ -113,6 +122,53 @@ public class TestProtobufResultSet {
         Item item = SSE.parse(s);
         ResultSetRewindable rs = ResultSetFactory.makeRewindable(BuilderRowSet.build(item));
         return rs;
+    }
+
+    // Wire compatibility with the protobuf library's own delimited read and write,
+    // which earlier versions of Jena used directly.
+
+    @Test public void resultSet_wire_write_compat() throws IOException {
+        rs0.reset();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ResultSetFormatter.output(out, rs0, ResultSetLang.RS_Protobuf);
+        rs0.reset();
+
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        RDF_VarTuple vars = RDF_VarTuple.parseDelimitedFrom(in);
+        assertEquals(List.of("x", "y"), vars.getVarsList().stream().map(RDF_Var::getName).toList());
+        int rows = 0;
+        while ( true ) {
+            RDF_DataTuple row = RDF_DataTuple.parseDelimitedFrom(in);
+            if ( row == null )
+                break;
+            assertEquals(2, row.getRowCount());
+            rows++;
+        }
+        assertEquals(rs0.size(), rows);
+    }
+
+    @Test public void resultSet_wire_read_compat() throws IOException {
+        rs0.reset();
+        List<Var> vars = Var.varList(rs0.getResultVars());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        RDF_VarTuple.Builder vrow = RDF_VarTuple.newBuilder();
+        vars.forEach(v -> vrow.addVars(RDF_Var.newBuilder().setName(v.getVarName())));
+        vrow.build().writeDelimitedTo(out);
+        RDF_DataTuple.Builder drow = RDF_DataTuple.newBuilder();
+        RDF_Term.Builder term = RDF_Term.newBuilder();
+        while ( rs0.hasNext() ) {
+            Binding b = rs0.nextBinding();
+            drow.clear();
+            for ( Var v : vars )
+                drow.addRow(ProtobufConvert.toProtobuf(b.get(v), term, false));
+            drow.build().writeDelimitedTo(out);
+        }
+        rs0.reset();
+
+        RowSet rs$ = ProtobufRDF.readRowSet(new ByteArrayInputStream(out.toByteArray()));
+        ResultSetRewindable resultSet2 = ResultSetFactory.makeRewindable(rs$);
+        assertTrue(ResultsCompare.equalsExact(rs0, resultSet2));
+        rs0.reset();
     }
 
     private static final String DIR = TS_RDFProtobuf.TestingDir;

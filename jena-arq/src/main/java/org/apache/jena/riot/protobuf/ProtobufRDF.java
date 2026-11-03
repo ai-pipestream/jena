@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import com.google.protobuf.CodedInputStream;
+
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow;
 import org.apache.jena.riot.system.PrefixMapFactory;
@@ -68,7 +70,7 @@ public class ProtobufRDF {
     public static StreamRDF streamToFile(String filename, boolean withValues) {
         OutputStream out = IO.openOutputFile(filename);
         out = IO.ensureBuffered(out);
-        return streamToOutputStream(out);
+        return streamToOutputStream(out, withValues);
     }
 
     /**
@@ -104,7 +106,7 @@ public class ProtobufRDF {
 
     /**
      * Read an input stream and send item to the {@link StreamRDF}. The input stream
-     * will be read with "parseDelimitedTo".
+     * is a sequence of length-delimited messages, as written by "writeDelimitedTo".
      * @param input InputStream
      * @param stream StreamRDF
      */
@@ -123,10 +125,11 @@ public class ProtobufRDF {
      * @param action  Code to act on the row.
      */
     public static void apply(InputStream input, VisitorStreamRowProtoRDF action) {
-        input = IO.ensureBuffered(input);
+        // The CodedInputStream buffers; no need to buffer the InputStream as well.
+        CodedInputStream codedInput = PBufRDF.delimitedInput(input);
         try {
             while(true) {
-                RDF_StreamRow x = RDF_StreamRow.parseDelimitedFrom(input);
+                RDF_StreamRow x = PBufRDF.readDelimited(codedInput, RDF_StreamRow.parser());
                 boolean b = PBufRDF.visit(x, action);
                 if ( !b )
                     return;

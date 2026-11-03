@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.protobuf.CodedInputStream;
+
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.atlas.iterator.IteratorSlotted;
 import org.apache.jena.graph.Node;
@@ -42,17 +44,17 @@ class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterator<Bind
 
     private List<Var> vars = new ArrayList<>();
     private List<String> varNames = new ArrayList<>();
-    private InputStream input;
+    private final CodedInputStream input;
     private BindingBuilder b = Binding.builder();
 
     Protobuf2Binding(InputStream input) {
-        this.input = input;
+        this.input = PBufRDF.delimitedInput(input);
         readVars();
     }
 
     private void readVars() {
         try {
-            RDF_VarTuple vrow = RDF_VarTuple.parseDelimitedFrom(input);
+            RDF_VarTuple vrow = PBufRDF.readDelimited(input, RDF_VarTuple.parser());
             if ( vrow != null )
                 vrow.getVarsList().forEach(rv->varNames.add(rv.getName()));
             vars = Var.varList(varNames);
@@ -67,7 +69,7 @@ class Protobuf2Binding extends IteratorSlotted<Binding> implements Iterator<Bind
     protected Binding moveToNext() {
         b.reset();
         try {
-            RDF_DataTuple dataTuple = RDF_DataTuple.parseDelimitedFrom(input);
+            RDF_DataTuple dataTuple = PBufRDF.readDelimited(input, RDF_DataTuple.parser());
             if ( dataTuple == null )
                 return null;
             List<RDF_Term> row = dataTuple.getRowList();

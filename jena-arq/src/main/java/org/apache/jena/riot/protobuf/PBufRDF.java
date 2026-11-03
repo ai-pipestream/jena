@@ -22,9 +22,13 @@
 package org.apache.jena.riot.protobuf;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.CodedInputStream;
+import com.google.protobuf.CodedOutputStream;
+import com.google.protobuf.MessageLite;
+import com.google.protobuf.Parser;
 
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.atlas.lib.InternalErrorException;
@@ -43,9 +47,73 @@ class PBufRDF {
 
     private static PrefixMap PMAP0 = PrefixMapFactory.emptyPrefixMap();
 
-    public static void writeDelimitedTo(GeneratedMessage gmv3, OutputStream output) {
+    /**
+     * Buffer size for the shared {@link CodedInputStream} and {@link CodedOutputStream}
+     * used for length-delimited streams. Each row is small, so this comfortably
+     * holds many rows per refill.
+     */
+    private static final int BUFFER_SIZE = 32*1024;
+
+    /**
+     * Create a {@link CodedInputStream} for reading a length-delimited stream of
+     * messages with {@link #readDelimited}.
+     * <p>
+     * The one {@code CodedInputStream} is used for the whole stream.
+     * {@code MessageLite.parseDelimitedFrom(InputStream)} creates a new
+     * {@code CodedInputStream}, with its own buffer, for every message, which
+     * is a large part of the per-row cost when reading millions of rows.
+     */
+    static CodedInputStream delimitedInput(InputStream input) {
+        return CodedInputStream.newInstance(input, BUFFER_SIZE);
+    }
+
+    /**
+     * Read one length-delimited message from a {@link CodedInputStream} created by
+     * {@link #delimitedInput}. Returns null at end of stream.
+     * <p>
+     * The wire format is the same as {@code writeDelimitedTo}/{@code parseDelimitedFrom}:
+     * a varint length followed by the message bytes.
+     */
+    static <X extends MessageLite> X readDelimited(CodedInputStream input, Parser<X> parser) throws IOException {
+        if ( input.isAtEnd() )
+            return null;
+        int size = input.readRawVarint32();
+        int oldLimit = input.pushLimit(size);
+        X message = parser.parseFrom(input);
+        input.checkLastTagWas(0);
+        input.popLimit(oldLimit);
+        // Stop the bytes-read counter growing without bound on a long stream.
+        input.resetSizeCounter();
+        return message;
+    }
+
+    /**
+     * Create a {@link CodedOutputStream} for writing a length-delimited stream of
+     * messages with {@link #writeDelimited}. The caller must call
+     * {@link CodedOutputStream#flush()} when the stream is complete.
+     * <p>
+     * As for reading, one {@code CodedOutputStream} serves the whole stream.
+     * {@code MessageLite.writeDelimitedTo(OutputStream)} creates a new
+     * {@code CodedOutputStream}, with its own buffer, for every message.
+     */
+    static CodedOutputStream delimitedOutput(OutputStream output) {
+        return CodedOutputStream.newInstance(output, BUFFER_SIZE);
+    }
+
+    /**
+     * Write one length-delimited message to a {@link CodedOutputStream} created by
+     * {@link #delimitedOutput}.
+     */
+    static void writeDelimited(MessageLite message, CodedOutputStream output) {
         try {
-            gmv3.writeDelimitedTo(output);
+            output.writeUInt32NoTag(message.getSerializedSize());
+            message.writeTo(output);
+        } catch (IOException e) { IO.exception(e); }
+    }
+
+    static void flush(CodedOutputStream output) {
+        try {
+            output.flush();
         } catch (IOException e) { IO.exception(e); }
     }
 

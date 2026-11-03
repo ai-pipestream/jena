@@ -35,7 +35,12 @@ import org.junit.jupiter.api.Test;
 import org.apache.jena.atlas.lib.StrUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_StreamRow;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term;
+import org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Triple;
+import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.system.StreamRDF;
@@ -119,8 +124,85 @@ public class TestProtobufStreamRDF {
       sameTerms(graph, g2);
     }
 
-    // Using delimited streams.
+    // Wire compatibility: the delimited stream must be the same bytes as
+    // the protobuf library's own writeDelimitedTo/parseDelimitedFrom produce
+    // and accept, because files written by earlier versions of Jena used them.
 
+    @Test public void delimited_wire_read_compat() throws IOException {
+        // Written with the protobuf library, one message at a time.
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for ( RDF_StreamRow row : rows() )
+            row.writeDelimitedTo(out);
+        // Read with Jena.
+        Graph g2 = GraphFactory.createGraphMem();
+        ProtobufRDF.inputStreamToStreamRDF(new ByteArrayInputStream(out.toByteArray()), StreamRDFLib.graph(g2));
+        assertTrue(IsoMatcher.isomorphic(graph, g2));
+        sameTerms(graph, g2);
+    }
+
+    @Test public void delimited_wire_write_compat() throws IOException {
+        // Written with Jena.
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamRDF stream = ProtobufRDF.streamToOutputStream(out);
+        StreamRDFOps.graphToStream(graph, stream);
+        // Read with the protobuf library, one message at a time.
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        Graph g2 = GraphFactory.createGraphMem();
+        Protobuf2StreamRDF visitor = new Protobuf2StreamRDF(PrefixMapFactory.create(), StreamRDFLib.graph(g2));
+        int count = 0;
+        while ( true ) {
+            RDF_StreamRow row = RDF_StreamRow.parseDelimitedFrom(in);
+            if ( row == null )
+                break;
+            PBufRDF.visit(row, visitor);
+            count++;
+        }
+        assertEquals(graph.size(), count);
+        assertTrue(IsoMatcher.isomorphic(graph, g2));
+        sameTerms(graph, g2);
+    }
+
+    @Test public void delimited_empty_stream() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamRDF stream = ProtobufRDF.streamToOutputStream(out);
+        stream.start();
+        stream.finish();
+        assertEquals(0, out.size());
+        Graph g2 = GraphFactory.createGraphMem();
+        ProtobufRDF.inputStreamToStreamRDF(new ByteArrayInputStream(out.toByteArray()), StreamRDFLib.graph(g2));
+        assertEquals(0, g2.size());
+    }
+
+    // Many rows: more than one refill of the shared input buffer.
+    @Test public void delimited_many_rows() {
+        Graph big = GraphFactory.createGraphMem();
+        Node p = SSE.parseNode(":p");
+        for ( int i = 0 ; i < 20_000 ; i++ ) {
+            Node s = NodeFactory.createURI("http://example/subject/with/a/long/enough/name/" + i);
+            Node o = NodeFactory.createLiteralString("object value " + i);
+            big.add(Triple.create(s, p, o));
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamRDF stream = ProtobufRDF.streamToOutputStream(out);
+        StreamRDFOps.graphToStream(big, stream);
+        Graph g2 = GraphFactory.createGraphMem();
+        ProtobufRDF.inputStreamToStreamRDF(new ByteArrayInputStream(out.toByteArray()), StreamRDFLib.graph(g2));
+        assertEquals(big.size(), g2.size());
+        sameTerms(big, g2);
+    }
+
+    private static java.util.List<RDF_StreamRow> rows() {
+        java.util.List<RDF_StreamRow> rows = new java.util.ArrayList<>();
+        RDF_StreamRow.Builder rowBuilder = RDF_StreamRow.newBuilder();
+        RDF_Triple.Builder tripleBuilder = RDF_Triple.newBuilder();
+        RDF_Term.Builder termBuilder = RDF_Term.newBuilder();
+        graph.find().forEachRemaining(t -> {
+            rowBuilder.clear();
+            rowBuilder.setTriple(PBufRDF.rdfTriple(t, tripleBuilder, termBuilder));
+            rows.add(rowBuilder.build());
+        });
+        return rows;
+    }
 
 //    // graph_01 and graph_02 are the same test but use different ways to read/write the graph.
 //    // Ditto dataset_01 and dataset_02
@@ -219,7 +301,7 @@ public class TestProtobufStreamRDF {
         Iterator<Triple> iter = g1.find(null, null, null);
         while(iter.hasNext()) {
             Triple t = iter.next();
-            g2.contains(t);
+            assertTrue(g2.contains(t), "Missing: "+t);
         }
     }
 

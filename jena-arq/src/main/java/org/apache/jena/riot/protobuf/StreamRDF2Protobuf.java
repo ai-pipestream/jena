@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.Consumer;
 
+import com.google.protobuf.CodedOutputStream;
+
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.protobuf.wire.PB_RDF.*;
@@ -48,8 +50,13 @@ public class StreamRDF2Protobuf implements StreamRDF, AutoCloseable
     private final Runnable andFinally;
 
     public static StreamRDF createDelimited(OutputStream outputStream, boolean withValues) {
-        Consumer<RDF_StreamRow> output = sr->PBufRDF.writeDelimitedTo(sr, outputStream);
-        return new StreamRDF2Protobuf(output, withValues, ()->IO.flush(outputStream));
+        CodedOutputStream codedOutput = PBufRDF.delimitedOutput(outputStream);
+        Consumer<RDF_StreamRow> output = sr->PBufRDF.writeDelimited(sr, codedOutput);
+        Runnable atEnd = () -> {
+            PBufRDF.flush(codedOutput);
+            IO.flush(outputStream);
+        };
+        return new StreamRDF2Protobuf(output, withValues, atEnd);
     }
 
     public static void writeBlk(OutputStream outputStream, Consumer<StreamRDF> stream, boolean withValues) {
