@@ -34,6 +34,7 @@ import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFBase;
 import org.apache.jena.riot.system.StreamRDFWriter;
+import org.apache.jena.sys.JenaSystem;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -67,9 +68,13 @@ public class TestBinaryRDFWrite {
     private RDFFormat format;
     private List<Triple> triples;
 
-    private static RDFFormat getFormat(String name) {
+    /** See {@link TestBinaryRDFRead#getFormat}. */
+    static RDFFormat getFormat(String name) {
         try {
-            return (RDFFormat) RDFFormat.class.getField(name).get(null);
+            int hash = name.indexOf('#');
+            Class<?> cls = hash < 0 ? RDFFormat.class : Class.forName(name.substring(0, hash));
+            String field = hash < 0 ? name : name.substring(hash + 1);
+            return (RDFFormat) cls.getField(field).get(null);
         } catch (ReflectiveOperationException e) {
             throw new IllegalArgumentException("Unknown format: " + name, e);
         }
@@ -77,6 +82,9 @@ public class TestBinaryRDFWrite {
 
     @Setup(Level.Trial)
     public void setup() {
+        // Initialize Jena before any format constant is touched, so that a format from
+        // another library can register itself with a fully built RIOT registry.
+        JenaSystem.init();
         format = getFormat(param1_Format);
         List<Triple> list = new ArrayList<>();
         RDFParser.source(param0_SourceFile).parse(new StreamRDFBase() {
@@ -103,10 +111,14 @@ public class TestBinaryRDFWrite {
         var opt = JmhDefaultOptions.getDefaults(this.getClass())
                 .warmupIterations(2)
                 .measurementIterations(5);
-        // -Dbenchmark.source=<file> runs the benchmark on another file.
+        // -Dbenchmark.source=<file> runs the benchmark on another file;
+        // -Dbenchmark.formats=A,B,... replaces the list of formats.
         String source = System.getProperty("benchmark.source");
         if ( source != null )
             opt.param("param0_SourceFile", source);
+        String formats = System.getProperty("benchmark.formats");
+        if ( formats != null )
+            opt.param("param1_Format", formats.split(","));
         var results = new Runner(opt.build()).run();
         Assert.assertNotNull(results);
     }

@@ -34,6 +34,7 @@ import org.apache.jena.riot.lang.StreamRDFCounting;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.riot.system.StreamRDFWriter;
+import org.apache.jena.sys.JenaSystem;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -52,8 +53,8 @@ import org.openjdk.jmh.runner.Runner;
  * Replace {@code testing/data.nt.gz} with a file of a size that gives stable numbers,
  * for example a BSBM dataset; the figure of interest is the difference between the
  * formats on the same file. The format parameter is the name of an {@link RDFFormat}
- * constant, so values that only exist on some branches ({@code RDF_PROTO_V2}) can be
- * given without changing this class.
+ * constant, so values that only exist on some branches ({@code RDF_PROTO_V2}) or on a
+ * class from another library can be given without changing this class.
  */
 @State(Scope.Benchmark)
 public class TestBinaryRDFRead {
@@ -72,9 +73,19 @@ public class TestBinaryRDFRead {
     private RDFFormat format;
     private Path file;
 
-    private static RDFFormat getFormat(String name) {
+    /**
+     * The format parameter is the name of a static {@link RDFFormat} constant: a bare name
+     * is looked up on {@code RDFFormat}; {@code some.Class#FIELD} names a constant on
+     * another class, so that a format registered by a library on the class path, such as
+     * {@code eu.neverblink.jelly.convert.jena.riot.JellyFormat#JELLY_BIG_STRICT}, can be
+     * measured alongside the built-in ones.
+     */
+    static RDFFormat getFormat(String name) {
         try {
-            return (RDFFormat) RDFFormat.class.getField(name).get(null);
+            int hash = name.indexOf('#');
+            Class<?> cls = hash < 0 ? RDFFormat.class : Class.forName(name.substring(0, hash));
+            String field = hash < 0 ? name : name.substring(hash + 1);
+            return (RDFFormat) cls.getField(field).get(null);
         } catch (ReflectiveOperationException e) {
             throw new IllegalArgumentException("Unknown format: " + name, e);
         }
@@ -82,6 +93,9 @@ public class TestBinaryRDFRead {
 
     @Setup(Level.Trial)
     public void setup() throws IOException {
+        // Initialize Jena before any format constant is touched, so that a format from
+        // another library can register itself with a fully built RIOT registry.
+        JenaSystem.init();
         format = getFormat(param1_Format);
         file = Files.createTempFile("binary-rdf-", ".bin");
         try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(file), 64 * 1024)) {
@@ -108,10 +122,14 @@ public class TestBinaryRDFRead {
         var opt = JmhDefaultOptions.getDefaults(this.getClass())
                 .warmupIterations(2)
                 .measurementIterations(5);
-        // -Dbenchmark.source=<file> runs the benchmark on another file.
+        // -Dbenchmark.source=<file> runs the benchmark on another file;
+        // -Dbenchmark.formats=A,B,... replaces the list of formats.
         String source = System.getProperty("benchmark.source");
         if ( source != null )
             opt.param("param0_SourceFile", source);
+        String formats = System.getProperty("benchmark.formats");
+        if ( formats != null )
+            opt.param("param1_Format", formats.split(","));
         var results = new Runner(opt.build()).run();
         Assert.assertNotNull(results);
     }

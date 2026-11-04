@@ -109,6 +109,15 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Jelly-RDF, a separate Protobuf-based RDF format, measured next to the Jena
+             binary formats by TestBinaryRDFRead and TestBinaryRDFWrite. Benchmarks only. -->
+        <dependency>
+            <groupId>eu.neverblink.jelly</groupId>
+            <artifactId>jelly-jena</artifactId>
+            <version>4.0.1</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>

@@ -21,6 +21,14 @@ From the checkout root, for the gRPC transport benchmark:
 
     mvn -pl jena-grpc -Dbenchmark.skip=false -Dtest=BenchGrpcTransportJmh -Dbenchmark.source=/data/bsbm-5m.nt test
 
+The format list of TestBinaryRDFRead and TestBinaryRDFWrite is the system property
+"benchmark.formats": the names of RDFFormat constants, or "some.Class#FIELD" for a
+constant on another class. With jelly-jena on the class path (it is a test dependency
+of jena-benchmarks-jmh), Jelly-RDF is measured alongside the Jena formats like this:
+
+    mvn -Dbenchmark.skip=false -Dtest=TestBinaryRDFRead -Dbenchmark.source=/data/bsbm-25m.nt \
+        -Dbenchmark.formats=RDF_THRIFT,RDF_PROTO,eu.neverblink.jelly.convert.jena.riot.JellyFormat#JELLY_BIG_STRICT test
+
 TestBinaryRDFRead writes the file in each format to a temporary file during setup and
 times the read of it. TestBinaryRDFWrite and BenchGrpcTransportJmh hold the parsed
 triples in memory, so their input has to fit in the heap as Triple objects: 5 million
