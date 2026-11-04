@@ -21,6 +21,7 @@
 package org.apache.jena.riot.protobuf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -46,12 +47,13 @@ import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.sse.SSE;
 import org.apache.jena.sparql.util.IsoMatcher;
 import org.junit.jupiter.api.Test;
 
-/** The version 2 encoding: stream header, term and datatype tables, repeats. */
+/** The version 2 encoding: stream header, term, namespace and datatype tables, terms left out. */
 public class TestProtobufV2 {
 
     static String gs = StrUtils.strjoinNL(
@@ -150,33 +152,192 @@ public class TestProtobufV2 {
         assertEquals(2, header.getVersion());
         assertEquals(ProtobufEncoderV2.DFT_TERM_TABLE_SIZE, header.getTermTableSize());
         assertEquals(ProtobufEncoderV2.DFT_DATATYPE_TABLE_SIZE, header.getDatatypeTableSize());
+        assertEquals(ProtobufEncoderV2.DFT_NAMESPACE_TABLE_SIZE, header.getNamespaceTableSize());
 
-        // First row: everything in full. Table slots: :s=0, :p=1, :o1=2.
+        // First row: everything in full, as namespace and local name. Table slots: :s=0, :p=1, :o1=2.
         RDF_Triple t1 = rows.get(1).getTriple();
-        assertEquals(RDF_Term.TermCase.IRI, t1.getS().getTermCase());
-        assertEquals(RDF_Term.TermCase.IRI, t1.getP().getTermCase());
-        assertEquals(RDF_Term.TermCase.IRI, t1.getO().getTermCase());
+        assertEquals(RDF_Term.TermCase.NSIRI, t1.getS().getTermCase());
+        assertEquals(RDF_Term.TermCase.NSIRI, t1.getP().getTermCase());
+        assertEquals(RDF_Term.TermCase.NSIRI, t1.getO().getTermCase());
+        // The namespace in full once, then by reference: 1 is the most recent namespace.
+        assertEquals(RDF_NsIRI.NsCase.NAMESPACE, t1.getS().getNsIri().getNsCase());
+        assertEquals("http://example/", t1.getS().getNsIri().getNamespace());
+        assertEquals("s", t1.getS().getNsIri().getLocalName());
+        assertEquals(RDF_NsIRI.NsCase.NAMESPACEREF, t1.getP().getNsIri().getNsCase());
+        assertEquals(1, t1.getP().getNsIri().getNamespaceRef());
+        assertEquals("p", t1.getP().getNsIri().getLocalName());
 
-        // Same subject and predicate as the row before. :o2=3.
+        // Same subject and predicate as the row before: left out. :o2=3.
         RDF_Triple t2 = rows.get(2).getTriple();
-        assertEquals(RDF_Term.TermCase.REPEAT, t2.getS().getTermCase());
-        assertEquals(RDF_Term.TermCase.REPEAT, t2.getP().getTermCase());
-        assertEquals(RDF_Term.TermCase.IRI, t2.getO().getTermCase());
+        assertLeftOut(t2.hasS(), t2.getSRef());
+        assertLeftOut(t2.hasP(), t2.getPRef());
+        assertEquals(RDF_Term.TermCase.NSIRI, t2.getO().getTermCase());
 
-        // :q=4 is new; :o1 was seen before and is in slot 2.
+        // :q=4 is new; :o1 was seen before and is in slot 2: three back from :q.
         RDF_Triple t3 = rows.get(3).getTriple();
-        assertEquals(RDF_Term.TermCase.REPEAT, t3.getS().getTermCase());
-        assertEquals(RDF_Term.TermCase.IRI, t3.getP().getTermCase());
-        assertEquals(RDF_Term.TermCase.TERMREF, t3.getO().getTermCase());
-        assertEquals(2, t3.getO().getTermRef());
+        assertLeftOut(t3.hasS(), t3.getSRef());
+        assertEquals(RDF_Term.TermCase.NSIRI, t3.getP().getTermCase());
+        assertFalse(t3.hasO());
+        assertEquals(3, t3.getORef());
 
         // Terms seen before in other positions are references, not repeats.
         RDF_Triple t4 = rows.get(4).getTriple();
-        assertEquals(RDF_Term.TermCase.TERMREF, t4.getS().getTermCase());
-        assertEquals(2, t4.getS().getTermRef());
-        assertEquals(RDF_Term.TermCase.REPEAT, t4.getP().getTermCase());
-        assertEquals(RDF_Term.TermCase.TERMREF, t4.getO().getTermCase());
-        assertEquals(0, t4.getO().getTermRef());
+        assertFalse(t4.hasS());
+        assertEquals(3, t4.getSRef());
+        assertLeftOut(t4.hasP(), t4.getPRef());
+        assertFalse(t4.hasO());
+        assertEquals(5, t4.getORef());     // :s is in slot 0, five back from :q.
+
+        assertEquals(triples, readV2(writeV2(triples, false)));
+    }
+
+    private static void assertLeftOut(boolean present, int ref) {
+        assertFalse(present);
+        assertEquals(0, ref);
+    }
+
+    @Test public void wire_namespace_split() {
+        List<Triple> triples = List.of(
+            SSE.parseTriple("(<http://example/ns#a> <http://example/ns#b> <http://example/ns#>)"),
+            SSE.parseTriple("(<http://example/ns#a> <http://example/ns#b> <urn:isbn:1234>)"),
+            SSE.parseTriple("(<http://example/ns#a> <http://example/ns#b> <http://example/>)"),
+            SSE.parseTriple("(<http://example/ns#a> <http://example/ns#b> <http://example/ns#c>)"));
+        byte[] bytes = writeV2(triples, false);
+        List<RDF_StreamRow> rows = rows(bytes);
+        RDF_Triple t1 = rows.get(1).getTriple();
+        assertEquals("http://example/ns#", t1.getS().getNsIri().getNamespace());
+        assertEquals("a", t1.getS().getNsIri().getLocalName());
+        // An IRI that ends in the split character has an empty local name.
+        assertEquals(1, t1.getO().getNsIri().getNamespaceRef());
+        assertEquals("", t1.getO().getNsIri().getLocalName());
+        // An IRI with no '/' or '#' is written whole.
+        RDF_Triple t2 = rows.get(2).getTriple();
+        assertEquals(RDF_Term.TermCase.IRI, t2.getO().getTermCase());
+        assertEquals("urn:isbn:1234", t2.getO().getIri().getIri());
+        // A second namespace in full, then the first namespace by reference: two back.
+        RDF_Triple t3 = rows.get(3).getTriple();
+        assertEquals("http://example/", t3.getO().getNsIri().getNamespace());
+        RDF_Triple t4 = rows.get(4).getTriple();
+        assertEquals(2, t4.getO().getNsIri().getNamespaceRef());
+        assertEquals(triples, readV2(bytes));
+    }
+
+    @Test public void wire_referenced_terms_are_kept() {
+        // A term table of four slots, with two new terms in every row. The
+        // predicate is the same in every row, so it is left out.
+        List<Triple> triples = new ArrayList<>();
+        for ( int i = 0; i < 20; i++ )
+            triples.add(Triple.create(NodeFactory.createURI("http://example/s"+i),
+                                      NodeFactory.createURI("http://example/p"),
+                                      NodeFactory.createURI("http://example/o"+i)));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamRDF stream = StreamRDF2Protobuf.createDelimited(out, false, 4, 1);
+        stream.start();
+        triples.forEach(stream::triple);
+        stream.finish();
+        List<RDF_StreamRow> rows = rows(out.toByteArray());
+        // Row 1: :s0, :p and :o0 in full. Every other row: subject and object in full, :p left out.
+        for ( int i = 2; i < rows.size(); i++ ) {
+            RDF_Triple t = rows.get(i).getTriple();
+            assertEquals(RDF_Term.TermCase.NSIRI, t.getS().getTermCase(), "row "+i);
+            assertLeftOut(t.hasP(), t.getPRef());
+            assertEquals(RDF_Term.TermCase.NSIRI, t.getO().getTermCase(), "row "+i);
+        }
+        assertEquals(triples, readV2(out.toByteArray()));
+
+        // Two predicates in turn, in a table of eight slots: each is referenced
+        // every other row, so it is passed over when the table wraps round and is
+        // never written in full again.
+        List<Triple> triples2 = new ArrayList<>();
+        Node p1 = NodeFactory.createURI("http://example/p1");
+        Node p2 = NodeFactory.createURI("http://example/p2");
+        for ( int i = 0; i < 20; i++ )
+            triples2.add(Triple.create(NodeFactory.createURI("http://example/s"+i),
+                                       ( i%2 == 0 ) ? p1 : p2,
+                                       NodeFactory.createURI("http://example/o"+i)));
+        ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+        StreamRDF stream2 = StreamRDF2Protobuf.createDelimited(out2, false, 8, 1);
+        stream2.start();
+        triples2.forEach(stream2::triple);
+        stream2.finish();
+        List<RDF_StreamRow> rows2 = rows(out2.toByteArray());
+        // From row 3 on, both predicates are in the table and stay there.
+        for ( int i = 3; i < rows2.size(); i++ ) {
+            RDF_Triple t = rows2.get(i).getTriple();
+            assertFalse(t.hasP(), "row "+i);
+            assertTrue(t.getPRef() > 0, "row "+i);
+        }
+        assertEquals(triples2, readV2(out2.toByteArray()));
+    }
+
+    @Test public void null_graph_quads() {
+        List<Quad> quads = List.of(
+            Quad.create(null, SSE.parseTriple("(:s :p :o1)")),
+            Quad.create(null, SSE.parseTriple("(:s :p :o2)")),
+            SSE.parseQuad("(:g :s :p :o2)"),
+            Quad.create(null, SSE.parseTriple("(:s :p :o2)")),
+            SSE.parseQuad("(:g :s :p :o2)"));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamRDF stream = ProtobufRDF.streamToOutputStream(out, false, true);
+        stream.start();
+        quads.forEach(stream::quad);
+        stream.finish();
+        List<RDF_StreamRow> rows = rows(out.toByteArray());
+        // A null graph is RDF_UNDEF every time, never left out.
+        assertEquals(RDF_Term.TermCase.UNDEFINED, rows.get(1).getQuad().getG().getTermCase());
+        assertEquals(RDF_Term.TermCase.UNDEFINED, rows.get(2).getQuad().getG().getTermCase());
+        assertEquals(RDF_Term.TermCase.NSIRI, rows.get(3).getQuad().getG().getTermCase());
+        assertEquals(RDF_Term.TermCase.UNDEFINED, rows.get(4).getQuad().getG().getTermCase());
+        // :g again: a repeat, because a null graph does not count as the previous graph.
+        assertLeftOut(rows.get(5).getQuad().hasG(), rows.get(5).getQuad().getGRef());
+        List<Quad> back = new ArrayList<>();
+        StreamRDF collector = new org.apache.jena.riot.system.StreamRDFBase() {
+            @Override public void quad(Quad quad) { back.add(quad); }
+        };
+        ProtobufRDF.inputStreamToStreamRDF(new ByteArrayInputStream(out.toByteArray()), collector);
+        assertEquals(quads, back);
+        // The same through the wire objects.
+        List<Quad> back2 = new ArrayList<>();
+        StreamRDF collector2 = new org.apache.jena.riot.system.StreamRDFBase() {
+            @Override public void quad(Quad quad) { back2.add(quad); }
+        };
+        java.util.function.Consumer<RDF_StreamRow> decoder = ProtobufRDF.rowConsumerToStreamRDF(collector2);
+        rows.forEach(decoder);
+        assertEquals(quads, back2);
+    }
+
+    @Test public void rows_across_chunks() {
+        // Rows that straddle the chunks the reader fills, one row larger than a chunk,
+        // and an input that hands over a few bytes at a time.
+        List<Triple> triples = new ArrayList<>();
+        Node s = NodeFactory.createURI("http://example/s");
+        Node p = NodeFactory.createURI("http://example/p");
+        StringBuilder big = new StringBuilder();
+        for ( int i = 0; i < ProtobufStreamReader.CHUNK_SIZE + 1000; i++ )
+            big.append((char)('a' + i%26));
+        for ( int i = 0; i < 50000; i++ )
+            triples.add(Triple.create(s, p, NodeFactory.createLiteralString("object "+i)));
+        triples.add(Triple.create(s, p, NodeFactory.createLiteralString(big.toString())));
+        for ( int i = 0; i < 1000; i++ )
+            triples.add(Triple.create(s, p, NodeFactory.createLiteralString("after "+i)));
+        byte[] bytes = writeV2(triples, false);
+        assertTrue(bytes.length > 2 * ProtobufStreamReader.CHUNK_SIZE);
+        assertEquals(triples, readV2(bytes));
+        List<Triple> back = new ArrayList<>();
+        StreamRDF collector = new org.apache.jena.riot.system.StreamRDFBase() {
+            @Override public void triple(Triple triple) { back.add(triple); }
+        };
+        java.io.InputStream trickle = new java.io.FilterInputStream(new ByteArrayInputStream(bytes)) {
+            @Override public int read(byte[] b, int off, int len) throws IOException { return super.read(b, off, Math.min(len, 3)); }
+        };
+        ProtobufRDF.inputStreamToStreamRDF(trickle, collector);
+        assertEquals(triples, back);
+    }
+
+    @Test public void truncated_stream() {
+        byte[] bytes = writeV2(List.of(SSE.parseTriple("(:s :p :o1)"), SSE.parseTriple("(:s :p :o2)")), false);
+        byte[] cut = java.util.Arrays.copyOf(bytes, bytes.length - 3);
+        assertThrows(RiotProtobufException.class, () -> readV2(cut));
     }
 
     @Test public void wire_datatype_reference() {
@@ -211,18 +372,19 @@ public class TestProtobufV2 {
         List<RDF_StreamRow> rows = rows(out.toByteArray());
         assertEquals(5, rows.size());
         RDF_Quad q2 = rows.get(2).getQuad();
-        assertEquals(RDF_Term.TermCase.REPEAT, q2.getG().getTermCase());
-        assertEquals(RDF_Term.TermCase.REPEAT, q2.getS().getTermCase());
+        assertLeftOut(q2.hasG(), q2.getGRef());
+        assertLeftOut(q2.hasS(), q2.getSRef());
         // The default graph node is a term like any other: in full the first time.
         RDF_Quad q3 = rows.get(3).getQuad();
         assertEquals(RDF_Term.TermCase.IRI, q3.getG().getTermCase());
-        assertEquals(RDF_Term.TermCase.REPEAT, q3.getS().getTermCase());
-        assertEquals(RDF_Term.TermCase.TERMREF, q3.getO().getTermCase());
+        assertLeftOut(q3.hasS(), q3.getSRef());
+        assertFalse(q3.hasO());
+        assertTrue(q3.getORef() > 0);
         // A triple after quads: subject, predicate and object repeat.
         RDF_Triple t4 = rows.get(4).getTriple();
-        assertEquals(RDF_Term.TermCase.REPEAT, t4.getS().getTermCase());
-        assertEquals(RDF_Term.TermCase.REPEAT, t4.getP().getTermCase());
-        assertEquals(RDF_Term.TermCase.REPEAT, t4.getO().getTermCase());
+        assertLeftOut(t4.hasS(), t4.getSRef());
+        assertLeftOut(t4.hasP(), t4.getPRef());
+        assertLeftOut(t4.hasO(), t4.getORef());
     }
 
     @Test public void wire_triple_term_uses_tables() {
@@ -233,19 +395,30 @@ public class TestProtobufV2 {
             inner);
         byte[] bytes = writeV2(triples, false);
         List<RDF_StreamRow> rows = rows(bytes);
-        // Inside the triple term: :s=0, :p=1, :o=2 in full; then :q=3; then :o as a reference.
+        // Inside the triple term: :s=0, :p=1, :o=2 in full; then :q=3; then :o as a reference, two back.
         RDF_Triple t1 = rows.get(1).getTriple();
         assertEquals(RDF_Term.TermCase.TRIPLETERM, t1.getS().getTermCase());
-        assertEquals(RDF_Term.TermCase.TERMREF, t1.getO().getTermCase());
-        assertEquals(2, t1.getO().getTermRef());
+        RDF_Triple innerPB = t1.getS().getTripleTerm();
+        assertEquals(RDF_Term.TermCase.NSIRI, innerPB.getS().getTermCase());
+        assertEquals(RDF_Term.TermCase.NSIRI, innerPB.getP().getTermCase());
+        assertEquals(RDF_Term.TermCase.NSIRI, innerPB.getO().getTermCase());
+        assertFalse(t1.hasO());
+        assertEquals(2, t1.getORef());
         // The same triple as a row: subject and predicate are references, the object repeats.
         RDF_Triple t2 = rows.get(2).getTriple();
-        assertEquals(RDF_Term.TermCase.TERMREF, t2.getS().getTermCase());
-        assertEquals(0, t2.getS().getTermRef());
-        assertEquals(RDF_Term.TermCase.TERMREF, t2.getP().getTermCase());
-        assertEquals(1, t2.getP().getTermRef());
-        assertEquals(RDF_Term.TermCase.REPEAT, t2.getO().getTermCase());
+        assertFalse(t2.hasS());
+        assertEquals(4, t2.getSRef());
+        assertFalse(t2.hasP());
+        assertEquals(3, t2.getPRef());
+        assertLeftOut(t2.hasO(), t2.getORef());
         assertEquals(triples, readV2(bytes));
+        // A triple term whose terms are all references.
+        List<Triple> triples2 = List.of(inner, Triple.create(tripleTerm, SSE.parseNode(":q"), SSE.parseNode(":o")));
+        byte[] bytes2 = writeV2(triples2, false);
+        RDF_Triple tt = rows(bytes2).get(2).getTriple().getS().getTripleTerm();
+        assertFalse(tt.hasS());
+        assertTrue(tt.getSRef() > 0 && tt.getPRef() > 0 && tt.getORef() > 0);
+        assertEquals(triples2, readV2(bytes2));
     }
 
     // ---- Tables that wrap round.
@@ -286,8 +459,7 @@ public class TestProtobufV2 {
     }
 
     @Test public void reference_without_header() throws IOException {
-        RDF_Term ref = RDF_Term.newBuilder().setTermRef(0).build();
-        RDF_Triple triple = RDF_Triple.newBuilder().setS(ref).setP(ref).setO(ref).build();
+        RDF_Triple triple = RDF_Triple.newBuilder().setSRef(1).setPRef(1).setORef(1).build();
         RDF_StreamRow row = RDF_StreamRow.newBuilder().setTriple(triple).build();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         CodedOutputStream coded = CodedOutputStream.newInstance(out);
@@ -299,9 +471,9 @@ public class TestProtobufV2 {
     }
 
     @Test public void repeat_without_previous() throws IOException {
-        RDF_Header header = RDF_Header.newBuilder().setVersion(2).setTermTableSize(10).setDatatypeTableSize(10).build();
-        RDF_Term repeat = RDF_Term.newBuilder().setRepeat(RDF_REPEAT.getDefaultInstance()).build();
-        RDF_Triple triple = RDF_Triple.newBuilder().setS(repeat).setP(repeat).setO(repeat).build();
+        RDF_Header header = RDF_Header.newBuilder().setVersion(2).setTermTableSize(10).setDatatypeTableSize(10).setNamespaceTableSize(10).build();
+        // Every term left out, with no previous row.
+        RDF_Triple triple = RDF_Triple.newBuilder().build();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         CodedOutputStream coded = CodedOutputStream.newInstance(out);
         PBufRDF.writeDelimited(RDF_StreamRow.newBuilder().setHeader(header).build(), coded);
@@ -313,7 +485,7 @@ public class TestProtobufV2 {
     }
 
     @Test public void bad_header() throws IOException {
-        RDF_Header header = RDF_Header.newBuilder().setVersion(3).setTermTableSize(10).setDatatypeTableSize(10).build();
+        RDF_Header header = RDF_Header.newBuilder().setVersion(3).setTermTableSize(10).setDatatypeTableSize(10).setNamespaceTableSize(10).build();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         CodedOutputStream coded = CodedOutputStream.newInstance(out);
         PBufRDF.writeDelimited(RDF_StreamRow.newBuilder().setHeader(header).build(), coded);

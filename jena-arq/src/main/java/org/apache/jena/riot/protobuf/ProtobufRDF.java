@@ -435,8 +435,7 @@ public class ProtobufRDF {
      */
     public static void inputStreamToStreamRDF(InputStream input, StreamRDF stream) {
         // Reads the wire format directly; see ProtobufStreamReader.
-        CodedInputStream codedInput = PBufRDF.delimitedInput(input);
-        ProtobufStreamReader reader = new ProtobufStreamReader(codedInput, PrefixMapFactory.create(), stream);
+        ProtobufStreamReader reader = new ProtobufStreamReader(input, PrefixMapFactory.create(), stream);
         stream.start();
         try {
             reader.read();

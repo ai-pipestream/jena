@@ -33,30 +33,37 @@ import org.apache.jena.sparql.core.Quad;
 /**
  * Encode terms for a version 2 RDF Protobuf stream.
  * <p>
- * The encoder keeps the term table, the datatype table and the terms of the
- * previous row, as described in {@code binary-rdf.proto}. A term that is already
- * in the table is written as a reference to its slot, and a term that is the
- * same as in the previous row is written as {@code RDF_REPEAT}. The reader,
- * {@link ProtobufDecoderV2}, maintains the same tables from what it reads, so
- * no table entries need to be sent.
+ * The encoder keeps the term table, the namespace table, the datatype table and
+ * the terms of the previous row, as described in {@code binary-rdf.proto}. A
+ * term that is already in the table is written as a reference, a term that is
+ * the same as in the previous row is left out, and an IRI written in full is
+ * split into its namespace and local name. The reader, {@link ProtobufDecoderV2},
+ * maintains the same tables from what it reads, so no table entries need to be
+ * sent.
  */
 final class ProtobufEncoderV2 {
     static final int VERSION = 2;
     static final int DFT_TERM_TABLE_SIZE = 16*1024;
     static final int DFT_DATATYPE_TABLE_SIZE = 64;
+    static final int DFT_NAMESPACE_TABLE_SIZE = 256;
 
-    private static final RDF_Term REPEAT = RDF_Term.newBuilder().setRepeat(RDF_REPEAT.getDefaultInstance()).build();
     private static final PrefixMap PMAP0 = PrefixMapFactory.emptyPrefixMap();
 
     private final boolean encodeValues;
 
-    // Term table: slots are filled in order and reused from the start when full.
+    // Term table, with clock replacement: a slot that has been referenced since
+    // its term was placed is passed over once.
     private final Node[] termTable;
+    private final boolean[] referenced;
     private final NodeIndex termIndex;
-    private int nextTerm = 0;
-    // A reference only carries a slot number and wire objects are immutable,
-    // so one object per slot serves for the whole stream.
-    private final RDF_Term[] references;
+    private int hand = 0;       // The slot to try next.
+    private int last = -1;      // The slot of the most recently placed term.
+
+    // Namespace table: slots are filled in order and reused from the start when full.
+    private final String[] namespaceTable;
+    private final Map<String, Integer> namespaceIndex;
+    private int nextNamespace = 0;
+    private int lastNamespace = -1;
 
     // Datatype table, filled in the same way.
     private final String[] datatypeTable;
@@ -68,18 +75,25 @@ final class ProtobufEncoderV2 {
 
     private final RDF_Term.Builder termBuilder = RDF_Term.newBuilder();
     private final RDF_Literal.Builder literalBuilder = RDF_Literal.newBuilder();
+    private final RDF_NsIRI.Builder nsIriBuilder = RDF_NsIRI.newBuilder();
 
     ProtobufEncoderV2(boolean encodeValues) {
-        this(encodeValues, DFT_TERM_TABLE_SIZE, DFT_DATATYPE_TABLE_SIZE);
+        this(encodeValues, DFT_TERM_TABLE_SIZE, DFT_DATATYPE_TABLE_SIZE, DFT_NAMESPACE_TABLE_SIZE);
     }
 
     ProtobufEncoderV2(boolean encodeValues, int termTableSize, int datatypeTableSize) {
-        if ( termTableSize < 1 || datatypeTableSize < 1 )
+        this(encodeValues, termTableSize, datatypeTableSize, DFT_NAMESPACE_TABLE_SIZE);
+    }
+
+    ProtobufEncoderV2(boolean encodeValues, int termTableSize, int datatypeTableSize, int namespaceTableSize) {
+        if ( termTableSize < 1 || datatypeTableSize < 1 || namespaceTableSize < 1 )
             throw new IllegalArgumentException("Table sizes must be at least 1");
         this.encodeValues = encodeValues;
         this.termTable = new Node[termTableSize];
+        this.referenced = new boolean[termTableSize];
         this.termIndex = new NodeIndex(termTableSize);
-        this.references = new RDF_Term[termTableSize];
+        this.namespaceTable = new String[namespaceTableSize];
+        this.namespaceIndex = new HashMap<>(2*namespaceTableSize);
         this.datatypeTable = new String[datatypeTableSize];
         this.datatypeIndex = new HashMap<>(2*datatypeTableSize);
     }
@@ -90,32 +104,56 @@ final class ProtobufEncoderV2 {
                 .setVersion(VERSION)
                 .setTermTableSize(termTable.length)
                 .setDatatypeTableSize(datatypeTable.length)
+                .setNamespaceTableSize(namespaceTable.length)
                 .build();
     }
 
     RDF_Triple triple(Triple triple, RDF_Triple.Builder tripleBuilder) {
         tripleBuilder.clear();
-        tripleBuilder.setS(encode(triple.getSubject(), 0));
-        tripleBuilder.setP(encode(triple.getPredicate(), 1));
-        tripleBuilder.setO(encode(triple.getObject(), 2));
+        Node s = triple.getSubject();
+        if ( !repeat(s, 0) ) {
+            int ref = termRef(s);
+            if ( ref > 0 ) tripleBuilder.setSRef(ref); else tripleBuilder.setS(full(s));
+        }
+        Node p = triple.getPredicate();
+        if ( !repeat(p, 1) ) {
+            int ref = termRef(p);
+            if ( ref > 0 ) tripleBuilder.setPRef(ref); else tripleBuilder.setP(full(p));
+        }
+        Node o = triple.getObject();
+        if ( !repeat(o, 2) ) {
+            int ref = termRef(o);
+            if ( ref > 0 ) tripleBuilder.setORef(ref); else tripleBuilder.setO(full(o));
+        }
         return tripleBuilder.build();
     }
 
     RDF_Quad quad(Quad quad, RDF_Quad.Builder quadBuilder) {
         quadBuilder.clear();
-        if ( quad.getGraph() != null )
-            quadBuilder.setG(encode(quad.getGraph(), 3));
-        quadBuilder.setS(encode(quad.getSubject(), 0));
-        quadBuilder.setP(encode(quad.getPredicate(), 1));
-        quadBuilder.setO(encode(quad.getObject(), 2));
+        Node s = quad.getSubject();
+        if ( !repeat(s, 0) ) {
+            int ref = termRef(s);
+            if ( ref > 0 ) quadBuilder.setSRef(ref); else quadBuilder.setS(full(s));
+        }
+        Node p = quad.getPredicate();
+        if ( !repeat(p, 1) ) {
+            int ref = termRef(p);
+            if ( ref > 0 ) quadBuilder.setPRef(ref); else quadBuilder.setP(full(p));
+        }
+        Node o = quad.getObject();
+        if ( !repeat(o, 2) ) {
+            int ref = termRef(o);
+            if ( ref > 0 ) quadBuilder.setORef(ref); else quadBuilder.setO(full(o));
+        }
+        // The graph goes after the subject, predicate and object: the reader meets
+        // the fields in that order and the tables must change in the same order.
+        // A null graph is written as RDF_UNDEF every time; it is never a repeat.
+        Node g = quad.getGraph();
+        if ( !repeat(g, 3) ) {
+            int ref = termRef(g);
+            if ( ref > 0 ) quadBuilder.setGRef(ref); else quadBuilder.setG(full(g));
+        }
         return quadBuilder.build();
-    }
-
-    /** Encode a term in a row position: 0 subject, 1 predicate, 2 object, 3 graph. */
-    private RDF_Term encode(Node node, int position) {
-        if ( repeat(node, position) )
-            return REPEAT;
-        return term(node);
     }
 
     // The table operations are also used by ProtobufStreamWriter, which writes
@@ -123,18 +161,40 @@ final class ProtobufEncoderV2 {
 
     /**
      * Whether the term is the same as the term of the previous row in this
-     * position. If not, it becomes the previous term for the next row.
+     * position. If not, it becomes the previous term for the next row. A null
+     * term (the graph of a quad) is never a repeat.
      */
     boolean repeat(Node node, int position) {
-        if ( node.equals(previous[position]) )
+        if ( node == null )
+            return false;
+        Node prev = previous[position];
+        // Hash codes are cached by the nodes; comparing them first saves comparing
+        // IRIs that share a long prefix, or literals, character by character.
+        if ( node == prev || ( prev != null && node.hashCode() == prev.hashCode() && node.equals(prev) ) )
             return true;
         previous[position] = node;
         return false;
     }
 
-    /** The slot of a term in the term table, or -1. */
-    int termSlot(Node node) {
-        return termIndex.get(node);
+    /**
+     * The reference for a term in the term table, or -1 if the term is not an IRI
+     * or blank node in the table. The slot is marked as referenced, so this must
+     * only be called when the reference is then written.
+     */
+    int termRef(Node node) {
+        if ( node == null || !(node.isURI() || node.isBlank()) )
+            return -1;
+        int slot = termIndex.get(node);
+        if ( slot < 0 )
+            return -1;
+        referenced[slot] = true;
+        return distance(last, slot, termTable.length);
+    }
+
+    /** The reference for a namespace in the namespace table, or -1. */
+    int namespaceRef(String namespace) {
+        Integer slot = namespaceIndex.get(namespace);
+        return ( slot == null ) ? -1 : distance(lastNamespace, slot, namespaceTable.length);
     }
 
     /** The slot of a datatype in the datatype table, or -1. */
@@ -143,18 +203,60 @@ final class ProtobufEncoderV2 {
         return ( slot == null ) ? -1 : slot;
     }
 
-    /** Encode a term, using and maintaining the tables. */
+    /** A reference as a distance back from the most recently placed entry: 1 is that entry. */
+    private static int distance(int last, int slot, int size) {
+        int d = last - slot;
+        if ( d < 0 )
+            d += size;
+        return d+1;
+    }
+
+    /**
+     * Where an IRI splits into namespace and local name: the index after its last
+     * '/' or '#', or 0 if it has neither and is written whole.
+     */
+    static int namespaceEnd(String iri) {
+        for ( int i = iri.length()-1; i >= 0; i-- ) {
+            char ch = iri.charAt(i);
+            if ( ch == '/' || ch == '#' )
+                return i+1;
+        }
+        return 0;
+    }
+
+    /**
+     * Encode a term that is written as an {@code RDF_Term}, not as a reference or
+     * left out: the caller has checked {@link #termRef} first. The tables are
+     * maintained.
+     */
     RDF_Term term(Node node) {
+        return full(node);
+    }
+
+    private RDF_Term full(Node node) {
         if ( node == null ) {
             termBuilder.clear();
             return ProtobufConvert.toProtobuf(node, PMAP0, termBuilder, false);
         }
         if ( node.isURI() || node.isBlank() ) {
-            int slot = termIndex.get(node);
-            if ( slot >= 0 )
-                return reference(slot);
             termBuilder.clear();
-            RDF_Term term = ProtobufConvert.toProtobuf(node, PMAP0, termBuilder, false);
+            RDF_Term term;
+            int nsEnd = node.isURI() ? namespaceEnd(node.getURI()) : 0;
+            if ( nsEnd > 0 ) {
+                String iri = node.getURI();
+                String namespace = iri.substring(0, nsEnd);
+                nsIriBuilder.clear();
+                int nsRef = namespaceRef(namespace);
+                if ( nsRef > 0 )
+                    nsIriBuilder.setNamespaceRef(nsRef);
+                else {
+                    nsIriBuilder.setNamespace(namespace);
+                    enterNamespace(namespace);
+                }
+                nsIriBuilder.setLocalName(iri.substring(nsEnd));
+                term = termBuilder.setNsIri(nsIriBuilder).build();
+            } else
+                term = ProtobufConvert.toProtobuf(node, PMAP0, termBuilder, false);
             enterTerm(node);
             return term;
         }
@@ -179,12 +281,18 @@ final class ProtobufEncoderV2 {
             return termBuilder.setLiteral(literalBuilder).build();
         }
         if ( node.isTripleTerm() ) {
-            // The terms inside a triple term use the tables but not RDF_REPEAT.
+            // The terms inside a triple term use the tables but are never left out.
             Triple triple = node.getTriple();
-            RDF_Term s = term(triple.getSubject());
-            RDF_Term p = term(triple.getPredicate());
-            RDF_Term o = term(triple.getObject());
-            RDF_Triple tripleTerm = RDF_Triple.newBuilder().setS(s).setP(p).setO(o).build();
+            RDF_Triple.Builder tripleTerm = RDF_Triple.newBuilder();
+            Node s = triple.getSubject();
+            int sRef = termRef(s);
+            if ( sRef > 0 ) tripleTerm.setSRef(sRef); else tripleTerm.setS(full(s));
+            Node p = triple.getPredicate();
+            int pRef = termRef(p);
+            if ( pRef > 0 ) tripleTerm.setPRef(pRef); else tripleTerm.setP(full(p));
+            Node o = triple.getObject();
+            int oRef = termRef(o);
+            if ( oRef > 0 ) tripleTerm.setORef(oRef); else tripleTerm.setO(full(o));
             return RDF_Term.newBuilder().setTripleTerm(tripleTerm).build();
         }
         // Variables and ANY.
@@ -192,24 +300,33 @@ final class ProtobufEncoderV2 {
         return ProtobufConvert.toProtobuf(node, PMAP0, termBuilder, false);
     }
 
-    private RDF_Term reference(int slot) {
-        RDF_Term ref = references[slot];
-        if ( ref == null ) {
-            ref = RDF_Term.newBuilder().setTermRef(slot).build();
-            references[slot] = ref;
-        }
-        return ref;
-    }
-
     /** Add a term written in full to the term table. */
     void enterTerm(Node node) {
-        int slot = nextTerm;
+        int slot = hand;
+        // Pass over slots referenced since their term was placed, clearing the mark.
+        while ( referenced[slot] ) {
+            referenced[slot] = false;
+            slot = ( slot+1 == termTable.length ) ? 0 : slot+1;
+        }
         Node evicted = termTable[slot];
         if ( evicted != null )
             termIndex.remove(evicted);
         termTable[slot] = node;
         termIndex.put(node, slot);
-        nextTerm = ( slot+1 == termTable.length ) ? 0 : slot+1;
+        last = slot;
+        hand = ( slot+1 == termTable.length ) ? 0 : slot+1;
+    }
+
+    /** Add a namespace written in full to the namespace table. */
+    void enterNamespace(String namespace) {
+        int slot = nextNamespace;
+        String evicted = namespaceTable[slot];
+        if ( evicted != null )
+            namespaceIndex.remove(evicted);
+        namespaceTable[slot] = namespace;
+        namespaceIndex.put(namespace, slot);
+        lastNamespace = slot;
+        nextNamespace = ( slot+1 == namespaceTable.length ) ? 0 : slot+1;
     }
 
     /** Add a datatype written in full to the datatype table. */

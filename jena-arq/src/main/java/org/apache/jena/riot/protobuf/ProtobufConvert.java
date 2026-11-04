@@ -233,9 +233,9 @@ public class ProtobufConvert
             case ANY :
                 return Node.ANY;
             case REPEAT :
-                throw new RiotProtobufException("RDF_REPEAT outside a version 2 stream");
-            case TERMREF :
-                throw new RiotProtobufException("Term reference outside a version 2 stream");
+                throw new RiotProtobufException("RDF_REPEAT is not supported");
+            case NSIRI :
+                throw new RiotProtobufException("RDF_NsIRI outside a version 2 stream");
             case UNDEFINED :
                 return null;
             case VALINTEGER : {

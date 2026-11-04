@@ -77,9 +77,20 @@ message RDF_ANY { }
 
 message RDF_UNDEF { }
 
-// Version 2: the term is the same as the term in the same position
-// (subject, predicate, object or graph) of the previous triple or quad.
+// Not written by Jena; a version 2 stream leaves out a repeated term instead.
 message RDF_REPEAT { }
+
+// Version 2: an IRI as its namespace, the IRI up to and including its last
+// '/' or '#', and the local name after it. The namespace is written in full
+// the first time and as a reference to the namespace table after that (see
+// RDF_Header).
+message RDF_NsIRI {
+  oneof ns {
+    string namespace    = 1 ;
+    uint32 namespaceRef = 2 ;
+  }
+  string localName = 3 ;
+}
 
 message RDF_Term {
   oneof term {
@@ -93,8 +104,8 @@ message RDF_Term {
     RDF_UNDEF      undefined  = 8 ;
     RDF_REPEAT     repeat     = 9 ;
 
-    // Version 2: index into the term table (see RDF_Header).
-    uint32         termRef    = 10 ;
+    // Version 2 (see RDF_Header).
+    RDF_NsIRI      nsIri      = 11 ;
 
     // Value forms of literals.
     sint64         valInteger = 20 ;
@@ -105,10 +116,16 @@ message RDF_Term {
 
 // === StreamRDF items 
 
+// Version 2: a term in the term table is written as a reference (sRef, pRef,
+// oRef, gRef) instead of as an RDF_Term, and a term that is the same as the
+// term in the same position of the previous triple or quad is left out.
 message RDF_Triple {
   RDF_Term S = 1 ;
   RDF_Term P = 2 ;
   RDF_Term O = 3 ;
+  uint32 sRef = 4 ;
+  uint32 pRef = 5 ;
+  uint32 oRef = 6 ;
 }
 
 message RDF_Quad {
@@ -116,6 +133,10 @@ message RDF_Quad {
   RDF_Term P = 2 ;
   RDF_Term O = 3 ;
   RDF_Term G = 4 ;
+  uint32 sRef = 5 ;
+  uint32 pRef = 6 ;
+  uint32 oRef = 7 ;
+  uint32 gRef = 8 ;
 }
 
 // Prefix declaration
@@ -128,26 +149,38 @@ message RDF_PrefixDecl {
 //
 // A version 1 stream has no header: every term is written in full.
 //
-// A version 2 stream starts with a header row and may then use RDF_REPEAT,
-// RDF_Term.termRef and RDF_Literal.datatypeRef. The reader and writer each
-// keep two tables that are filled in the same, fixed way as the stream is
-// processed, so no table entries are sent explicitly:
+// A version 2 stream starts with a header row and may then leave out repeated
+// terms and use the references RDF_Triple.sRef (and pRef, oRef, RDF_Quad.gRef),
+// RDF_NsIRI.namespaceRef and RDF_Literal.datatypeRef. The
+// reader and writer each keep three tables that are filled in the same, fixed
+// way as the stream is processed, so no table entries are sent explicitly:
 //
 //   Term table: every IRI, prefix name and blank node written in full
 //   (including those inside triple terms, in subject, predicate, object
-//   order) is placed in the next slot of the table, wrapping round to slot 0
-//   when the table is full. A termRef is the slot of a term written earlier.
+//   order) is placed in a slot of the table. A reference is a distance back
+//   from the most recently placed term: 1 is that term, 2 the one placed
+//   before it, and so on. Slots are taken in order, wrapping round to slot 0
+//   when the table is full, except that a slot whose term has been referenced
+//   since it was placed is passed over once and its term kept (clock
+//   replacement: passing over it clears the mark, so the slot is taken next
+//   time round unless the term is referenced again).
+//
+//   Namespace table: every namespace written in full (RDF_NsIRI.namespace)
+//   is placed in the next slot of the namespace table, wrapping round when
+//   the table is full. A namespaceRef is a distance back from the most
+//   recently placed namespace, as for the term table.
 //
 //   Datatype table: every datatype IRI written in full (RDF_Literal.datatype)
-//   is placed in the next slot of the datatype table in the same way.
-//   A datatypeRef is the slot of a datatype written earlier.
+//   is placed in the next slot of the datatype table, wrapping round when the
+//   table is full. A datatypeRef is the slot of a datatype written earlier.
 //
-// A header part way through a stream starts both tables again, so
+// A header part way through a stream starts all tables again, so
 // version 2 streams can be concatenated.
 message RDF_Header {
-  uint32 version = 1 ;            // Currently 2.
-  uint32 termTableSize = 2 ;      // Number of slots in the term table.
-  uint32 datatypeTableSize = 3 ;  // Number of slots in the datatype table.
+  uint32 version = 1 ;             // Currently 2.
+  uint32 termTableSize = 2 ;       // Number of slots in the term table.
+  uint32 datatypeTableSize = 3 ;   // Number of slots in the datatype table.
+  uint32 namespaceTableSize = 4 ;  // Number of slots in the namespace table.
 }
 
 // StreamRDF

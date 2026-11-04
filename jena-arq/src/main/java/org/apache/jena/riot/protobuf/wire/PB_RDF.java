@@ -5354,8 +5354,7 @@ public final class PB_RDF {
   }
   /**
    * <pre>
-   * Version 2: the term is the same as the term in the same position
-   * (subject, predicate, object or graph) of the previous triple or quad.
+   * Not written by Jena; a version 2 stream leaves out a repeated term instead.
    * </pre>
    *
    * Protobuf type {@code RDF_REPEAT}
@@ -5542,8 +5541,7 @@ public final class PB_RDF {
     }
     /**
      * <pre>
-     * Version 2: the term is the same as the term in the same position
-     * (subject, predicate, object or graph) of the previous triple or quad.
+     * Not written by Jena; a version 2 stream leaves out a repeated term instead.
      * </pre>
      *
      * Protobuf type {@code RDF_REPEAT}
@@ -5713,6 +5711,899 @@ public final class PB_RDF {
 
   }
 
+  public interface RDF_NsIRIOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:RDF_NsIRI)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string namespace = 1;</code>
+     * @return Whether the namespace field is set.
+     */
+    boolean hasNamespace();
+    /**
+     * <code>string namespace = 1;</code>
+     * @return The namespace.
+     */
+    java.lang.String getNamespace();
+    /**
+     * <code>string namespace = 1;</code>
+     * @return The bytes for namespace.
+     */
+    com.google.protobuf.ByteString
+        getNamespaceBytes();
+
+    /**
+     * <code>uint32 namespaceRef = 2;</code>
+     * @return Whether the namespaceRef field is set.
+     */
+    boolean hasNamespaceRef();
+    /**
+     * <code>uint32 namespaceRef = 2;</code>
+     * @return The namespaceRef.
+     */
+    int getNamespaceRef();
+
+    /**
+     * <code>string localName = 3;</code>
+     * @return The localName.
+     */
+    java.lang.String getLocalName();
+    /**
+     * <code>string localName = 3;</code>
+     * @return The bytes for localName.
+     */
+    com.google.protobuf.ByteString
+        getLocalNameBytes();
+
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.NsCase getNsCase();
+  }
+  /**
+   * <pre>
+   * Version 2: an IRI as its namespace, the IRI up to and including its last
+   * '/' or '#', and the local name after it. The namespace is written in full
+   * the first time and as a reference to the namespace table after that (see
+   * RDF_Header).
+   * </pre>
+   *
+   * Protobuf type {@code RDF_NsIRI}
+   */
+  public static final class RDF_NsIRI extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:RDF_NsIRI)
+      RDF_NsIRIOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 28,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        RDF_NsIRI.class.getName());
+    }
+    // Use RDF_NsIRI.newBuilder() to construct.
+    private RDF_NsIRI(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private RDF_NsIRI() {
+      localName_ = "";
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_NsIRI_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_NsIRI_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.class, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.Builder.class);
+    }
+
+    private int nsCase_ = 0;
+    @SuppressWarnings("serial")
+    private java.lang.Object ns_;
+    public enum NsCase
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+      NAMESPACE(1),
+      NAMESPACEREF(2),
+      NS_NOT_SET(0);
+      private final int value;
+      private NsCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static NsCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static NsCase forNumber(int value) {
+        switch (value) {
+          case 1: return NAMESPACE;
+          case 2: return NAMESPACEREF;
+          case 0: return NS_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public NsCase
+    getNsCase() {
+      return NsCase.forNumber(
+          nsCase_);
+    }
+
+    public static final int NAMESPACE_FIELD_NUMBER = 1;
+    /**
+     * <code>string namespace = 1;</code>
+     * @return Whether the namespace field is set.
+     */
+    public boolean hasNamespace() {
+      return nsCase_ == 1;
+    }
+    /**
+     * <code>string namespace = 1;</code>
+     * @return The namespace.
+     */
+    public java.lang.String getNamespace() {
+      java.lang.Object ref = "";
+      if (nsCase_ == 1) {
+        ref = ns_;
+      }
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (nsCase_ == 1) {
+          ns_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>string namespace = 1;</code>
+     * @return The bytes for namespace.
+     */
+    public com.google.protobuf.ByteString
+        getNamespaceBytes() {
+      java.lang.Object ref = "";
+      if (nsCase_ == 1) {
+        ref = ns_;
+      }
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        if (nsCase_ == 1) {
+          ns_ = b;
+        }
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NAMESPACEREF_FIELD_NUMBER = 2;
+    /**
+     * <code>uint32 namespaceRef = 2;</code>
+     * @return Whether the namespaceRef field is set.
+     */
+    @java.lang.Override
+    public boolean hasNamespaceRef() {
+      return nsCase_ == 2;
+    }
+    /**
+     * <code>uint32 namespaceRef = 2;</code>
+     * @return The namespaceRef.
+     */
+    @java.lang.Override
+    public int getNamespaceRef() {
+      if (nsCase_ == 2) {
+        return (java.lang.Integer) ns_;
+      }
+      return 0;
+    }
+
+    public static final int LOCALNAME_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object localName_ = "";
+    /**
+     * <code>string localName = 3;</code>
+     * @return The localName.
+     */
+    @java.lang.Override
+    public java.lang.String getLocalName() {
+      java.lang.Object ref = localName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        localName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string localName = 3;</code>
+     * @return The bytes for localName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getLocalNameBytes() {
+      java.lang.Object ref = localName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        localName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (nsCase_ == 1) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 1, ns_);
+      }
+      if (nsCase_ == 2) {
+        output.writeUInt32(
+            2, (int)((java.lang.Integer) ns_));
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(localName_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 3, localName_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (nsCase_ == 1) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(1, ns_);
+      }
+      if (nsCase_ == 2) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(
+              2, (int)((java.lang.Integer) ns_));
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(localName_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(3, localName_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI)) {
+        return super.equals(obj);
+      }
+      org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI other = (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI) obj;
+
+      if (!getLocalName()
+          .equals(other.getLocalName())) return false;
+      if (!getNsCase().equals(other.getNsCase())) return false;
+      switch (nsCase_) {
+        case 1:
+          if (!getNamespace()
+              .equals(other.getNamespace())) return false;
+          break;
+        case 2:
+          if (getNamespaceRef()
+              != other.getNamespaceRef()) return false;
+          break;
+        case 0:
+        default:
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + LOCALNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getLocalName().hashCode();
+      switch (nsCase_) {
+        case 1:
+          hash = (37 * hash) + NAMESPACE_FIELD_NUMBER;
+          hash = (53 * hash) + getNamespace().hashCode();
+          break;
+        case 2:
+          hash = (37 * hash) + NAMESPACEREF_FIELD_NUMBER;
+          hash = (53 * hash) + getNamespaceRef();
+          break;
+        case 0:
+        default:
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Version 2: an IRI as its namespace, the IRI up to and including its last
+     * '/' or '#', and the local name after it. The namespace is written in full
+     * the first time and as a reference to the namespace table after that (see
+     * RDF_Header).
+     * </pre>
+     *
+     * Protobuf type {@code RDF_NsIRI}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:RDF_NsIRI)
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRIOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_NsIRI_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_NsIRI_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.class, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.Builder.class);
+      }
+
+      // Construct using org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        localName_ = "";
+        nsCase_ = 0;
+        ns_ = null;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.internal_static_RDF_NsIRI_descriptor;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI getDefaultInstanceForType() {
+        return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI build() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI buildPartial() {
+        org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI result = new org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.localName_ = localName_;
+        }
+      }
+
+      private void buildPartialOneofs(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI result) {
+        result.nsCase_ = nsCase_;
+        result.ns_ = this.ns_;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI) {
+          return mergeFrom((org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI other) {
+        if (other == org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.getDefaultInstance()) return this;
+        if (!other.getLocalName().isEmpty()) {
+          localName_ = other.localName_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        switch (other.getNsCase()) {
+          case NAMESPACE: {
+            nsCase_ = 1;
+            ns_ = other.ns_;
+            onChanged();
+            break;
+          }
+          case NAMESPACEREF: {
+            setNamespaceRef(other.getNamespaceRef());
+            break;
+          }
+          case NS_NOT_SET: {
+            break;
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                java.lang.String s = input.readStringRequireUtf8();
+                nsCase_ = 1;
+                ns_ = s;
+                break;
+              } // case 10
+              case 16: {
+                ns_ = input.readUInt32();
+                nsCase_ = 2;
+                break;
+              } // case 16
+              case 26: {
+                localName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int nsCase_ = 0;
+      private java.lang.Object ns_;
+      public NsCase
+          getNsCase() {
+        return NsCase.forNumber(
+            nsCase_);
+      }
+
+      public Builder clearNs() {
+        nsCase_ = 0;
+        ns_ = null;
+        onChanged();
+        return this;
+      }
+
+      private int bitField0_;
+
+      /**
+       * <code>string namespace = 1;</code>
+       * @return Whether the namespace field is set.
+       */
+      @java.lang.Override
+      public boolean hasNamespace() {
+        return nsCase_ == 1;
+      }
+      /**
+       * <code>string namespace = 1;</code>
+       * @return The namespace.
+       */
+      @java.lang.Override
+      public java.lang.String getNamespace() {
+        java.lang.Object ref = "";
+        if (nsCase_ == 1) {
+          ref = ns_;
+        }
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (nsCase_ == 1) {
+            ns_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string namespace = 1;</code>
+       * @return The bytes for namespace.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getNamespaceBytes() {
+        java.lang.Object ref = "";
+        if (nsCase_ == 1) {
+          ref = ns_;
+        }
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          if (nsCase_ == 1) {
+            ns_ = b;
+          }
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string namespace = 1;</code>
+       * @param value The namespace to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNamespace(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        nsCase_ = 1;
+        ns_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string namespace = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearNamespace() {
+        if (nsCase_ == 1) {
+          nsCase_ = 0;
+          ns_ = null;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>string namespace = 1;</code>
+       * @param value The bytes for namespace to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNamespaceBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        nsCase_ = 1;
+        ns_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>uint32 namespaceRef = 2;</code>
+       * @return Whether the namespaceRef field is set.
+       */
+      public boolean hasNamespaceRef() {
+        return nsCase_ == 2;
+      }
+      /**
+       * <code>uint32 namespaceRef = 2;</code>
+       * @return The namespaceRef.
+       */
+      public int getNamespaceRef() {
+        if (nsCase_ == 2) {
+          return (java.lang.Integer) ns_;
+        }
+        return 0;
+      }
+      /**
+       * <code>uint32 namespaceRef = 2;</code>
+       * @param value The namespaceRef to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNamespaceRef(int value) {
+
+        nsCase_ = 2;
+        ns_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint32 namespaceRef = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearNamespaceRef() {
+        if (nsCase_ == 2) {
+          nsCase_ = 0;
+          ns_ = null;
+          onChanged();
+        }
+        return this;
+      }
+
+      private java.lang.Object localName_ = "";
+      /**
+       * <code>string localName = 3;</code>
+       * @return The localName.
+       */
+      public java.lang.String getLocalName() {
+        java.lang.Object ref = localName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          localName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string localName = 3;</code>
+       * @return The bytes for localName.
+       */
+      public com.google.protobuf.ByteString
+          getLocalNameBytes() {
+        java.lang.Object ref = localName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          localName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string localName = 3;</code>
+       * @param value The localName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLocalName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        localName_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string localName = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLocalName() {
+        localName_ = getDefaultInstance().getLocalName();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string localName = 3;</code>
+       * @param value The bytes for localName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLocalNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        localName_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:RDF_NsIRI)
+    }
+
+    // @@protoc_insertion_point(class_scope:RDF_NsIRI)
+    private static final org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI();
+    }
+
+    public static org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RDF_NsIRI>
+        PARSER = new com.google.protobuf.AbstractParser<RDF_NsIRI>() {
+      @java.lang.Override
+      public RDF_NsIRI parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<RDF_NsIRI> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RDF_NsIRI> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface RDF_TermOrBuilder extends
       // @@protoc_insertion_point(interface_extends:RDF_Term)
       com.google.protobuf.MessageOrBuilder {
@@ -5854,22 +6745,30 @@ public final class PB_RDF {
 
     /**
      * <pre>
-     * Version 2: index into the term table (see RDF_Header).
+     * Version 2 (see RDF_Header).
      * </pre>
      *
-     * <code>uint32 termRef = 10;</code>
-     * @return Whether the termRef field is set.
+     * <code>.RDF_NsIRI nsIri = 11;</code>
+     * @return Whether the nsIri field is set.
      */
-    boolean hasTermRef();
+    boolean hasNsIri();
     /**
      * <pre>
-     * Version 2: index into the term table (see RDF_Header).
+     * Version 2 (see RDF_Header).
      * </pre>
      *
-     * <code>uint32 termRef = 10;</code>
-     * @return The termRef.
+     * <code>.RDF_NsIRI nsIri = 11;</code>
+     * @return The nsIri.
      */
-    int getTermRef();
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI getNsIri();
+    /**
+     * <pre>
+     * Version 2 (see RDF_Header).
+     * </pre>
+     *
+     * <code>.RDF_NsIRI nsIri = 11;</code>
+     */
+    org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRIOrBuilder getNsIriOrBuilder();
 
     /**
      * <pre>
@@ -5970,7 +6869,7 @@ public final class PB_RDF {
       ANY(7),
       UNDEFINED(8),
       REPEAT(9),
-      TERMREF(10),
+      NSIRI(11),
       VALINTEGER(20),
       VALDOUBLE(21),
       VALDECIMAL(22),
@@ -6000,7 +6899,7 @@ public final class PB_RDF {
           case 7: return ANY;
           case 8: return UNDEFINED;
           case 9: return REPEAT;
-          case 10: return TERMREF;
+          case 11: return NSIRI;
           case 20: return VALINTEGER;
           case 21: return VALDOUBLE;
           case 22: return VALDECIMAL;
@@ -6298,33 +7197,47 @@ public final class PB_RDF {
       return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_REPEAT.getDefaultInstance();
     }
 
-    public static final int TERMREF_FIELD_NUMBER = 10;
+    public static final int NSIRI_FIELD_NUMBER = 11;
     /**
      * <pre>
-     * Version 2: index into the term table (see RDF_Header).
+     * Version 2 (see RDF_Header).
      * </pre>
      *
-     * <code>uint32 termRef = 10;</code>
-     * @return Whether the termRef field is set.
+     * <code>.RDF_NsIRI nsIri = 11;</code>
+     * @return Whether the nsIri field is set.
      */
     @java.lang.Override
-    public boolean hasTermRef() {
-      return termCase_ == 10;
+    public boolean hasNsIri() {
+      return termCase_ == 11;
     }
     /**
      * <pre>
-     * Version 2: index into the term table (see RDF_Header).
+     * Version 2 (see RDF_Header).
      * </pre>
      *
-     * <code>uint32 termRef = 10;</code>
-     * @return The termRef.
+     * <code>.RDF_NsIRI nsIri = 11;</code>
+     * @return The nsIri.
      */
     @java.lang.Override
-    public int getTermRef() {
-      if (termCase_ == 10) {
-        return (java.lang.Integer) term_;
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI getNsIri() {
+      if (termCase_ == 11) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI) term_;
       }
-      return 0;
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * Version 2 (see RDF_Header).
+     * </pre>
+     *
+     * <code>.RDF_NsIRI nsIri = 11;</code>
+     */
+    @java.lang.Override
+    public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRIOrBuilder getNsIriOrBuilder() {
+      if (termCase_ == 11) {
+         return (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI) term_;
+      }
+      return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.getDefaultInstance();
     }
 
     public static final int VALINTEGER_FIELD_NUMBER = 20;
@@ -6449,9 +7362,8 @@ public final class PB_RDF {
       if (termCase_ == 9) {
         output.writeMessage(9, (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_REPEAT) term_);
       }
-      if (termCase_ == 10) {
-        output.writeUInt32(
-            10, (int)((java.lang.Integer) term_));
+      if (termCase_ == 11) {
+        output.writeMessage(11, (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI) term_);
       }
       if (termCase_ == 20) {
         output.writeSInt64(
@@ -6509,10 +7421,9 @@ public final class PB_RDF {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(9, (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_REPEAT) term_);
       }
-      if (termCase_ == 10) {
+      if (termCase_ == 11) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(
-              10, (int)((java.lang.Integer) term_));
+          .computeMessageSize(11, (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI) term_);
       }
       if (termCase_ == 20) {
         size += com.google.protobuf.CodedOutputStream
@@ -6581,9 +7492,9 @@ public final class PB_RDF {
           if (!getRepeat()
               .equals(other.getRepeat())) return false;
           break;
-        case 10:
-          if (getTermRef()
-              != other.getTermRef()) return false;
+        case 11:
+          if (!getNsIri()
+              .equals(other.getNsIri())) return false;
           break;
         case 20:
           if (getValInteger()
@@ -6649,9 +7560,9 @@ public final class PB_RDF {
           hash = (37 * hash) + REPEAT_FIELD_NUMBER;
           hash = (53 * hash) + getRepeat().hashCode();
           break;
-        case 10:
-          hash = (37 * hash) + TERMREF_FIELD_NUMBER;
-          hash = (53 * hash) + getTermRef();
+        case 11:
+          hash = (37 * hash) + NSIRI_FIELD_NUMBER;
+          hash = (53 * hash) + getNsIri().hashCode();
           break;
         case 20:
           hash = (37 * hash) + VALINTEGER_FIELD_NUMBER;
@@ -6828,6 +7739,9 @@ public final class PB_RDF {
         if (repeatBuilder_ != null) {
           repeatBuilder_.clear();
         }
+        if (nsIriBuilder_ != null) {
+          nsIriBuilder_.clear();
+        }
         if (valDecimalBuilder_ != null) {
           valDecimalBuilder_.clear();
         }
@@ -6908,6 +7822,10 @@ public final class PB_RDF {
             repeatBuilder_ != null) {
           result.term_ = repeatBuilder_.build();
         }
+        if (termCase_ == 11 &&
+            nsIriBuilder_ != null) {
+          result.term_ = nsIriBuilder_.build();
+        }
         if (termCase_ == 22 &&
             valDecimalBuilder_ != null) {
           result.term_ = valDecimalBuilder_.build();
@@ -6963,8 +7881,8 @@ public final class PB_RDF {
             mergeRepeat(other.getRepeat());
             break;
           }
-          case TERMREF: {
-            setTermRef(other.getTermRef());
+          case NSIRI: {
+            mergeNsIri(other.getNsIri());
             break;
           }
           case VALINTEGER: {
@@ -7072,11 +7990,13 @@ public final class PB_RDF {
                 termCase_ = 9;
                 break;
               } // case 74
-              case 80: {
-                term_ = input.readUInt32();
-                termCase_ = 10;
+              case 90: {
+                input.readMessage(
+                    getNsIriFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                termCase_ = 11;
                 break;
-              } // case 80
+              } // case 90
               case 160: {
                 term_ = input.readSInt64();
                 termCase_ = 20;
@@ -8404,62 +9324,182 @@ public final class PB_RDF {
         return repeatBuilder_;
       }
 
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRIOrBuilder> nsIriBuilder_;
       /**
        * <pre>
-       * Version 2: index into the term table (see RDF_Header).
+       * Version 2 (see RDF_Header).
        * </pre>
        *
-       * <code>uint32 termRef = 10;</code>
-       * @return Whether the termRef field is set.
+       * <code>.RDF_NsIRI nsIri = 11;</code>
+       * @return Whether the nsIri field is set.
        */
-      public boolean hasTermRef() {
-        return termCase_ == 10;
+      @java.lang.Override
+      public boolean hasNsIri() {
+        return termCase_ == 11;
       }
       /**
        * <pre>
-       * Version 2: index into the term table (see RDF_Header).
+       * Version 2 (see RDF_Header).
        * </pre>
        *
-       * <code>uint32 termRef = 10;</code>
-       * @return The termRef.
+       * <code>.RDF_NsIRI nsIri = 11;</code>
+       * @return The nsIri.
        */
-      public int getTermRef() {
-        if (termCase_ == 10) {
-          return (java.lang.Integer) term_;
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI getNsIri() {
+        if (nsIriBuilder_ == null) {
+          if (termCase_ == 11) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI) term_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.getDefaultInstance();
+        } else {
+          if (termCase_ == 11) {
+            return nsIriBuilder_.getMessage();
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.getDefaultInstance();
         }
-        return 0;
       }
       /**
        * <pre>
-       * Version 2: index into the term table (see RDF_Header).
+       * Version 2 (see RDF_Header).
        * </pre>
        *
-       * <code>uint32 termRef = 10;</code>
-       * @param value The termRef to set.
-       * @return This builder for chaining.
+       * <code>.RDF_NsIRI nsIri = 11;</code>
        */
-      public Builder setTermRef(int value) {
-
-        termCase_ = 10;
-        term_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Version 2: index into the term table (see RDF_Header).
-       * </pre>
-       *
-       * <code>uint32 termRef = 10;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearTermRef() {
-        if (termCase_ == 10) {
-          termCase_ = 0;
-          term_ = null;
+      public Builder setNsIri(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI value) {
+        if (nsIriBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          term_ = value;
           onChanged();
+        } else {
+          nsIriBuilder_.setMessage(value);
+        }
+        termCase_ = 11;
+        return this;
+      }
+      /**
+       * <pre>
+       * Version 2 (see RDF_Header).
+       * </pre>
+       *
+       * <code>.RDF_NsIRI nsIri = 11;</code>
+       */
+      public Builder setNsIri(
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.Builder builderForValue) {
+        if (nsIriBuilder_ == null) {
+          term_ = builderForValue.build();
+          onChanged();
+        } else {
+          nsIriBuilder_.setMessage(builderForValue.build());
+        }
+        termCase_ = 11;
+        return this;
+      }
+      /**
+       * <pre>
+       * Version 2 (see RDF_Header).
+       * </pre>
+       *
+       * <code>.RDF_NsIRI nsIri = 11;</code>
+       */
+      public Builder mergeNsIri(org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI value) {
+        if (nsIriBuilder_ == null) {
+          if (termCase_ == 11 &&
+              term_ != org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.getDefaultInstance()) {
+            term_ = org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.newBuilder((org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI) term_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            term_ = value;
+          }
+          onChanged();
+        } else {
+          if (termCase_ == 11) {
+            nsIriBuilder_.mergeFrom(value);
+          } else {
+            nsIriBuilder_.setMessage(value);
+          }
+        }
+        termCase_ = 11;
+        return this;
+      }
+      /**
+       * <pre>
+       * Version 2 (see RDF_Header).
+       * </pre>
+       *
+       * <code>.RDF_NsIRI nsIri = 11;</code>
+       */
+      public Builder clearNsIri() {
+        if (nsIriBuilder_ == null) {
+          if (termCase_ == 11) {
+            termCase_ = 0;
+            term_ = null;
+            onChanged();
+          }
+        } else {
+          if (termCase_ == 11) {
+            termCase_ = 0;
+            term_ = null;
+          }
+          nsIriBuilder_.clear();
         }
         return this;
+      }
+      /**
+       * <pre>
+       * Version 2 (see RDF_Header).
+       * </pre>
+       *
+       * <code>.RDF_NsIRI nsIri = 11;</code>
+       */
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.Builder getNsIriBuilder() {
+        return getNsIriFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Version 2 (see RDF_Header).
+       * </pre>
+       *
+       * <code>.RDF_NsIRI nsIri = 11;</code>
+       */
+      @java.lang.Override
+      public org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRIOrBuilder getNsIriOrBuilder() {
+        if ((termCase_ == 11) && (nsIriBuilder_ != null)) {
+          return nsIriBuilder_.getMessageOrBuilder();
+        } else {
+          if (termCase_ == 11) {
+            return (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI) term_;
+          }
+          return org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Version 2 (see RDF_Header).
+       * </pre>
+       *
+       * <code>.RDF_NsIRI nsIri = 11;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRIOrBuilder> 
+          getNsIriFieldBuilder() {
+        if (nsIriBuilder_ == null) {
+          if (!(termCase_ == 11)) {
+            term_ = org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.getDefaultInstance();
+          }
+          nsIriBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI.Builder, org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRIOrBuilder>(
+                  (org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_NsIRI) term_,
+                  getParentForChildren(),
+                  isClean());
+          term_ = null;
+        }
+        termCase_ = 11;
+        onChanged();
+        return nsIriBuilder_;
       }
 
       /**
@@ -8803,8 +9843,32 @@ public final class PB_RDF {
      * <code>.RDF_Term O = 3;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getOOrBuilder();
+
+    /**
+     * <code>uint32 sRef = 4;</code>
+     * @return The sRef.
+     */
+    int getSRef();
+
+    /**
+     * <code>uint32 pRef = 5;</code>
+     * @return The pRef.
+     */
+    int getPRef();
+
+    /**
+     * <code>uint32 oRef = 6;</code>
+     * @return The oRef.
+     */
+    int getORef();
   }
   /**
+   * <pre>
+   * Version 2: a term in the term table is written as a reference (sRef, pRef,
+   * oRef, gRef) instead of as an RDF_Term, and a term that is the same as the
+   * term in the same position of the previous triple or quad is left out.
+   * </pre>
+   *
    * Protobuf type {@code RDF_Triple}
    */
   public static final class RDF_Triple extends
@@ -8920,6 +9984,39 @@ public final class PB_RDF {
       return o_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : o_;
     }
 
+    public static final int SREF_FIELD_NUMBER = 4;
+    private int sRef_ = 0;
+    /**
+     * <code>uint32 sRef = 4;</code>
+     * @return The sRef.
+     */
+    @java.lang.Override
+    public int getSRef() {
+      return sRef_;
+    }
+
+    public static final int PREF_FIELD_NUMBER = 5;
+    private int pRef_ = 0;
+    /**
+     * <code>uint32 pRef = 5;</code>
+     * @return The pRef.
+     */
+    @java.lang.Override
+    public int getPRef() {
+      return pRef_;
+    }
+
+    public static final int OREF_FIELD_NUMBER = 6;
+    private int oRef_ = 0;
+    /**
+     * <code>uint32 oRef = 6;</code>
+     * @return The oRef.
+     */
+    @java.lang.Override
+    public int getORef() {
+      return oRef_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8943,6 +10040,15 @@ public final class PB_RDF {
       if (((bitField0_ & 0x00000004) != 0)) {
         output.writeMessage(3, getO());
       }
+      if (sRef_ != 0) {
+        output.writeUInt32(4, sRef_);
+      }
+      if (pRef_ != 0) {
+        output.writeUInt32(5, pRef_);
+      }
+      if (oRef_ != 0) {
+        output.writeUInt32(6, oRef_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -8963,6 +10069,18 @@ public final class PB_RDF {
       if (((bitField0_ & 0x00000004) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getO());
+      }
+      if (sRef_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, sRef_);
+      }
+      if (pRef_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(5, pRef_);
+      }
+      if (oRef_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(6, oRef_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -8994,6 +10112,12 @@ public final class PB_RDF {
         if (!getO()
             .equals(other.getO())) return false;
       }
+      if (getSRef()
+          != other.getSRef()) return false;
+      if (getPRef()
+          != other.getPRef()) return false;
+      if (getORef()
+          != other.getORef()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -9017,6 +10141,12 @@ public final class PB_RDF {
         hash = (37 * hash) + O_FIELD_NUMBER;
         hash = (53 * hash) + getO().hashCode();
       }
+      hash = (37 * hash) + SREF_FIELD_NUMBER;
+      hash = (53 * hash) + getSRef();
+      hash = (37 * hash) + PREF_FIELD_NUMBER;
+      hash = (53 * hash) + getPRef();
+      hash = (37 * hash) + OREF_FIELD_NUMBER;
+      hash = (53 * hash) + getORef();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -9115,6 +10245,12 @@ public final class PB_RDF {
       return builder;
     }
     /**
+     * <pre>
+     * Version 2: a term in the term table is written as a reference (sRef, pRef,
+     * oRef, gRef) instead of as an RDF_Term, and a term that is the same as the
+     * term in the same position of the previous triple or quad is left out.
+     * </pre>
+     *
      * Protobuf type {@code RDF_Triple}
      */
     public static final class Builder extends
@@ -9171,6 +10307,9 @@ public final class PB_RDF {
           oBuilder_.dispose();
           oBuilder_ = null;
         }
+        sRef_ = 0;
+        pRef_ = 0;
+        oRef_ = 0;
         return this;
       }
 
@@ -9223,6 +10362,15 @@ public final class PB_RDF {
               : oBuilder_.build();
           to_bitField0_ |= 0x00000004;
         }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.sRef_ = sRef_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.pRef_ = pRef_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.oRef_ = oRef_;
+        }
         result.bitField0_ |= to_bitField0_;
       }
 
@@ -9246,6 +10394,15 @@ public final class PB_RDF {
         }
         if (other.hasO()) {
           mergeO(other.getO());
+        }
+        if (other.getSRef() != 0) {
+          setSRef(other.getSRef());
+        }
+        if (other.getPRef() != 0) {
+          setPRef(other.getPRef());
+        }
+        if (other.getORef() != 0) {
+          setORef(other.getORef());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -9294,6 +10451,21 @@ public final class PB_RDF {
                 bitField0_ |= 0x00000004;
                 break;
               } // case 26
+              case 32: {
+                sRef_ = input.readUInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              case 40: {
+                pRef_ = input.readUInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 48: {
+                oRef_ = input.readUInt32();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 48
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -9674,6 +10846,102 @@ public final class PB_RDF {
         return oBuilder_;
       }
 
+      private int sRef_ ;
+      /**
+       * <code>uint32 sRef = 4;</code>
+       * @return The sRef.
+       */
+      @java.lang.Override
+      public int getSRef() {
+        return sRef_;
+      }
+      /**
+       * <code>uint32 sRef = 4;</code>
+       * @param value The sRef to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSRef(int value) {
+
+        sRef_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint32 sRef = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSRef() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        sRef_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int pRef_ ;
+      /**
+       * <code>uint32 pRef = 5;</code>
+       * @return The pRef.
+       */
+      @java.lang.Override
+      public int getPRef() {
+        return pRef_;
+      }
+      /**
+       * <code>uint32 pRef = 5;</code>
+       * @param value The pRef to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPRef(int value) {
+
+        pRef_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint32 pRef = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPRef() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        pRef_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int oRef_ ;
+      /**
+       * <code>uint32 oRef = 6;</code>
+       * @return The oRef.
+       */
+      @java.lang.Override
+      public int getORef() {
+        return oRef_;
+      }
+      /**
+       * <code>uint32 oRef = 6;</code>
+       * @param value The oRef to set.
+       * @return This builder for chaining.
+       */
+      public Builder setORef(int value) {
+
+        oRef_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint32 oRef = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearORef() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        oRef_ = 0;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:RDF_Triple)
     }
 
@@ -9788,6 +11056,30 @@ public final class PB_RDF {
      * <code>.RDF_Term G = 4;</code>
      */
     org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_TermOrBuilder getGOrBuilder();
+
+    /**
+     * <code>uint32 sRef = 5;</code>
+     * @return The sRef.
+     */
+    int getSRef();
+
+    /**
+     * <code>uint32 pRef = 6;</code>
+     * @return The pRef.
+     */
+    int getPRef();
+
+    /**
+     * <code>uint32 oRef = 7;</code>
+     * @return The oRef.
+     */
+    int getORef();
+
+    /**
+     * <code>uint32 gRef = 8;</code>
+     * @return The gRef.
+     */
+    int getGRef();
   }
   /**
    * Protobuf type {@code RDF_Quad}
@@ -9931,6 +11223,50 @@ public final class PB_RDF {
       return g_ == null ? org.apache.jena.riot.protobuf.wire.PB_RDF.RDF_Term.getDefaultInstance() : g_;
     }
 
+    public static final int SREF_FIELD_NUMBER = 5;
+    private int sRef_ = 0;
+    /**
+     * <code>uint32 sRef = 5;</code>
+     * @return The sRef.
+     */
+    @java.lang.Override
+    public int getSRef() {
+      return sRef_;
+    }
+
+    public static final int PREF_FIELD_NUMBER = 6;
+    private int pRef_ = 0;
+    /**
+     * <code>uint32 pRef = 6;</code>
+     * @return The pRef.
+     */
+    @java.lang.Override
+    public int getPRef() {
+      return pRef_;
+    }
+
+    public static final int OREF_FIELD_NUMBER = 7;
+    private int oRef_ = 0;
+    /**
+     * <code>uint32 oRef = 7;</code>
+     * @return The oRef.
+     */
+    @java.lang.Override
+    public int getORef() {
+      return oRef_;
+    }
+
+    public static final int GREF_FIELD_NUMBER = 8;
+    private int gRef_ = 0;
+    /**
+     * <code>uint32 gRef = 8;</code>
+     * @return The gRef.
+     */
+    @java.lang.Override
+    public int getGRef() {
+      return gRef_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -9957,6 +11293,18 @@ public final class PB_RDF {
       if (((bitField0_ & 0x00000008) != 0)) {
         output.writeMessage(4, getG());
       }
+      if (sRef_ != 0) {
+        output.writeUInt32(5, sRef_);
+      }
+      if (pRef_ != 0) {
+        output.writeUInt32(6, pRef_);
+      }
+      if (oRef_ != 0) {
+        output.writeUInt32(7, oRef_);
+      }
+      if (gRef_ != 0) {
+        output.writeUInt32(8, gRef_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -9981,6 +11329,22 @@ public final class PB_RDF {
       if (((bitField0_ & 0x00000008) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getG());
+      }
+      if (sRef_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(5, sRef_);
+      }
+      if (pRef_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(6, pRef_);
+      }
+      if (oRef_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(7, oRef_);
+      }
+      if (gRef_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(8, gRef_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -10017,6 +11381,14 @@ public final class PB_RDF {
         if (!getG()
             .equals(other.getG())) return false;
       }
+      if (getSRef()
+          != other.getSRef()) return false;
+      if (getPRef()
+          != other.getPRef()) return false;
+      if (getORef()
+          != other.getORef()) return false;
+      if (getGRef()
+          != other.getGRef()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -10044,6 +11416,14 @@ public final class PB_RDF {
         hash = (37 * hash) + G_FIELD_NUMBER;
         hash = (53 * hash) + getG().hashCode();
       }
+      hash = (37 * hash) + SREF_FIELD_NUMBER;
+      hash = (53 * hash) + getSRef();
+      hash = (37 * hash) + PREF_FIELD_NUMBER;
+      hash = (53 * hash) + getPRef();
+      hash = (37 * hash) + OREF_FIELD_NUMBER;
+      hash = (53 * hash) + getORef();
+      hash = (37 * hash) + GREF_FIELD_NUMBER;
+      hash = (53 * hash) + getGRef();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -10204,6 +11584,10 @@ public final class PB_RDF {
           gBuilder_.dispose();
           gBuilder_ = null;
         }
+        sRef_ = 0;
+        pRef_ = 0;
+        oRef_ = 0;
+        gRef_ = 0;
         return this;
       }
 
@@ -10262,6 +11646,18 @@ public final class PB_RDF {
               : gBuilder_.build();
           to_bitField0_ |= 0x00000008;
         }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.sRef_ = sRef_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.pRef_ = pRef_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.oRef_ = oRef_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.gRef_ = gRef_;
+        }
         result.bitField0_ |= to_bitField0_;
       }
 
@@ -10288,6 +11684,18 @@ public final class PB_RDF {
         }
         if (other.hasG()) {
           mergeG(other.getG());
+        }
+        if (other.getSRef() != 0) {
+          setSRef(other.getSRef());
+        }
+        if (other.getPRef() != 0) {
+          setPRef(other.getPRef());
+        }
+        if (other.getORef() != 0) {
+          setORef(other.getORef());
+        }
+        if (other.getGRef() != 0) {
+          setGRef(other.getGRef());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -10343,6 +11751,26 @@ public final class PB_RDF {
                 bitField0_ |= 0x00000008;
                 break;
               } // case 34
+              case 40: {
+                sRef_ = input.readUInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 48: {
+                pRef_ = input.readUInt32();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 48
+              case 56: {
+                oRef_ = input.readUInt32();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
+              case 64: {
+                gRef_ = input.readUInt32();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 64
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -10842,6 +12270,134 @@ public final class PB_RDF {
           g_ = null;
         }
         return gBuilder_;
+      }
+
+      private int sRef_ ;
+      /**
+       * <code>uint32 sRef = 5;</code>
+       * @return The sRef.
+       */
+      @java.lang.Override
+      public int getSRef() {
+        return sRef_;
+      }
+      /**
+       * <code>uint32 sRef = 5;</code>
+       * @param value The sRef to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSRef(int value) {
+
+        sRef_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint32 sRef = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSRef() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        sRef_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int pRef_ ;
+      /**
+       * <code>uint32 pRef = 6;</code>
+       * @return The pRef.
+       */
+      @java.lang.Override
+      public int getPRef() {
+        return pRef_;
+      }
+      /**
+       * <code>uint32 pRef = 6;</code>
+       * @param value The pRef to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPRef(int value) {
+
+        pRef_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint32 pRef = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPRef() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        pRef_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int oRef_ ;
+      /**
+       * <code>uint32 oRef = 7;</code>
+       * @return The oRef.
+       */
+      @java.lang.Override
+      public int getORef() {
+        return oRef_;
+      }
+      /**
+       * <code>uint32 oRef = 7;</code>
+       * @param value The oRef to set.
+       * @return This builder for chaining.
+       */
+      public Builder setORef(int value) {
+
+        oRef_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint32 oRef = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearORef() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        oRef_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int gRef_ ;
+      /**
+       * <code>uint32 gRef = 8;</code>
+       * @return The gRef.
+       */
+      @java.lang.Override
+      public int getGRef() {
+        return gRef_;
+      }
+      /**
+       * <code>uint32 gRef = 8;</code>
+       * @param value The gRef to set.
+       * @return This builder for chaining.
+       */
+      public Builder setGRef(int value) {
+
+        gRef_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint32 gRef = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearGRef() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        gRef_ = 0;
+        onChanged();
+        return this;
       }
 
       // @@protoc_insertion_point(builder_scope:RDF_Quad)
@@ -11594,6 +13150,16 @@ public final class PB_RDF {
      * @return The datatypeTableSize.
      */
     int getDatatypeTableSize();
+
+    /**
+     * <pre>
+     * Number of slots in the namespace table.
+     * </pre>
+     *
+     * <code>uint32 namespaceTableSize = 4;</code>
+     * @return The namespaceTableSize.
+     */
+    int getNamespaceTableSize();
   }
   /**
    * <pre>
@@ -11601,21 +13167,32 @@ public final class PB_RDF {
    *
    * A version 1 stream has no header: every term is written in full.
    *
-   * A version 2 stream starts with a header row and may then use RDF_REPEAT,
-   * RDF_Term.termRef and RDF_Literal.datatypeRef. The reader and writer each
-   * keep two tables that are filled in the same, fixed way as the stream is
-   * processed, so no table entries are sent explicitly:
+   * A version 2 stream starts with a header row and may then leave out repeated
+   * terms and use the references RDF_Triple.sRef (and pRef, oRef, RDF_Quad.gRef),
+   * RDF_NsIRI.namespaceRef and RDF_Literal.datatypeRef. The
+   * reader and writer each keep three tables that are filled in the same, fixed
+   * way as the stream is processed, so no table entries are sent explicitly:
    *
    * Term table: every IRI, prefix name and blank node written in full
    * (including those inside triple terms, in subject, predicate, object
-   * order) is placed in the next slot of the table, wrapping round to slot 0
-   * when the table is full. A termRef is the slot of a term written earlier.
+   * order) is placed in a slot of the table. A reference is a distance back
+   * from the most recently placed term: 1 is that term, 2 the one placed
+   * before it, and so on. Slots are taken in order, wrapping round to slot 0
+   * when the table is full, except that a slot whose term has been referenced
+   * since it was placed is passed over once and its term kept (clock
+   * replacement: passing over it clears the mark, so the slot is taken next
+   * time round unless the term is referenced again).
+   *
+   * Namespace table: every namespace written in full (RDF_NsIRI.namespace)
+   * is placed in the next slot of the namespace table, wrapping round when
+   * the table is full. A namespaceRef is a distance back from the most
+   * recently placed namespace, as for the term table.
    *
    * Datatype table: every datatype IRI written in full (RDF_Literal.datatype)
-   * is placed in the next slot of the datatype table in the same way.
-   * A datatypeRef is the slot of a datatype written earlier.
+   * is placed in the next slot of the datatype table, wrapping round when the
+   * table is full. A datatypeRef is the slot of a datatype written earlier.
    *
-   * A header part way through a stream starts both tables again, so
+   * A header part way through a stream starts all tables again, so
    * version 2 streams can be concatenated.
    * </pre>
    *
@@ -11700,6 +13277,21 @@ public final class PB_RDF {
       return datatypeTableSize_;
     }
 
+    public static final int NAMESPACETABLESIZE_FIELD_NUMBER = 4;
+    private int namespaceTableSize_ = 0;
+    /**
+     * <pre>
+     * Number of slots in the namespace table.
+     * </pre>
+     *
+     * <code>uint32 namespaceTableSize = 4;</code>
+     * @return The namespaceTableSize.
+     */
+    @java.lang.Override
+    public int getNamespaceTableSize() {
+      return namespaceTableSize_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -11723,6 +13315,9 @@ public final class PB_RDF {
       if (datatypeTableSize_ != 0) {
         output.writeUInt32(3, datatypeTableSize_);
       }
+      if (namespaceTableSize_ != 0) {
+        output.writeUInt32(4, namespaceTableSize_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -11743,6 +13338,10 @@ public final class PB_RDF {
       if (datatypeTableSize_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(3, datatypeTableSize_);
+      }
+      if (namespaceTableSize_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, namespaceTableSize_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -11765,6 +13364,8 @@ public final class PB_RDF {
           != other.getTermTableSize()) return false;
       if (getDatatypeTableSize()
           != other.getDatatypeTableSize()) return false;
+      if (getNamespaceTableSize()
+          != other.getNamespaceTableSize()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -11782,6 +13383,8 @@ public final class PB_RDF {
       hash = (53 * hash) + getTermTableSize();
       hash = (37 * hash) + DATATYPETABLESIZE_FIELD_NUMBER;
       hash = (53 * hash) + getDatatypeTableSize();
+      hash = (37 * hash) + NAMESPACETABLESIZE_FIELD_NUMBER;
+      hash = (53 * hash) + getNamespaceTableSize();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -11885,21 +13488,32 @@ public final class PB_RDF {
      *
      * A version 1 stream has no header: every term is written in full.
      *
-     * A version 2 stream starts with a header row and may then use RDF_REPEAT,
-     * RDF_Term.termRef and RDF_Literal.datatypeRef. The reader and writer each
-     * keep two tables that are filled in the same, fixed way as the stream is
-     * processed, so no table entries are sent explicitly:
+     * A version 2 stream starts with a header row and may then leave out repeated
+     * terms and use the references RDF_Triple.sRef (and pRef, oRef, RDF_Quad.gRef),
+     * RDF_NsIRI.namespaceRef and RDF_Literal.datatypeRef. The
+     * reader and writer each keep three tables that are filled in the same, fixed
+     * way as the stream is processed, so no table entries are sent explicitly:
      *
      * Term table: every IRI, prefix name and blank node written in full
      * (including those inside triple terms, in subject, predicate, object
-     * order) is placed in the next slot of the table, wrapping round to slot 0
-     * when the table is full. A termRef is the slot of a term written earlier.
+     * order) is placed in a slot of the table. A reference is a distance back
+     * from the most recently placed term: 1 is that term, 2 the one placed
+     * before it, and so on. Slots are taken in order, wrapping round to slot 0
+     * when the table is full, except that a slot whose term has been referenced
+     * since it was placed is passed over once and its term kept (clock
+     * replacement: passing over it clears the mark, so the slot is taken next
+     * time round unless the term is referenced again).
+     *
+     * Namespace table: every namespace written in full (RDF_NsIRI.namespace)
+     * is placed in the next slot of the namespace table, wrapping round when
+     * the table is full. A namespaceRef is a distance back from the most
+     * recently placed namespace, as for the term table.
      *
      * Datatype table: every datatype IRI written in full (RDF_Literal.datatype)
-     * is placed in the next slot of the datatype table in the same way.
-     * A datatypeRef is the slot of a datatype written earlier.
+     * is placed in the next slot of the datatype table, wrapping round when the
+     * table is full. A datatypeRef is the slot of a datatype written earlier.
      *
-     * A header part way through a stream starts both tables again, so
+     * A header part way through a stream starts all tables again, so
      * version 2 streams can be concatenated.
      * </pre>
      *
@@ -11939,6 +13553,7 @@ public final class PB_RDF {
         version_ = 0;
         termTableSize_ = 0;
         datatypeTableSize_ = 0;
+        namespaceTableSize_ = 0;
         return this;
       }
 
@@ -11981,6 +13596,9 @@ public final class PB_RDF {
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.datatypeTableSize_ = datatypeTableSize_;
         }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.namespaceTableSize_ = namespaceTableSize_;
+        }
       }
 
       @java.lang.Override
@@ -12003,6 +13621,9 @@ public final class PB_RDF {
         }
         if (other.getDatatypeTableSize() != 0) {
           setDatatypeTableSize(other.getDatatypeTableSize());
+        }
+        if (other.getNamespaceTableSize() != 0) {
+          setNamespaceTableSize(other.getNamespaceTableSize());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -12045,6 +13666,11 @@ public final class PB_RDF {
                 bitField0_ |= 0x00000004;
                 break;
               } // case 24
+              case 32: {
+                namespaceTableSize_ = input.readUInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -12190,6 +13816,50 @@ public final class PB_RDF {
       public Builder clearDatatypeTableSize() {
         bitField0_ = (bitField0_ & ~0x00000004);
         datatypeTableSize_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int namespaceTableSize_ ;
+      /**
+       * <pre>
+       * Number of slots in the namespace table.
+       * </pre>
+       *
+       * <code>uint32 namespaceTableSize = 4;</code>
+       * @return The namespaceTableSize.
+       */
+      @java.lang.Override
+      public int getNamespaceTableSize() {
+        return namespaceTableSize_;
+      }
+      /**
+       * <pre>
+       * Number of slots in the namespace table.
+       * </pre>
+       *
+       * <code>uint32 namespaceTableSize = 4;</code>
+       * @param value The namespaceTableSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNamespaceTableSize(int value) {
+
+        namespaceTableSize_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Number of slots in the namespace table.
+       * </pre>
+       *
+       * <code>uint32 namespaceTableSize = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearNamespaceTableSize() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        namespaceTableSize_ = 0;
         onChanged();
         return this;
       }
@@ -23893,6 +25563,11 @@ public final class PB_RDF {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_RDF_REPEAT_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_RDF_NsIRI_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_RDF_NsIRI_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_RDF_Term_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -23996,53 +25671,59 @@ public final class PB_RDF {
       "\030\006 \001(\rH\000B\r\n\013literalKind\"+\n\013RDF_Decimal\022\r" +
       "\n\005value\030\001 \001(\022\022\r\n\005scale\030\002 \001(\021\"\027\n\007RDF_Var\022" +
       "\014\n\004name\030\001 \001(\t\"\t\n\007RDF_ANY\"\013\n\tRDF_UNDEF\"\014\n" +
-      "\nRDF_REPEAT\"\214\003\n\010RDF_Term\022\027\n\003iri\030\001 \001(\0132\010." +
-      "RDF_IRIH\000\022\033\n\005bnode\030\002 \001(\0132\n.RDF_BNodeH\000\022\037" +
-      "\n\007literal\030\003 \001(\0132\014.RDF_LiteralH\000\022%\n\nprefi" +
-      "xName\030\004 \001(\0132\017.RDF_PrefixNameH\000\022\034\n\010variab" +
-      "le\030\005 \001(\0132\010.RDF_VarH\000\022!\n\ntripleTerm\030\006 \001(\013" +
-      "2\013.RDF_TripleH\000\022\027\n\003any\030\007 \001(\0132\010.RDF_ANYH\000" +
-      "\022\037\n\tundefined\030\010 \001(\0132\n.RDF_UNDEFH\000\022\035\n\006rep" +
-      "eat\030\t \001(\0132\013.RDF_REPEATH\000\022\021\n\007termRef\030\n \001(" +
-      "\rH\000\022\024\n\nvalInteger\030\024 \001(\022H\000\022\023\n\tvalDouble\030\025" +
-      " \001(\001H\000\022\"\n\nvalDecimal\030\026 \001(\0132\014.RDF_Decimal" +
-      "H\000B\006\n\004term\"N\n\nRDF_Triple\022\024\n\001S\030\001 \001(\0132\t.RD" +
-      "F_Term\022\024\n\001P\030\002 \001(\0132\t.RDF_Term\022\024\n\001O\030\003 \001(\0132" +
-      "\t.RDF_Term\"b\n\010RDF_Quad\022\024\n\001S\030\001 \001(\0132\t.RDF_" +
-      "Term\022\024\n\001P\030\002 \001(\0132\t.RDF_Term\022\024\n\001O\030\003 \001(\0132\t." +
-      "RDF_Term\022\024\n\001G\030\004 \001(\0132\t.RDF_Term\"-\n\016RDF_Pr" +
-      "efixDecl\022\016\n\006prefix\030\001 \001(\t\022\013\n\003uri\030\002 \001(\t\"O\n" +
-      "\nRDF_Header\022\017\n\007version\030\001 \001(\r\022\025\n\rtermTabl" +
-      "eSize\030\002 \001(\r\022\031\n\021datatypeTableSize\030\003 \001(\r\"\260" +
-      "\001\n\rRDF_StreamRow\022%\n\nprefixDecl\030\001 \001(\0132\017.R" +
-      "DF_PrefixDeclH\000\022\035\n\006triple\030\002 \001(\0132\013.RDF_Tr" +
-      "ipleH\000\022\031\n\004quad\030\003 \001(\0132\t.RDF_QuadH\000\022\030\n\004bas" +
-      "e\030\004 \001(\0132\010.RDF_IRIH\000\022\035\n\006header\030\005 \001(\0132\013.RD" +
-      "F_HeaderH\000B\005\n\003row\")\n\nRDF_Stream\022\033\n\003row\030\001" +
-      " \003(\0132\016.RDF_StreamRow\"&\n\014RDF_VarTuple\022\026\n\004" +
-      "vars\030\001 \003(\0132\010.RDF_Var\"\'\n\rRDF_DataTuple\022\026\n" +
-      "\003row\030\001 \003(\0132\t.RDF_Term\"(\n\tRDF_Graph\022\033\n\006tr" +
-      "iple\030\001 \003(\0132\013.RDF_Triple\"P\n\020Patch_Prefix_" +
-      "Add\022\034\n\tgraphNode\030\001 \001(\0132\t.RDF_Term\022\016\n\006pre" +
-      "fix\030\002 \001(\t\022\016\n\006iriStr\030\003 \001(\t\"@\n\020Patch_Prefi" +
-      "x_Del\022\034\n\tgraphNode\030\001 \001(\0132\t.RDF_Term\022\016\n\006p" +
-      "refix\030\002 \001(\t\"6\n\014Patch_Header\022\014\n\004name\030\001 \001(" +
-      "\t\022\030\n\005value\030\002 \001(\0132\t.RDF_Term\"h\n\016Patch_Dat" +
-      "a_Add\022\024\n\001s\030\001 \001(\0132\t.RDF_Term\022\024\n\001p\030\002 \001(\0132\t" +
-      ".RDF_Term\022\024\n\001o\030\003 \001(\0132\t.RDF_Term\022\024\n\001g\030\004 \001" +
-      "(\0132\t.RDF_Term\"h\n\016Patch_Data_Del\022\024\n\001s\030\001 \001" +
-      "(\0132\t.RDF_Term\022\024\n\001p\030\002 \001(\0132\t.RDF_Term\022\024\n\001o" +
-      "\030\003 \001(\0132\t.RDF_Term\022\024\n\001g\030\004 \001(\0132\t.RDF_Term\"" +
-      "\351\001\n\rRDF_Patch_Row\022\037\n\006header\030\001 \001(\0132\r.Patc" +
-      "h_HeaderH\000\022\"\n\007dataAdd\030\002 \001(\0132\017.Patch_Data" +
-      "_AddH\000\022\"\n\007dataDel\030\003 \001(\0132\017.Patch_Data_Del" +
-      "H\000\022&\n\tprefixAdd\030\004 \001(\0132\021.Patch_Prefix_Add" +
-      "H\000\022&\n\tprefixDel\030\005 \001(\0132\021.Patch_Prefix_Del" +
-      "H\000\022\030\n\003txn\030\006 \001(\0162\t.PatchTxnH\000B\005\n\003row\"(\n\tR" +
-      "DF_Patch\022\033\n\003row\030\001 \003(\0132\016.RDF_Patch_Row*/\n" +
-      "\010PatchTxn\022\006\n\002TX\020\000\022\006\n\002TC\020\001\022\006\n\002TA\020\002\022\013\n\007Seg" +
-      "ment\020\003B.\n\"org.apache.jena.riot.protobuf." +
-      "wireB\006PB_RDFH\001b\006proto3"
+      "\nRDF_REPEAT\"Q\n\tRDF_NsIRI\022\023\n\tnamespace\030\001 " +
+      "\001(\tH\000\022\026\n\014namespaceRef\030\002 \001(\rH\000\022\021\n\tlocalNa" +
+      "me\030\003 \001(\tB\004\n\002ns\"\226\003\n\010RDF_Term\022\027\n\003iri\030\001 \001(\013" +
+      "2\010.RDF_IRIH\000\022\033\n\005bnode\030\002 \001(\0132\n.RDF_BNodeH" +
+      "\000\022\037\n\007literal\030\003 \001(\0132\014.RDF_LiteralH\000\022%\n\npr" +
+      "efixName\030\004 \001(\0132\017.RDF_PrefixNameH\000\022\034\n\010var" +
+      "iable\030\005 \001(\0132\010.RDF_VarH\000\022!\n\ntripleTerm\030\006 " +
+      "\001(\0132\013.RDF_TripleH\000\022\027\n\003any\030\007 \001(\0132\010.RDF_AN" +
+      "YH\000\022\037\n\tundefined\030\010 \001(\0132\n.RDF_UNDEFH\000\022\035\n\006" +
+      "repeat\030\t \001(\0132\013.RDF_REPEATH\000\022\033\n\005nsIri\030\013 \001" +
+      "(\0132\n.RDF_NsIRIH\000\022\024\n\nvalInteger\030\024 \001(\022H\000\022\023" +
+      "\n\tvalDouble\030\025 \001(\001H\000\022\"\n\nvalDecimal\030\026 \001(\0132" +
+      "\014.RDF_DecimalH\000B\006\n\004term\"x\n\nRDF_Triple\022\024\n" +
+      "\001S\030\001 \001(\0132\t.RDF_Term\022\024\n\001P\030\002 \001(\0132\t.RDF_Ter" +
+      "m\022\024\n\001O\030\003 \001(\0132\t.RDF_Term\022\014\n\004sRef\030\004 \001(\r\022\014\n" +
+      "\004pRef\030\005 \001(\r\022\014\n\004oRef\030\006 \001(\r\"\232\001\n\010RDF_Quad\022\024" +
+      "\n\001S\030\001 \001(\0132\t.RDF_Term\022\024\n\001P\030\002 \001(\0132\t.RDF_Te" +
+      "rm\022\024\n\001O\030\003 \001(\0132\t.RDF_Term\022\024\n\001G\030\004 \001(\0132\t.RD" +
+      "F_Term\022\014\n\004sRef\030\005 \001(\r\022\014\n\004pRef\030\006 \001(\r\022\014\n\004oR" +
+      "ef\030\007 \001(\r\022\014\n\004gRef\030\010 \001(\r\"-\n\016RDF_PrefixDecl" +
+      "\022\016\n\006prefix\030\001 \001(\t\022\013\n\003uri\030\002 \001(\t\"k\n\nRDF_Hea" +
+      "der\022\017\n\007version\030\001 \001(\r\022\025\n\rtermTableSize\030\002 " +
+      "\001(\r\022\031\n\021datatypeTableSize\030\003 \001(\r\022\032\n\022namesp" +
+      "aceTableSize\030\004 \001(\r\"\260\001\n\rRDF_StreamRow\022%\n\n" +
+      "prefixDecl\030\001 \001(\0132\017.RDF_PrefixDeclH\000\022\035\n\006t" +
+      "riple\030\002 \001(\0132\013.RDF_TripleH\000\022\031\n\004quad\030\003 \001(\013" +
+      "2\t.RDF_QuadH\000\022\030\n\004base\030\004 \001(\0132\010.RDF_IRIH\000\022" +
+      "\035\n\006header\030\005 \001(\0132\013.RDF_HeaderH\000B\005\n\003row\")\n" +
+      "\nRDF_Stream\022\033\n\003row\030\001 \003(\0132\016.RDF_StreamRow" +
+      "\"&\n\014RDF_VarTuple\022\026\n\004vars\030\001 \003(\0132\010.RDF_Var" +
+      "\"\'\n\rRDF_DataTuple\022\026\n\003row\030\001 \003(\0132\t.RDF_Ter" +
+      "m\"(\n\tRDF_Graph\022\033\n\006triple\030\001 \003(\0132\013.RDF_Tri" +
+      "ple\"P\n\020Patch_Prefix_Add\022\034\n\tgraphNode\030\001 \001" +
+      "(\0132\t.RDF_Term\022\016\n\006prefix\030\002 \001(\t\022\016\n\006iriStr\030" +
+      "\003 \001(\t\"@\n\020Patch_Prefix_Del\022\034\n\tgraphNode\030\001" +
+      " \001(\0132\t.RDF_Term\022\016\n\006prefix\030\002 \001(\t\"6\n\014Patch" +
+      "_Header\022\014\n\004name\030\001 \001(\t\022\030\n\005value\030\002 \001(\0132\t.R" +
+      "DF_Term\"h\n\016Patch_Data_Add\022\024\n\001s\030\001 \001(\0132\t.R" +
+      "DF_Term\022\024\n\001p\030\002 \001(\0132\t.RDF_Term\022\024\n\001o\030\003 \001(\013" +
+      "2\t.RDF_Term\022\024\n\001g\030\004 \001(\0132\t.RDF_Term\"h\n\016Pat" +
+      "ch_Data_Del\022\024\n\001s\030\001 \001(\0132\t.RDF_Term\022\024\n\001p\030\002" +
+      " \001(\0132\t.RDF_Term\022\024\n\001o\030\003 \001(\0132\t.RDF_Term\022\024\n" +
+      "\001g\030\004 \001(\0132\t.RDF_Term\"\351\001\n\rRDF_Patch_Row\022\037\n" +
+      "\006header\030\001 \001(\0132\r.Patch_HeaderH\000\022\"\n\007dataAd" +
+      "d\030\002 \001(\0132\017.Patch_Data_AddH\000\022\"\n\007dataDel\030\003 " +
+      "\001(\0132\017.Patch_Data_DelH\000\022&\n\tprefixAdd\030\004 \001(" +
+      "\0132\021.Patch_Prefix_AddH\000\022&\n\tprefixDel\030\005 \001(" +
+      "\0132\021.Patch_Prefix_DelH\000\022\030\n\003txn\030\006 \001(\0162\t.Pa" +
+      "tchTxnH\000B\005\n\003row\"(\n\tRDF_Patch\022\033\n\003row\030\001 \003(" +
+      "\0132\016.RDF_Patch_Row*/\n\010PatchTxn\022\006\n\002TX\020\000\022\006\n" +
+      "\002TC\020\001\022\006\n\002TA\020\002\022\013\n\007Segment\020\003B.\n\"org.apache" +
+      ".jena.riot.protobuf.wireB\006PB_RDFH\001b\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -24102,104 +25783,110 @@ public final class PB_RDF {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_REPEAT_descriptor,
         new java.lang.String[] { });
-    internal_static_RDF_Term_descriptor =
+    internal_static_RDF_NsIRI_descriptor =
       getDescriptor().getMessageTypes().get(9);
+    internal_static_RDF_NsIRI_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_RDF_NsIRI_descriptor,
+        new java.lang.String[] { "Namespace", "NamespaceRef", "LocalName", "Ns", });
+    internal_static_RDF_Term_descriptor =
+      getDescriptor().getMessageTypes().get(10);
     internal_static_RDF_Term_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Term_descriptor,
-        new java.lang.String[] { "Iri", "Bnode", "Literal", "PrefixName", "Variable", "TripleTerm", "Any", "Undefined", "Repeat", "TermRef", "ValInteger", "ValDouble", "ValDecimal", "Term", });
+        new java.lang.String[] { "Iri", "Bnode", "Literal", "PrefixName", "Variable", "TripleTerm", "Any", "Undefined", "Repeat", "NsIri", "ValInteger", "ValDouble", "ValDecimal", "Term", });
     internal_static_RDF_Triple_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_RDF_Triple_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Triple_descriptor,
-        new java.lang.String[] { "S", "P", "O", });
+        new java.lang.String[] { "S", "P", "O", "SRef", "PRef", "ORef", });
     internal_static_RDF_Quad_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_RDF_Quad_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Quad_descriptor,
-        new java.lang.String[] { "S", "P", "O", "G", });
+        new java.lang.String[] { "S", "P", "O", "G", "SRef", "PRef", "ORef", "GRef", });
     internal_static_RDF_PrefixDecl_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_RDF_PrefixDecl_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_PrefixDecl_descriptor,
         new java.lang.String[] { "Prefix", "Uri", });
     internal_static_RDF_Header_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_RDF_Header_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Header_descriptor,
-        new java.lang.String[] { "Version", "TermTableSize", "DatatypeTableSize", });
+        new java.lang.String[] { "Version", "TermTableSize", "DatatypeTableSize", "NamespaceTableSize", });
     internal_static_RDF_StreamRow_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_RDF_StreamRow_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_StreamRow_descriptor,
         new java.lang.String[] { "PrefixDecl", "Triple", "Quad", "Base", "Header", "Row", });
     internal_static_RDF_Stream_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_RDF_Stream_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Stream_descriptor,
         new java.lang.String[] { "Row", });
     internal_static_RDF_VarTuple_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_RDF_VarTuple_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_VarTuple_descriptor,
         new java.lang.String[] { "Vars", });
     internal_static_RDF_DataTuple_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_RDF_DataTuple_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_DataTuple_descriptor,
         new java.lang.String[] { "Row", });
     internal_static_RDF_Graph_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_RDF_Graph_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Graph_descriptor,
         new java.lang.String[] { "Triple", });
     internal_static_Patch_Prefix_Add_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_Patch_Prefix_Add_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Patch_Prefix_Add_descriptor,
         new java.lang.String[] { "GraphNode", "Prefix", "IriStr", });
     internal_static_Patch_Prefix_Del_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_Patch_Prefix_Del_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Patch_Prefix_Del_descriptor,
         new java.lang.String[] { "GraphNode", "Prefix", });
     internal_static_Patch_Header_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_Patch_Header_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Patch_Header_descriptor,
         new java.lang.String[] { "Name", "Value", });
     internal_static_Patch_Data_Add_descriptor =
-      getDescriptor().getMessageTypes().get(22);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_Patch_Data_Add_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Patch_Data_Add_descriptor,
         new java.lang.String[] { "S", "P", "O", "G", });
     internal_static_Patch_Data_Del_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_Patch_Data_Del_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Patch_Data_Del_descriptor,
         new java.lang.String[] { "S", "P", "O", "G", });
     internal_static_RDF_Patch_Row_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_RDF_Patch_Row_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Patch_Row_descriptor,
         new java.lang.String[] { "Header", "DataAdd", "DataDel", "PrefixAdd", "PrefixDel", "Txn", "Row", });
     internal_static_RDF_Patch_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_RDF_Patch_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RDF_Patch_descriptor,

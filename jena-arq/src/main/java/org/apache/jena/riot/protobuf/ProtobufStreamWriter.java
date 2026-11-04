@@ -66,6 +66,7 @@ final class ProtobufStreamWriter implements StreamRDF {
     private static final int BNODE = 4;
     private static final int LITERAL = 5;
     private static final int MESSAGE = 6;
+    private static final int NSIRI = 7;
 
     // Literal kinds, by RDF_Literal field number.
     private static final int LIT_LANGTAG = 2;
@@ -77,14 +78,16 @@ final class ProtobufStreamWriter implements StreamRDF {
     /** What to write for one term, decided once and used for the size and for the bytes. */
     private static final class TermPlan {
         int kind;
-        String string;      // IRI, blank node label or literal lexical form.
+        String string;      // IRI, blank node label, literal lexical form or local name.
         int literalKind;
-        String literalString;  // Language tag, datatype IRI or language-direction.
-        int slot;           // Term reference or datatype reference.
+        String literalString;  // Language tag, datatype IRI, language-direction or namespace.
+        int slot;           // Term reference, namespace reference or datatype reference.
         MessageLite message;
-        int innerSize;      // Size of the RDF_IRI, RDF_BNode or RDF_Literal inside the term.
+        int innerSize;      // Size of the RDF_IRI, RDF_BNode, RDF_NsIRI or RDF_Literal inside the term.
         int size;           // Size of the RDF_Term.
     }
+
+    private static final RDF_Term UNDEF = RDF_Term.newBuilder().setUndefined(RDF_UNDEF.getDefaultInstance()).build();
 
     private static final PrefixMap PMAP0 = PrefixMapFactory.emptyPrefixMap();
 
@@ -209,9 +212,9 @@ final class ProtobufStreamWriter implements StreamRDF {
             rowStart(messageSize(size));
             out.writeTag(2, LEN);
             out.writeUInt32NoTag(size);
-            term(1, plans[0]);
-            term(2, plans[1]);
-            term(3, plans[2]);
+            term(1, 4, plans[0]);
+            term(2, 5, plans[1]);
+            term(3, 6, plans[2]);
         } catch (IOException ex) { IO.exception(ex); }
         rowWritten();
     }
@@ -220,7 +223,9 @@ final class ProtobufStreamWriter implements StreamRDF {
     public void quad(Quad quad) {
         header();
         try {
-            boolean withGraph = ( quad.getGraph() != null );
+            // Version 1 leaves out a null graph; version 2 writes it as RDF_UNDEF,
+            // because a term left out means the term of the previous row.
+            boolean withGraph = ( quad.getGraph() != null || tables != null );
             int size = plan(quad.getSubject(), 0)
                      + plan(quad.getPredicate(), 1)
                      + plan(quad.getObject(), 2);
@@ -233,11 +238,11 @@ final class ProtobufStreamWriter implements StreamRDF {
             rowStart(messageSize(size));
             out.writeTag(3, LEN);
             out.writeUInt32NoTag(size);
-            term(1, plans[0]);
-            term(2, plans[1]);
-            term(3, plans[2]);
+            term(1, 5, plans[0]);
+            term(2, 6, plans[1]);
+            term(3, 7, plans[2]);
             if ( withGraph )
-                term(4, plans[3]);
+                term(4, 8, plans[3]);
         } catch (IOException ex) { IO.exception(ex); }
         rowWritten();
     }
@@ -249,27 +254,57 @@ final class ProtobufStreamWriter implements StreamRDF {
 
     /**
      * Decide how to write a term in a row position and return the size of the
-     * term as a field of the triple or quad (tag, length and the RDF_Term bytes).
+     * term as a field of the triple or quad: tag, length and the RDF_Term bytes,
+     * or the tag and value of a reference, or nothing for a term left out.
      */
     private int plan(Node node, int position) {
         TermPlan plan = plans[position];
         plan.message = null;
+        if ( node == null )
+            // The null graph of a quad (version 2: version 1 does not get here).
+            return planMessage(plan, UNDEF);
         if ( tables != null && tables.repeat(node, position) ) {
             plan.kind = REPEAT;
-            // RDF_REPEAT is an empty message: tag and zero length.
-            plan.size = 2;
-            return messageSize(plan.size);
+            plan.size = 0;
+            return 0;
         }
         if ( node.isURI() || node.isBlank() ) {
             if ( tables != null ) {
-                int slot = tables.termSlot(node);
-                if ( slot >= 0 ) {
+                int ref = tables.termRef(node);
+                if ( ref > 0 ) {
                     plan.kind = REF;
-                    plan.slot = slot;
-                    plan.size = CodedOutputStream.computeUInt32Size(10, slot);
-                    return messageSize(plan.size);
+                    plan.slot = ref;
+                    // The reference is a field of the triple or quad: one byte of tag.
+                    plan.size = 1 + CodedOutputStream.computeUInt32SizeNoTag(ref);
+                    return plan.size;
                 }
                 tables.enterTerm(node);
+                if ( node.isURI() ) {
+                    String iri = node.getURI();
+                    int nsEnd = ProtobufEncoderV2.namespaceEnd(iri);
+                    if ( nsEnd > 0 ) {
+                        plan.kind = NSIRI;
+                        plan.string = iri.substring(nsEnd);
+                        String namespace = iri.substring(0, nsEnd);
+                        int nsRef = tables.namespaceRef(namespace);
+                        int inner;
+                        if ( nsRef > 0 ) {
+                            plan.slot = nsRef;
+                            plan.literalString = null;
+                            inner = CodedOutputStream.computeUInt32Size(2, nsRef);
+                        } else {
+                            tables.enterNamespace(namespace);
+                            plan.slot = -1;
+                            plan.literalString = namespace;
+                            inner = CodedOutputStream.computeStringSize(1, namespace);
+                        }
+                        if ( !plan.string.isEmpty() )
+                            inner += CodedOutputStream.computeStringSize(3, plan.string);
+                        plan.innerSize = inner;
+                        plan.size = messageSize(inner);
+                        return messageSize(plan.size);
+                    }
+                }
             }
             plan.kind = node.isURI() ? IRI : BNODE;
             plan.string = node.isURI() ? node.getURI() : node.getBlankNodeLabel();
@@ -345,16 +380,30 @@ final class ProtobufStreamWriter implements StreamRDF {
         return value.isEmpty() ? 0 : CodedOutputStream.computeStringSize(1, value);
     }
 
-    /** Write a planned term as a field of a triple or quad. */
-    private void term(int field, TermPlan plan) throws IOException {
+    /**
+     * Write a planned term as a field of a triple or quad: the RDF_Term field, the
+     * reference field, or nothing for a term left out.
+     */
+    private void term(int field, int refField, TermPlan plan) throws IOException {
+        if ( plan.kind == REPEAT )
+            return;
+        if ( plan.kind == REF ) {
+            out.writeUInt32(refField, plan.slot);
+            return;
+        }
         out.writeTag(field, LEN);
         out.writeUInt32NoTag(plan.size);
         switch (plan.kind) {
-            case REPEAT -> {
-                out.writeTag(9, LEN);
-                out.writeUInt32NoTag(0);
+            case NSIRI -> {
+                out.writeTag(11, LEN);
+                out.writeUInt32NoTag(plan.innerSize);
+                if ( plan.slot > 0 )
+                    out.writeUInt32(2, plan.slot);
+                else
+                    out.writeString(1, plan.literalString);
+                if ( !plan.string.isEmpty() )
+                    out.writeString(3, plan.string);
             }
-            case REF -> out.writeUInt32(10, plan.slot);
             case IRI, BNODE -> {
                 out.writeTag(plan.kind == IRI ? 1 : 2, LEN);
                 out.writeUInt32NoTag(plan.innerSize);
